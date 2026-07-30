@@ -114,7 +114,7 @@
         </div>
       </div>
 
-      <!-- METRIC CARDS -->
+      <!-- METRIC CARDS (Dapat Di-filter Berdasarkan Tahun) -->
       <div class="bg-white p-4 rounded border border-slate-200 shadow-sm grid grid-cols-2 md:grid-cols-5 divide-y md:divide-y-0 md:divide-x divide-slate-200 text-slate-600">
         <div class="px-3 py-1"><p class="text-[11px] text-slate-400 font-semibold">📋 Total Pekerjaan</p><p id="statTotal" class="text-2xl font-bold text-slate-700 mt-1">0</p></div>
         <div class="px-3 py-1"><p class="text-[11px] text-slate-400 font-semibold">📄 Cancel</p><p id="statCancle" class="text-2xl font-bold text-slate-700 mt-1">0</p></div>
@@ -126,8 +126,13 @@
       <!-- FILTER PANEL -->
       <div class="bg-white p-4 rounded border border-slate-200 shadow-sm flex flex-col md:flex-row gap-3 justify-between items-center text-xs">
         <div class="flex flex-wrap gap-2 w-full md:w-auto flex-1 items-center">
-          <input id="searchInput" type="text" onkeyup="resetAndRenderTable()" placeholder="Cari di semua kolom..." class="px-3 py-2 border border-slate-300 rounded outline-none focus:border-teal-500 w-full md:w-64">
+          <input id="searchInput" type="text" onkeyup="resetAndRenderTable()" placeholder="Cari di semua kolom..." class="px-3 py-2 border border-slate-300 rounded outline-none focus:border-teal-500 w-full md:w-48">
           
+          <!-- FILTER TAHUN -->
+          <select id="tahunFilter" onchange="resetAndRenderTable()" class="px-2 py-2 border border-slate-300 rounded text-slate-600 outline-none font-semibold text-teal-700 bg-teal-50/50 border-teal-300">
+            <option value="">-- Semua Tahun --</option>
+          </select>
+
           <!-- FILTER STATUS -->
           <select id="statusFilter" onchange="resetAndRenderTable()" class="px-2 py-2 border border-slate-300 rounded text-slate-600 outline-none">
             <option value="">-- Semua Status --</option>
@@ -265,7 +270,7 @@
 </div>
 
 <script>
-const API_URL = 'https://script.google.com/macros/s/AKfycbwuUWixRc2JRksLYMOTLCvd8CYznYUGERVcxD-6Cg46jd1Yf3v_82JjTS2fDWCFwsei/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbyaqlvcAlxf1pj4a59KD6Ab1riSyMIy3bICU-7xGJhywywr5z91doxdiWE-P1Zq3Cgk/exec';
 
 let allData = [];
 let headersList = [];
@@ -277,11 +282,17 @@ let rowsPerPage = 10;
 
 let currentUser = null;
 
+const userSessionStorage = {
+  get: (key) => localStorage.getItem(key),
+  set: (key, val) => localStorage.setItem(key, val),
+  remove: (key) => localStorage.removeItem(key)
+};
+
 async function init() {
   try {
-    const session = await window.storage.get('session_user', false);
-    if (session && session.value) {
-      currentUser = JSON.parse(session.value);
+    const session = userSessionStorage.get('session_user');
+    if (session) {
+      currentUser = JSON.parse(session);
       showApp();
       await fetchData();
       return;
@@ -299,7 +310,7 @@ function showApp() {
   document.getElementById('loginScreen').classList.add('hidden');
   document.getElementById('appRoot').classList.remove('hidden');
   document.getElementById('sidebarUserName').textContent = currentUser.nama || currentUser.username;
-  document.getElementById('sidebarUserRole').textContent = currentUser.role || '';
+  document.getElementById('sidebarUserRole').textContent = currentUser.role || 'User';
 }
 
 async function doLoginSubmit() {
@@ -327,7 +338,7 @@ async function doLoginSubmit() {
     const json = await res.json();
     if (json.status === 'success') {
       currentUser = json.user;
-      try { await window.storage.set('session_user', JSON.stringify(currentUser), false); } catch (e) {}
+      try { userSessionStorage.set('session_user', JSON.stringify(currentUser)); } catch (e) {}
       document.getElementById('loginPassword').value = '';
       showApp();
       await fetchData();
@@ -345,7 +356,7 @@ async function doLoginSubmit() {
 
 async function logout() {
   currentUser = null;
-  try { await window.storage.delete('session_user', false); } catch (e) {}
+  try { userSessionStorage.remove('session_user'); } catch (e) {}
   document.getElementById('loginUsername').value = '';
   document.getElementById('loginPassword').value = '';
   showLoginScreen();
@@ -372,10 +383,10 @@ async function fetchData() {
   }
   
   document.getElementById('loadingState').classList.add('hidden');
-  renderStats();
   populateLayananFilter();
+  populateTahunFilter();
   renderTableHeader();
-  renderTable();
+  renderTable(); // Menghitung otomatis statistik berdasarkan filter
 }
 
 function renderTableHeader() {
@@ -416,11 +427,42 @@ function populateLayananFilter() {
   });
 }
 
-function renderStats() {
-  document.getElementById('statTotal').textContent = allData.length;
+function extractYearFromRecord(d) {
+  for (let k in d) {
+    if (k.toLowerCase().includes('tgl') || k.toLowerCase().includes('tanggal') || k.toLowerCase().includes('tahun')) {
+      let val = String(d[k]);
+      let m = val.match(/\b(20\d{2})\b/);
+      if (m) return m[1];
+    }
+  }
+  return null;
+}
+
+function populateTahunFilter() {
+  const select = document.getElementById('tahunFilter');
+  select.innerHTML = '<option value="">-- Semua Tahun --</option>';
+
+  const tahunSet = new Set();
+  allData.forEach(d => {
+    let yr = extractYearFromRecord(d);
+    if (yr) tahunSet.add(yr);
+  });
+
+  Array.from(tahunSet).sort((a,b) => b - a).forEach(tahun => {
+    const opt = document.createElement('option');
+    opt.value = tahun;
+    opt.textContent = tahun;
+    select.appendChild(opt);
+  });
+}
+
+// Fungsi renderStats sekarang menerima data yang terfilter
+function renderStats(dataSet) {
+  const dataToCalculate = dataSet || allData;
+  document.getElementById('statTotal').textContent = dataToCalculate.length;
   let cancleCount = 0, surveyCount = 0, progCount = 0, doneCount = 0;
   
-  allData.forEach(d => {
+  dataToCalculate.forEach(d => {
     let statusKey = Object.keys(d).find(k => k.toLowerCase().includes('status')) || '';
     let st = statusKey ? String(d[statusKey]).trim().toLowerCase() : '';
 
@@ -457,6 +499,7 @@ function renderTable() {
   const q = document.getElementById('searchInput').value.toLowerCase();
   const st = document.getElementById('statusFilter').value.toLowerCase();
   const lay = document.getElementById('layananFilter').value.toLowerCase();
+  const th = document.getElementById('tahunFilter').value;
 
   tbody.innerHTML = '';
 
@@ -471,8 +514,14 @@ function renderTable() {
     const valLayanan = getKolom(d, 'layanan pa').toLowerCase();
     const matchLay = !lay || valLayanan === lay;
 
-    return matchQ && matchSt && matchLay;
+    let recYear = extractYearFromRecord(d);
+    let matchTh = !th || (recYear && recYear === th);
+
+    return matchQ && matchSt && matchLay && matchTh;
   });
+
+  // Perbarui Metric Cards agar angkanya ikut berubah sesuai filter tahun/pencarian
+  renderStats(filtered);
 
   const totalItems = filtered.length;
   const totalPages = Math.ceil(totalItems / rowsPerPage) || 1;
@@ -637,7 +686,7 @@ function openFormModal(action) {
   document.getElementById('modalTitle').textContent = action === 'create' ? '➕ Tambah Data PA Baru' : '✏️ Edit Data Rekap PA';
 
   headersList.forEach((key) => {
-    if (key.toUpperCase() === 'DIUBAH OLEH') return; // kolom ini otomatis, tidak ditampilkan di form
+    if (key.toUpperCase() === 'DIUBAH OLEH') return;
 
     let val = '';
     if (action === 'update' && currentActiveData) {
@@ -698,20 +747,9 @@ async function handleFormSubmit(e) {
   const rowObj = {};
 
   formData.forEach((value, key) => {
-    const keyLower = key.toLowerCase();
-    const isDate = keyLower.includes('tgl') || keyLower.includes('tanggal');
-
-    if (isDate && value) {
-      const parts = value.split('-');
-      if (parts.length === 3 && parts[0].length === 4) {
-        value = `${parts[2]}-${parts[1]}-${parts[0]}`;
-      }
-    }
-
     rowObj[key] = value;
   });
 
-  // Catat siapa yang menambahkan/mengubah data ini
   rowObj['DIUBAH OLEH'] = currentUser ? (currentUser.nama || currentUser.username) : '';
 
   const payload = { action: currentAction, data: rowObj };
@@ -784,26 +822,27 @@ async function confirmDelete() {
 }
 
 function showDashboardView() {
-  document.getElementById('dashboardView').classList.remove('hidden');
   document.getElementById('detailView').classList.add('hidden');
+  document.getElementById('dashboardView').classList.remove('hidden');
 }
 
 function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('hidden');
+  const sidebar = document.getElementById('sidebar');
+  sidebar.classList.toggle('-ml-64');
 }
 
 function exportData() {
-  if (!allData || allData.length === 0) {
+  if (allData.length === 0) {
     alert('Tidak ada data untuk diexport!');
     return;
   }
-  const ws = XLSX.utils.json_to_sheet(allData);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "REKAP_PA");
-  XLSX.writeFile(wb, "REKAP_PA.xlsx");
+  const worksheet = XLSX.utils.json_to_sheet(allData);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap PA");
+  XLSX.writeFile(workbook, `Rekap_PA_${new Date().toISOString().slice(0,10)}.xlsx`);
 }
 
-init();
+window.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
