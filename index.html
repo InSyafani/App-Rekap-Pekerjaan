@@ -30,7 +30,32 @@
 </head>
 <body class="bg-slate-100 text-slate-700 min-h-screen flex flex-col antialiased">
 
-<div class="flex flex-1 min-h-screen">
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="fixed inset-0 z-50 bg-inspekta-sidebar flex items-center justify-center p-4">
+  <div class="w-full max-w-sm">
+    <div class="text-center mb-6">
+      <div class="w-12 h-12 rounded-full bg-white text-teal-700 flex items-center justify-center font-bold text-2xl mx-auto mb-3">+</div>
+      <h1 class="font-bold text-2xl text-white tracking-wide">WINSONS</h1>
+      <p class="text-teal-100 text-xs mt-1">Aplikasi Rekap Pekerjaan</p>
+    </div>
+    <div class="bg-white rounded-lg shadow-xl p-5">
+      <div class="space-y-3">
+        <div>
+          <label class="block text-slate-600 font-semibold mb-1 text-xs">Username</label>
+          <input id="loginUsername" type="text" placeholder="Username" class="w-full px-3 py-2 border border-slate-300 rounded outline-none focus:border-teal-500 text-xs" onkeydown="if(event.key==='Enter') document.getElementById('loginPassword').focus()">
+        </div>
+        <div>
+          <label class="block text-slate-600 font-semibold mb-1 text-xs">Password</label>
+          <input id="loginPassword" type="password" placeholder="Password" class="w-full px-3 py-2 border border-slate-300 rounded outline-none focus:border-teal-500 text-xs" onkeydown="if(event.key==='Enter') doLoginSubmit()">
+        </div>
+      </div>
+      <button id="loginBtn" onclick="doLoginSubmit()" class="w-full mt-4 bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold px-4 py-2.5 rounded shadow-sm transition">Masuk</button>
+      <p id="loginError" class="hidden text-xs text-rose-600 mt-3 text-center font-medium"></p>
+    </div>
+  </div>
+</div>
+
+<div id="appRoot" class="hidden flex flex-1 min-h-screen">
   
   <!-- SIDEBAR KIRI -->
   <aside id="sidebar" class="w-64 bg-inspekta-sidebar text-white flex flex-col shrink-0 transition-all duration-300">
@@ -42,8 +67,8 @@
     <div class="p-4 border-b border-teal-600/40 flex items-center gap-3">
       <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold">👤</div>
       <div class="text-xs overflow-hidden">
-        <p class="font-semibold truncate text-white">Administrator</p>
-        <p class="text-teal-100 font-medium text-[11px] mt-1">PLN / Icon Plus</p>
+        <p id="sidebarUserName" class="font-semibold truncate text-white">Administrator</p>
+        <p id="sidebarUserRole" class="text-teal-100 font-medium text-[11px] mt-1">PLN / Icon Plus</p>
       </div>
     </div>
 
@@ -55,7 +80,9 @@
 
     <!-- FOOTER SIDEBAR KIRI -->
     <div class="p-3 border-t border-teal-600/40 space-y-3">
-      <!-- TULISAN VERSI & BUILDER -->
+      <button onclick="logout()" class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded bg-teal-800/60 hover:bg-teal-800 text-white text-xs font-semibold transition">
+        🚪 Logout
+      </button>
       <div class="text-center text-[11px] text-teal-100/80 leading-snug">
         <p class="font-medium">Versi Beta 1.3</p>
         <p class="text-teal-200/90 font-semibold mt-0.5">Builder by Indah Syafani</p>
@@ -89,8 +116,8 @@
 
       <!-- METRIC CARDS -->
       <div class="bg-white p-4 rounded border border-slate-200 shadow-sm grid grid-cols-2 md:grid-cols-5 divide-y md:divide-y-0 md:divide-x divide-slate-200 text-slate-600">
-        <div class="px-3 py-1"><p class="text-[11px] text-slate-400 font-semibold">📋 Total Data</p><p id="statTotal" class="text-2xl font-bold text-slate-700 mt-1">0</p></div>
-        <div class="px-3 py-1"><p class="text-[11px] text-slate-400 font-semibold">📄 Cancle</p><p id="statCancle" class="text-2xl font-bold text-slate-700 mt-1">0</p></div>
+        <div class="px-3 py-1"><p class="text-[11px] text-slate-400 font-semibold">📋 Total Pekerjaan</p><p id="statTotal" class="text-2xl font-bold text-slate-700 mt-1">0</p></div>
+        <div class="px-3 py-1"><p class="text-[11px] text-slate-400 font-semibold">📄 Cancel</p><p id="statCancle" class="text-2xl font-bold text-slate-700 mt-1">0</p></div>
         <div class="px-3 py-1"><p class="text-[11px] text-slate-400 font-semibold">📄 Survey</p><p id="statSurvey" class="text-2xl font-bold text-slate-700 mt-1">0</p></div>
         <div class="px-3 py-1"><p class="text-[11px] text-slate-400 font-semibold">🔄 In Progress</p><p id="statProgress" class="text-2xl font-bold text-slate-700 mt-1">0</p></div>
         <div class="px-3 py-1"><p class="text-[11px] text-slate-400 font-semibold">☑️ Done</p><p id="statDone" class="text-2xl font-bold text-slate-700 mt-1">0</p></div>
@@ -205,7 +232,7 @@
     </main>
 
   </div>
-</div>
+</div><!-- /#appRoot -->
 
 <!-- MODAL FORM -->
 <div id="formModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
@@ -238,7 +265,7 @@
 </div>
 
 <script>
-const API_URL = 'https://script.google.com/macros/s/AKfycbwhlBBLdThrqGaMvCJYScvypa2QYKv_vuNcHbLFV-ZhHzaGl98-Z5DJogSaZ-TvKme6/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbwuUWixRc2JRksLYMOTLCvd8CYznYUGERVcxD-6Cg46jd1Yf3v_82JjTS2fDWCFwsei/exec';
 
 let allData = [];
 let headersList = [];
@@ -248,8 +275,80 @@ let currentAction = 'create';
 let currentPage = 1;
 let rowsPerPage = 10;
 
+let currentUser = null;
+
 async function init() {
-  await fetchData();
+  try {
+    const session = await window.storage.get('session_user', false);
+    if (session && session.value) {
+      currentUser = JSON.parse(session.value);
+      showApp();
+      await fetchData();
+      return;
+    }
+  } catch (e) {}
+  showLoginScreen();
+}
+
+function showLoginScreen() {
+  document.getElementById('appRoot').classList.add('hidden');
+  document.getElementById('loginScreen').classList.remove('hidden');
+}
+
+function showApp() {
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('appRoot').classList.remove('hidden');
+  document.getElementById('sidebarUserName').textContent = currentUser.nama || currentUser.username;
+  document.getElementById('sidebarUserRole').textContent = currentUser.role || '';
+}
+
+async function doLoginSubmit() {
+  const username = document.getElementById('loginUsername').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errEl = document.getElementById('loginError');
+  errEl.classList.add('hidden');
+
+  if (!username || !password) {
+    errEl.textContent = 'Username dan password wajib diisi';
+    errEl.classList.remove('hidden');
+    return;
+  }
+
+  const btn = document.getElementById('loginBtn');
+  btn.textContent = 'Memeriksa...';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'login', data: { username, password } })
+    });
+    const json = await res.json();
+    if (json.status === 'success') {
+      currentUser = json.user;
+      try { await window.storage.set('session_user', JSON.stringify(currentUser), false); } catch (e) {}
+      document.getElementById('loginPassword').value = '';
+      showApp();
+      await fetchData();
+    } else {
+      errEl.textContent = json.message || 'Username atau password salah';
+      errEl.classList.remove('hidden');
+    }
+  } catch (e) {
+    errEl.textContent = 'Gagal terhubung ke server. Cek koneksi.';
+    errEl.classList.remove('hidden');
+  }
+  btn.textContent = 'Masuk';
+  btn.disabled = false;
+}
+
+async function logout() {
+  currentUser = null;
+  try { await window.storage.delete('session_user', false); } catch (e) {}
+  document.getElementById('loginUsername').value = '';
+  document.getElementById('loginPassword').value = '';
+  showLoginScreen();
 }
 
 async function fetchData() {
@@ -292,6 +391,7 @@ function renderTableHeader() {
 }
 
 function getKolom(obj, searchKey) {
+  if (!obj) return '-';
   const key = Object.keys(obj).find(k => k.trim().toLowerCase() === searchKey.toLowerCase());
   return key && obj[key] !== undefined && obj[key] !== '' ? obj[key] : '-';
 }
@@ -363,8 +463,11 @@ function renderTable() {
   const filtered = allData.filter(d => {
     const textAll = Object.values(d).join(' ').toLowerCase();
     const matchQ = !q || textAll.includes(q);
-    const matchSt = !st || textAll.includes(st);
     
+    let statusKey = Object.keys(d).find(k => k.toLowerCase().includes('status')) || '';
+    let statusVal = statusKey ? String(d[statusKey]).toLowerCase() : '';
+    let matchSt = !st || statusVal.includes(st) || (st.includes('cancle') && statusVal.includes('cancel'));
+
     const valLayanan = getKolom(d, 'layanan pa').toLowerCase();
     const matchLay = !lay || valLayanan === lay;
 
@@ -399,9 +502,11 @@ function renderTable() {
       rowHtml += `<td class="py-2.5 px-3 border-r border-slate-200 text-slate-700 truncate" title="${valSO}">${valSO}</td>`;
       rowHtml += `<td class="py-2.5 px-3 border-r border-slate-200 text-slate-700 truncate" title="${valPTL}">${valPTL}</td>`;
 
+      const dataIndex = allData.indexOf(d);
+
       rowHtml += `
         <td class="py-2.5 px-3 text-center truncate">
-          <button onclick="showDetailView('${encodeURIComponent(JSON.stringify(d))}')" class="text-teal-600 hover:underline font-semibold">
+          <button onclick="showDetailByIndex(${dataIndex})" class="text-teal-600 hover:underline font-semibold">
             Lihat Detail
           </button>
         </td>
@@ -458,8 +563,13 @@ function goToPage(page) {
   renderTable();
 }
 
-function showDetailView(encodedData) {
-  const d = JSON.parse(decodeURIComponent(encodedData));
+function showDetailByIndex(index) {
+  if (index >= 0 && index < allData.length) {
+    showDetailView(allData[index]);
+  }
+}
+
+function showDetailView(d) {
   currentActiveData = d;
   
   document.getElementById('dashboardView').classList.add('hidden');
@@ -487,7 +597,6 @@ function showDetailView(encodedData) {
 
     const isDate = keyLower.includes('tgl') || keyLower.includes('tanggal');
 
-    // 1. FORMAT TANGGAL KE DD-MM-YYYY
     if (isDate && val && val !== '-') {
       let parts = String(val).split('-');
       if (parts.length === 3 && parts[0].length === 4) {
@@ -502,7 +611,6 @@ function showDetailView(encodedData) {
         }
       }
     } 
-    // 2. FORMAT MATA UANG/ANGKA
     else if (typeof val === 'number' && val > 1000 && !isTextOnly) {
       val = 'Rp ' + val.toLocaleString('id-ID');
     }
@@ -546,7 +654,6 @@ function openFormModal(action) {
     } else if (isDate) {
       inputType = 'date';
       
-      // Ubah nilai DD-MM-YYYY atau ISO ke YYYY-MM-DD agar dibaca oleh HTML Datepicker
       if (val) {
         let parts = String(val).split('-');
         if (parts.length === 3 && parts[0].length === 2) {
@@ -592,7 +699,6 @@ async function handleFormSubmit(e) {
     const keyLower = key.toLowerCase();
     const isDate = keyLower.includes('tgl') || keyLower.includes('tanggal');
 
-    // Konversi nilai input (YYYY-MM-DD) ke DD-MM-YYYY saat disimpan
     if (isDate && value) {
       const parts = value.split('-');
       if (parts.length === 3 && parts[0].length === 4) {
@@ -623,7 +729,7 @@ async function handleFormSubmit(e) {
       await fetchData();
       
       if (currentAction === 'create') showDashboardView();
-      else showDetailView(encodeURIComponent(JSON.stringify(rowObj)));
+      else showDetailView(rowObj);
     } else {
       alert('❌ Gagal: ' + resJson.message);
     }
@@ -682,6 +788,10 @@ function toggleSidebar() {
 }
 
 function exportData() {
+  if (!allData || allData.length === 0) {
+    alert('Tidak ada data untuk diexport!');
+    return;
+  }
   const ws = XLSX.utils.json_to_sheet(allData);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "REKAP_PA");
