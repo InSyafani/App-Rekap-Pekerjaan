@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APLIKASI REKAP PEKERJAAN</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  * { font-family: 'Open Sans', sans-serif; }
+  .bg-inspekta-sidebar { background-color: #2b7a83; }
+  .bg-inspekta-header { background-color: #009da5; }
+  
+  .badge-done { background-color: #009da5; color: white; }
+  .badge-approved { background-color: #28a745; color: white; }
+  .badge-waiting { background-color: #fd7e14; color: white; }
+  .badge-draft { background-color: #6c757d; color: white; }
+  .badge-progress { background-color: #17a2b8; color: white; }
+
+  ::-webkit-scrollbar { height: 6px; width: 6px; }
+  ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+  @media print {
+    aside, header, #btnBackDetail, #btnExportPdf, #btnEditData, #btnDeleteData { display: none !important; }
+    main { padding: 0 !important; }
+  }
+</style>
+</head>
+<body class="bg-slate-100 text-slate-700 min-h-screen flex flex-col antialiased">
+
+<div class="flex flex-1 min-h-screen">
+  
+  <!-- SIDEBAR KIRI -->
+  <aside id="sidebar" class="w-64 bg-inspekta-sidebar text-white flex flex-col shrink-0 transition-all duration-300">
+    <div class="p-4 flex items-center gap-3 border-b border-teal-600/40">
+      <div class="w-8 h-8 rounded-full bg-white text-teal-700 flex items-center justify-center font-bold text-lg">+</div>
+      <span class="font-bold text-xl tracking-wide">WINSONS</span>
+    </div>
+
+    <div class="p-4 border-b border-teal-600/40 flex items-center gap-3">
+      <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold">👤</div>
+      <div class="text-xs overflow-hidden">
+        <p class="font-semibold truncate text-white">Administrator</p>
+        <p class="text-teal-100 font-medium text-[11px] mt-1">PLN / Icon Plus</p>
+      </div>
+    </div>
+
+    <nav class="flex-1 p-2 space-y-1 text-xs">
+      <a href="#" onclick="showDashboardView()" class="flex items-center gap-3 px-3 py-2.5 rounded bg-teal-800/80 font-semibold text-white">
+        <span>📊</span> Dashboard Rekap PA
+      </a>
+    </nav>
+
+    <!-- FOOTER SIDEBAR KIRI -->
+    <div class="p-3 border-t border-teal-600/40 space-y-3">
+      <!-- TULISAN VERSI & BUILDER -->
+      <div class="text-center text-[11px] text-teal-100/80 leading-snug">
+        <p class="font-medium">Versi Beta 1.3</p>
+        <p class="text-teal-200/90 font-semibold mt-0.5">Builder by Indah Syafani</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- KONTEN UTAMA -->
+  <div class="flex-1 flex flex-col min-w-0">
+    
+    <header class="bg-white border-b border-slate-200 px-6 py-2.5 flex items-center justify-between shadow-sm">
+      <button onclick="toggleSidebar()" class="text-slate-600 hover:text-slate-800 text-lg">☰</button>
+      <div class="flex items-center gap-3 text-xs">
+        <span class="font-semibold text-slate-700">Aplikasi Rekap Pekerjaan</span>
+      </div>
+    </header>
+
+    <!-- 1. DASHBOARD VIEW -->
+    <main id="dashboardView" class="p-6 space-y-5 overflow-y-auto">
+      <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-normal text-slate-600">PEKERJAAN ICON</h1>
+        <div class="flex gap-2">
+          <button onclick="openCreateModal()" class="bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold px-4 py-2 rounded shadow-sm flex items-center gap-1">
+            ➕ Tambah PA Baru
+          </button>
+          <button onclick="exportData()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded shadow-sm">
+            Export Excel
+          </button>
+        </div>
+      </div>
+
+      <!-- METRIC CARDS -->
+      <div class="bg-white p-4 rounded border border-slate-200 shadow-sm grid grid-cols-2 md:grid-cols-5 divide-y md:divide-y-0 md:divide-x divide-slate-200 text-slate-600">
+        <div class="px-3 py-1"><p class="text-[11px] text-slate-400 font-semibold">📋 Total Data</p><p id="statTotal" class="text-2xl font-bold text-slate-700 mt-1">0</p></div>
+        <div class="px-3 py-1"><p class="text-[11px] text-slate-400 font-semibold">📄 Cancle</p><p id="statCancle" class="text-2xl font-bold text-slate-700 mt-1">0</p></div>
+        <div class="px-3 py-1"><p class="text-[11px] text-slate-400 font-semibold">📄 Survey</p><p id="statSurvey" class="text-2xl font-bold text-slate-700 mt-1">0</p></div>
+        <div class="px-3 py-1"><p class="text-[11px] text-slate-400 font-semibold">🔄 In Progress</p><p id="statProgress" class="text-2xl font-bold text-slate-700 mt-1">0</p></div>
+        <div class="px-3 py-1"><p class="text-[11px] text-slate-400 font-semibold">☑️ Done</p><p id="statDone" class="text-2xl font-bold text-slate-700 mt-1">0</p></div>
+      </div>
+
+      <!-- FILTER PANEL -->
+      <div class="bg-white p-4 rounded border border-slate-200 shadow-sm flex flex-col md:flex-row gap-3 justify-between items-center text-xs">
+        <div class="flex flex-wrap gap-2 w-full md:w-auto flex-1 items-center">
+          <input id="searchInput" type="text" onkeyup="resetAndRenderTable()" placeholder="Cari di semua kolom..." class="px-3 py-2 border border-slate-300 rounded outline-none focus:border-teal-500 w-full md:w-64">
+          
+          <!-- FILTER STATUS -->
+          <select id="statusFilter" onchange="resetAndRenderTable()" class="px-2 py-2 border border-slate-300 rounded text-slate-600 outline-none">
+            <option value="">-- Semua Status --</option>
+            <option value="Done">Done</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Survey">Survey</option>
+            <option value="Cancle">Cancle</option>
+          </select>
+
+          <!-- FILTER LAYANAN PA -->
+          <select id="layananFilter" onchange="resetAndRenderTable()" class="px-2 py-2 border border-slate-300 rounded text-slate-600 outline-none">
+            <option value="">-- Semua Layanan PA --</option>
+          </select>
+
+          <button onclick="resetAndRenderTable()" class="bg-slate-700 hover:bg-slate-800 text-white font-semibold px-4 py-2 rounded">Cari Data</button>
+        </div>
+
+        <!-- PILIHAN JUMLAH BARIS -->
+        <div class="flex items-center gap-2 whitespace-nowrap">
+          <span class="text-slate-500 font-semibold">Tampilkan:</span>
+          <select id="rowsPerPageSelect" onchange="changeRowsPerPage()" class="px-2 py-1.5 border border-slate-300 rounded outline-none text-slate-600">
+            <option value="10" selected>10 baris</option>
+            <option value="25">25 baris</option>
+            <option value="50">50 baris</option>
+            <option value="100">100 baris</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- TABEL DASHBOARD -->
+      <div class="bg-white rounded border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-left border-collapse table-fixed">
+            <thead>
+              <tr id="tableHeaderRow" class="bg-inspekta-header text-white font-semibold">
+                <th class="py-2.5 px-3 border-r border-teal-600/30 w-12 text-center shrink-0">#</th>
+                <th class="py-2.5 px-3 border-r border-teal-600/30 w-[140px] shrink-0">ID</th>
+                <th class="py-2.5 px-3 border-r border-teal-600/30 w-[300px] shrink-0">NAMA PEKERJAAN</th>
+                <th class="py-2.5 px-3 border-r border-teal-600/30 w-[160px] shrink-0">SO</th>
+                <th class="py-2.5 px-3 border-r border-teal-600/30 w-[160px] shrink-0">PTL</th>
+                <th class="py-2.5 px-3 text-center w-[100px] shrink-0">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody" class="divide-y divide-slate-200"></tbody>
+          </table>
+        </div>
+        <div id="loadingState" class="py-12 text-center">
+          <div class="inline-block w-6 h-6 border-2 border-teal-600 border-t-transparent rounded-full animate-spin"></div>
+          <p class="text-xs text-slate-400 mt-2">Menghubungkan ke Spreadsheet...</p>
+        </div>
+
+        <!-- PAGINASI -->
+        <div class="p-3 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-600 gap-3">
+          <div id="paginationInfo" class="font-medium text-slate-500">
+            Menampilkan 0 - 0 dari 0 data
+          </div>
+          <div id="paginationControls" class="flex items-center gap-1"></div>
+        </div>
+      </div>
+    </main>
+
+    <!-- 2. DETAIL VIEW -->
+    <main id="detailView" class="hidden p-6 space-y-4 overflow-y-auto">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-200">
+        <div>
+          <span id="detTitle" class="text-xl font-medium text-slate-600">Detail Rekap PA</span>
+          <span class="text-xl italic font-light text-slate-400 ml-2">Informasi Lengkap</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="btnEditData" onclick="openFormModal('update')" class="bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold px-3 py-1.5 rounded shadow-sm flex items-center gap-1">
+            ✏️ Edit
+          </button>
+          <button id="btnDeleteData" onclick="confirmDelete()" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold px-3 py-1.5 rounded shadow-sm flex items-center gap-1">
+            🗑️ Hapus
+          </button>
+          <button id="btnExportPdf" onclick="window.print()" class="bg-amber-400 hover:bg-amber-500 text-slate-800 text-xs font-semibold px-3 py-1.5 rounded shadow-sm flex items-center gap-1">
+            📄 PDF
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 text-xs">
+        <div class="bg-white rounded border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+          <div class="p-3 border-b border-slate-200 font-semibold text-slate-700 text-sm">
+            Informasi Utama / Data Pengajuan
+          </div>
+          <div id="detailColLeft" class="divide-y divide-slate-100 flex-1"></div>
+          <div class="p-4 bg-slate-50 border-t border-slate-100">
+            <a href="#" onclick="showDashboardView()" class="text-sky-500 hover:underline font-medium">
+              &larr; Kembali ke Dashboard
+            </a>
+          </div>
+        </div>
+
+        <div class="bg-white rounded border border-slate-200 shadow-sm overflow-hidden flex flex-col self-start">
+          <div class="p-3 border-b border-slate-200 font-semibold text-slate-700 text-sm">
+            Rincian Tambahan / Status
+          </div>
+          <div id="detailColRight" class="divide-y divide-slate-100"></div>
+        </div>
+      </div>
+    </main>
+
+  </div>
+</div>
+
+<!-- MODAL FORM -->
+<div id="formModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+  <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+    
+    <div class="px-5 py-3.5 bg-inspekta-header text-white flex items-center justify-between">
+      <h3 id="modalTitle" class="font-bold text-sm">Form Data Rekap PA</h3>
+      <button onclick="closeFormModal()" class="text-white hover:text-slate-200 text-lg font-bold">&times;</button>
+    </div>
+
+    <form id="dataForm" onsubmit="handleFormSubmit(event)" class="p-5 overflow-y-auto space-y-4 text-xs flex-1">
+      <div id="formFieldsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+      
+      <div id="saveLoading" class="hidden text-center py-2 text-teal-600 font-semibold flex items-center justify-center gap-2">
+        <div class="w-4 h-4 border-2 border-teal-600 border-t-transparent rounded-full animate-spin"></div>
+        <span id="loadingText">Menyimpan ke Google Sheets...</span>
+      </div>
+    </form>
+
+    <div class="px-5 py-3 bg-slate-100 border-t border-slate-200 flex justify-end gap-2 text-xs">
+      <button type="button" onclick="closeFormModal()" class="px-4 py-2 bg-slate-300 hover:bg-slate-400 text-slate-700 font-semibold rounded">
+        Batal
+      </button>
+      <button type="submit" form="dataForm" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded">
+        💾 Simpan
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const API_URL = 'https://script.google.com/macros/s/AKfycbwhlBBLdThrqGaMvCJYScvypa2QYKv_vuNcHbLFV-ZhHzaGl98-Z5DJogSaZ-TvKme6/exec';
+
+let allData = [];
+let headersList = [];
+let currentActiveData = null;
+let currentAction = 'create'; 
+
+let currentPage = 1;
+let rowsPerPage = 10;
+
+async function init() {
+  await fetchData();
+}
+
+async function fetchData() {
+  document.getElementById('loadingState').classList.remove('hidden');
+  try {
+    const fetchUrl = API_URL + (API_URL.includes('?') ? '&' : '?') + 't=' + new Date().getTime();
+    const res = await fetch(fetchUrl, { method: 'GET', redirect: 'follow' });
+    const json = await res.json();
+    
+    if (json.status === 'success' && json.data) {
+      allData = json.data;
+    } else if (Array.isArray(json)) {
+      allData = json;
+    }
+
+    if (allData.length > 0) {
+      headersList = Object.keys(allData[0]);
+    }
+  } catch (e) {
+    console.error("Gagal koneksi ke Spreadsheet:", e);
+  }
+  
+  document.getElementById('loadingState').classList.add('hidden');
+  renderStats();
+  populateLayananFilter();
+  renderTableHeader();
+  renderTable();
+}
+
+function renderTableHeader() {
+  const tr = document.getElementById('tableHeaderRow');
+  tr.innerHTML = `
+    <th class="py-2.5 px-3 border-r border-teal-600/30 w-12 text-center shrink-0">#</th>
+    <th class="py-2.5 px-3 border-r border-teal-600/30 w-[140px] shrink-0">ID</th>
+    <th class="py-2.5 px-3 border-r border-teal-600/30 w-[300px] shrink-0">NAMA PEKERJAAN</th>
+    <th class="py-2.5 px-3 border-r border-teal-600/30 w-[160px] shrink-0">SO</th>
+    <th class="py-2.5 px-3 border-r border-teal-600/30 w-[160px] shrink-0">PTL</th>
+    <th class="py-2.5 px-3 text-center w-[100px] shrink-0">Aksi</th>
+  `;
+}
+
+function getKolom(obj, searchKey) {
+  const key = Object.keys(obj).find(k => k.trim().toLowerCase() === searchKey.toLowerCase());
+  return key && obj[key] !== undefined && obj[key] !== '' ? obj[key] : '-';
+}
+
+function populateLayananFilter() {
+  const select = document.getElementById('layananFilter');
+  select.innerHTML = '<option value="">-- Semua Layanan PA --</option>';
+
+  const layananSet = new Set();
+  allData.forEach(d => {
+    const val = getKolom(d, 'layanan pa');
+    if (val && val !== '-') {
+      layananSet.add(val);
+    }
+  });
+
+  layananSet.forEach(layanan => {
+    const opt = document.createElement('option');
+    opt.value = layanan;
+    opt.textContent = layanan;
+    select.appendChild(opt);
+  });
+}
+
+function renderStats() {
+  document.getElementById('statTotal').textContent = allData.length;
+  let cancleCount = 0, surveyCount = 0, progCount = 0, doneCount = 0;
+  
+  allData.forEach(d => {
+    let statusKey = Object.keys(d).find(k => k.toLowerCase().includes('status')) || '';
+    let st = statusKey ? String(d[statusKey]).trim().toLowerCase() : '';
+
+    if (st === 'done') {
+      doneCount++;
+    } else if (st.includes('cancle') || st.includes('cancel')) {
+      cancleCount++;
+    } else if (st.includes('survey')) {
+      surveyCount++;
+    } else if (st.includes('progress') || st.includes('proses')) {
+      progCount++;
+    }
+  });
+
+  document.getElementById('statCancle').textContent = cancleCount;
+  document.getElementById('statSurvey').textContent = surveyCount;
+  document.getElementById('statProgress').textContent = progCount;
+  document.getElementById('statDone').textContent = doneCount;
+}
+
+function resetAndRenderTable() {
+  currentPage = 1;
+  renderTable();
+}
+
+function changeRowsPerPage() {
+  rowsPerPage = parseInt(document.getElementById('rowsPerPageSelect').value);
+  currentPage = 1;
+  renderTable();
+}
+
+function renderTable() {
+  const tbody = document.getElementById('tableBody');
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const st = document.getElementById('statusFilter').value.toLowerCase();
+  const lay = document.getElementById('layananFilter').value.toLowerCase();
+
+  tbody.innerHTML = '';
+
+  const filtered = allData.filter(d => {
+    const textAll = Object.values(d).join(' ').toLowerCase();
+    const matchQ = !q || textAll.includes(q);
+    const matchSt = !st || textAll.includes(st);
+    
+    const valLayanan = getKolom(d, 'layanan pa').toLowerCase();
+    const matchLay = !lay || valLayanan === lay;
+
+    return matchQ && matchSt && matchLay;
+  });
+
+  const totalItems = filtered.length;
+  const totalPages = Math.ceil(totalItems / rowsPerPage) || 1;
+  
+  if (currentPage > totalPages) currentPage = totalPages;
+
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = Math.min(startIndex + rowsPerPage, totalItems);
+
+  const pageData = filtered.slice(startIndex, endIndex);
+
+  if (pageData.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400 font-medium">Data tidak ditemukan.</td></tr>`;
+  } else {
+    pageData.forEach((d, i) => {
+      const realIndex = startIndex + i + 1;
+      let rowHtml = `<tr class="${i % 2 === 0 ? 'bg-white' : 'bg-slate-50'} hover:bg-slate-100 transition">`;
+      rowHtml += `<td class="py-2.5 px-3 border-r border-slate-200 text-slate-500 text-center truncate">${realIndex}</td>`;
+
+      const valID = getKolom(d, 'id');
+      const valNamaPekerjaan = getKolom(d, 'nama pekerjaan');
+      const valSO = getKolom(d, 'so');
+      const valPTL = getKolom(d, 'ptl');
+
+      rowHtml += `<td class="py-2.5 px-3 border-r border-slate-200 text-slate-700 font-semibold truncate" title="${valID}">${valID}</td>`;
+      rowHtml += `<td class="py-2.5 px-3 border-r border-slate-200 text-slate-700 font-medium truncate" title="${valNamaPekerjaan}">${valNamaPekerjaan}</td>`;
+      rowHtml += `<td class="py-2.5 px-3 border-r border-slate-200 text-slate-700 truncate" title="${valSO}">${valSO}</td>`;
+      rowHtml += `<td class="py-2.5 px-3 border-r border-slate-200 text-slate-700 truncate" title="${valPTL}">${valPTL}</td>`;
+
+      rowHtml += `
+        <td class="py-2.5 px-3 text-center truncate">
+          <button onclick="showDetailView('${encodeURIComponent(JSON.stringify(d))}')" class="text-teal-600 hover:underline font-semibold">
+            Lihat Detail
+          </button>
+        </td>
+      </tr>`;
+
+      tbody.innerHTML += rowHtml;
+    });
+  }
+
+  renderPaginationUI(totalItems, totalPages, startIndex, endIndex);
+}
+
+function renderPaginationUI(totalItems, totalPages, startIndex, endIndex) {
+  const info = document.getElementById('paginationInfo');
+  const controls = document.getElementById('paginationControls');
+
+  if (totalItems === 0) {
+    info.textContent = "Menampilkan 0 - 0 dari 0 data";
+    controls.innerHTML = '';
+    return;
+  }
+
+  info.textContent = `Menampilkan ${startIndex + 1} - ${endIndex} dari ${totalItems} data`;
+
+  let buttonsHtml = '';
+
+  buttonsHtml += `
+    <button onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled class="px-2.5 py-1 rounded bg-slate-200 text-slate-400 cursor-not-allowed"' : 'class="px-2.5 py-1 rounded bg-white border border-slate-300 text-slate-700 hover:bg-slate-100"'}>
+      &laquo; Prev
+    </button>
+  `;
+
+  for (let p = 1; p <= totalPages; p++) {
+    if (p === currentPage) {
+      buttonsHtml += `<button class="px-3 py-1 rounded bg-teal-600 text-white font-bold">${p}</button>`;
+    } else if (p === 1 || p === totalPages || (p >= currentPage - 1 && p <= currentPage + 1)) {
+      buttonsHtml += `<button onclick="goToPage(${p})" class="px-3 py-1 rounded bg-white border border-slate-300 text-slate-700 hover:bg-slate-100">${p}</button>`;
+    } else if (p === currentPage - 2 || p === currentPage + 2) {
+      buttonsHtml += `<span class="px-1 text-slate-400">...</span>`;
+    }
+  }
+
+  buttonsHtml += `
+    <button onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled class="px-2.5 py-1 rounded bg-slate-200 text-slate-400 cursor-not-allowed"' : 'class="px-2.5 py-1 rounded bg-white border border-slate-300 text-slate-700 hover:bg-slate-100"'}>
+      Next &raquo;
+    </button>
+  `;
+
+  controls.innerHTML = buttonsHtml;
+}
+
+function goToPage(page) {
+  currentPage = page;
+  renderTable();
+}
+
+function showDetailView(encodedData) {
+  const d = JSON.parse(decodeURIComponent(encodedData));
+  currentActiveData = d;
+  
+  document.getElementById('dashboardView').classList.add('hidden');
+  document.getElementById('detailView').classList.remove('hidden');
+
+  const colLeft = document.getElementById('detailColLeft');
+  const colRight = document.getElementById('detailColRight');
+
+  colLeft.innerHTML = '';
+  colRight.innerHTML = '';
+
+  const totalKeys = headersList.length;
+  const half = Math.ceil(totalKeys / 2);
+
+  headersList.forEach((key, idx) => {
+    let val = d[key] !== undefined && d[key] !== null ? d[key] : '-';
+    let keyLower = key.toLowerCase();
+
+    let isTextOnly = keyLower.includes('sid') || 
+                     keyLower.includes('no') || 
+                     keyLower.includes('id') || 
+                     keyLower.includes('kode') || 
+                     keyLower.includes('nomor') || 
+                     keyLower.includes('kontrak');
+
+    const isDate = keyLower.includes('tgl') || keyLower.includes('tanggal');
+
+    // 1. FORMAT TANGGAL KE DD-MM-YYYY
+    if (isDate && val && val !== '-') {
+      let parts = String(val).split('-');
+      if (parts.length === 3 && parts[0].length === 4) {
+        val = `${parts[2]}-${parts[1]}-${parts[0]}`;
+      } else {
+        let dateObj = new Date(val);
+        if (!isNaN(dateObj.getTime())) {
+          let day = String(dateObj.getDate()).padStart(2, '0');
+          let month = String(dateObj.getMonth() + 1).padStart(2, '0');
+          let year = dateObj.getFullYear();
+          val = `${day}-${month}-${year}`;
+        }
+      }
+    } 
+    // 2. FORMAT MATA UANG/ANGKA
+    else if (typeof val === 'number' && val > 1000 && !isTextOnly) {
+      val = 'Rp ' + val.toLocaleString('id-ID');
+    }
+
+    const itemHtml = `
+      <div class="grid grid-cols-3 p-2.5">
+        <span class="text-slate-500 font-medium">${key}</span>
+        <span class="col-span-2 text-slate-800 font-semibold">${val}</span>
+      </div>`;
+
+    if (idx < half) {
+      colLeft.innerHTML += itemHtml;
+    } else {
+      colRight.innerHTML += itemHtml;
+    }
+  });
+}
+
+function openFormModal(action) {
+  currentAction = action;
+  const container = document.getElementById('formFieldsContainer');
+  container.innerHTML = '';
+
+  document.getElementById('modalTitle').textContent = action === 'create' ? '➕ Tambah Data PA Baru' : '✏️ Edit Data Rekap PA';
+
+  headersList.forEach((key) => {
+    let val = '';
+    if (action === 'update' && currentActiveData) {
+      val = currentActiveData[key] !== undefined && currentActiveData[key] !== null ? currentActiveData[key] : '';
+    }
+
+    const keyLower = key.toLowerCase();
+    const isID = key.toUpperCase() === 'ID';
+    const isDate = keyLower.includes('tgl') || keyLower.includes('tanggal');
+
+    let inputType = 'text';
+    let inputAttr = `class="w-full px-3 py-1.5 border border-slate-300 rounded focus:border-teal-500 outline-none"`;
+    
+    if (isID) {
+      inputAttr = `readonly class="w-full px-3 py-1.5 border border-slate-200 rounded bg-slate-100 text-slate-500 cursor-not-allowed"`;
+    } else if (isDate) {
+      inputType = 'date';
+      
+      // Ubah nilai DD-MM-YYYY atau ISO ke YYYY-MM-DD agar dibaca oleh HTML Datepicker
+      if (val) {
+        let parts = String(val).split('-');
+        if (parts.length === 3 && parts[0].length === 2) {
+          val = `${parts[2]}-${parts[1]}-${parts[0]}`;
+        } else {
+          let d = new Date(val);
+          if (!isNaN(d.getTime())) {
+            let year = d.getFullYear();
+            let month = String(d.getMonth() + 1).padStart(2, '0');
+            let day = String(d.getDate()).padStart(2, '0');
+            val = `${year}-${month}-${day}`;
+          }
+        }
+      }
+    }
+
+    const inputGroup = `
+      <div>
+        <label class="block text-slate-600 font-semibold mb-1">${key}</label>
+        <input type="${inputType}" name="${key}" value="${val}" ${inputAttr}>
+      </div>`;
+    container.innerHTML += inputGroup;
+  });
+
+  document.getElementById('formModal').classList.remove('hidden');
+}
+
+function openCreateModal() {
+  openFormModal('create');
+}
+
+function closeFormModal() {
+  document.getElementById('formModal').classList.add('hidden');
+}
+
+async function handleFormSubmit(e) {
+  e.preventDefault();
+  const form = document.getElementById('dataForm');
+  const formData = new FormData(form);
+  const rowObj = {};
+
+  formData.forEach((value, key) => {
+    const keyLower = key.toLowerCase();
+    const isDate = keyLower.includes('tgl') || keyLower.includes('tanggal');
+
+    // Konversi nilai input (YYYY-MM-DD) ke DD-MM-YYYY saat disimpan
+    if (isDate && value) {
+      const parts = value.split('-');
+      if (parts.length === 3 && parts[0].length === 4) {
+        value = `${parts[2]}-${parts[1]}-${parts[0]}`;
+      }
+    }
+
+    rowObj[key] = value;
+  });
+
+  const payload = { action: currentAction, data: rowObj };
+
+  document.getElementById('loadingText').textContent = 'Menyimpan data ke Spreadsheet...';
+  document.getElementById('saveLoading').classList.remove('hidden');
+
+  try {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(payload)
+    });
+
+    const resJson = await response.json();
+
+    if (resJson.status === 'success') {
+      alert('✅ ' + resJson.message);
+      closeFormModal();
+      await fetchData();
+      
+      if (currentAction === 'create') showDashboardView();
+      else showDetailView(encodeURIComponent(JSON.stringify(rowObj)));
+    } else {
+      alert('❌ Gagal: ' + resJson.message);
+    }
+  } catch (err) {
+    alert('❌ Terjadi kesalahan koneksi.');
+  } finally {
+    document.getElementById('saveLoading').classList.add('hidden');
+  }
+}
+
+async function confirmDelete() {
+  if (!currentActiveData) return;
+  const targetId = getKolom(currentActiveData, 'id');
+
+  if (targetId === '-') {
+    alert('❌ Kolom ID tidak ditemukan pada baris data ini!');
+    return;
+  }
+
+  if (confirm(`Apakah Anda yakin ingin menghapus data dengan ID: ${targetId}?`)) {
+    const payload = {
+      action: 'delete',
+      id: targetId
+    };
+
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify(payload)
+      });
+
+      const resJson = await response.json();
+
+      if (resJson.status === 'success') {
+        alert('✅ ' + resJson.message);
+        await fetchData();
+        showDashboardView();
+      } else {
+        alert('❌ Gagal menghapus: ' + resJson.message);
+      }
+    } catch (err) {
+      console.error('Error delete:', err);
+      alert('❌ Terjadi kesalahan saat menghapus data.');
+    }
+  }
+}
+
+function showDashboardView() {
+  document.getElementById('dashboardView').classList.remove('hidden');
+  document.getElementById('detailView').classList.add('hidden');
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('hidden');
+}
+
+function exportData() {
+  const ws = XLSX.utils.json_to_sheet(allData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "REKAP_PA");
+  XLSX.writeFile(wb, "REKAP_PA.xlsx");
+}
+
+init();
+</script>
+</body>
+</html>
