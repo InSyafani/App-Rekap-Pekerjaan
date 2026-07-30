@@ -104,22 +104,29 @@
           </button>
         </nav>
       </div>
-
-      <!-- User Profile & Logout -->
-      <div class="p-4 border-t border-slate-800">
-        <div class="flex items-center justify-between bg-slate-800/50 p-3 rounded-xl mb-3">
+     <!-- User Profile & Logout -->
+      <div class="p-4 border-t border-slate-800 space-y-3">
+        <!-- Profile Card -->
+        <div class="flex items-center justify-between bg-slate-800/50 p-3 rounded-xl">
           <div class="truncate">
             <p id="userDisplayName" class="text-sm font-semibold text-white truncate">User</p>
             <p id="userDisplayRole" class="text-xs text-slate-400 capitalize">Role</p>
           </div>
         </div>
+
+        <!-- Tombol Keluar Sesi -->
         <button onclick="handleLogout()" class="w-full py-2.5 px-4 bg-rose-600/10 hover:bg-rose-600/20 text-rose-400 rounded-xl font-medium text-xs flex items-center justify-center space-x-2 transition">
           <i class="fa-solid fa-right-from-bracket"></i>
           <span>Keluar Sesi</span>
-          </button>
-          <p class="text-xs text-slate-400"> </p>
-          <p class="text-xs text-slate-400">Builder by Indah Syafani</p>
-          </div>
+        </button>
+
+        <!-- Builder Credit Footer (Estetis & Minimalis) -->
+        <div class="pt-2 text-center">
+          <p class="text-[11px] font-medium text-slate-400/80 tracking-wide">
+            Built with <span class="text-rose-500">♥</span> by <span class="text-slate-300 font-semibold">Indah Syafani</span>
+          </p>
+        </div>
+      </div>
     </aside>
 
     <!-- Main Content Area -->
