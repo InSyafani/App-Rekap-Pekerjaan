@@ -637,6 +637,8 @@ function openFormModal(action) {
   document.getElementById('modalTitle').textContent = action === 'create' ? '➕ Tambah Data PA Baru' : '✏️ Edit Data Rekap PA';
 
   headersList.forEach((key) => {
+    if (key.toUpperCase() === 'DIUBAH OLEH') return; // kolom ini otomatis, tidak ditampilkan di form
+
     let val = '';
     if (action === 'update' && currentActiveData) {
       val = currentActiveData[key] !== undefined && currentActiveData[key] !== null ? currentActiveData[key] : '';
@@ -708,6 +710,9 @@ async function handleFormSubmit(e) {
 
     rowObj[key] = value;
   });
+
+  // Catat siapa yang menambahkan/mengubah data ini
+  rowObj['DIUBAH OLEH'] = currentUser ? (currentUser.nama || currentUser.username) : '';
 
   const payload = { action: currentAction, data: rowObj };
 
