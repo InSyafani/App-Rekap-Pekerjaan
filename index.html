@@ -12,7 +12,7 @@
   * { font-family: 'Open Sans', sans-serif; }
   .bg-inspekta-sidebar { background-color: #2b7a83; }
   .bg-inspekta-header { background-color: #009da5; }
-  
+
   .badge-done { background-color: #009da5; color: white; }
   .badge-approved { background-color: #28a745; color: white; }
   .badge-waiting { background-color: #fd7e14; color: white; }
@@ -114,10 +114,10 @@
         </div>
       </div>
 
-      <!-- METRIC CARDS (Dapat Di-filter Berdasarkan Tahun) -->
+      <!-- METRIC CARDS -->
       <div class="bg-white p-4 rounded border border-slate-200 shadow-sm grid grid-cols-2 md:grid-cols-5 divide-y md:divide-y-0 md:divide-x divide-slate-200 text-slate-600">
         <div class="px-3 py-1"><p class="text-[11px] text-slate-400 font-semibold">📋 Total Pekerjaan</p><p id="statTotal" class="text-2xl font-bold text-slate-700 mt-1">0</p></div>
-        <div class="px-3 py-1"><p class="text-[11px] text-slate-400 font-semibold">📄 Cancel</p><p id="statCancle" class="text-2xl font-bold text-slate-700 mt-1">0</p></div>
+        <div class="px-3 py-1"><p class="text-[11px] text-slate-400 font-semibold">📄 Cancel</p><p id="statCancel" class="text-2xl font-bold text-slate-700 mt-1">0</p></div>
         <div class="px-3 py-1"><p class="text-[11px] text-slate-400 font-semibold">📄 Survey</p><p id="statSurvey" class="text-2xl font-bold text-slate-700 mt-1">0</p></div>
         <div class="px-3 py-1"><p class="text-[11px] text-slate-400 font-semibold">🔄 In Progress</p><p id="statProgress" class="text-2xl font-bold text-slate-700 mt-1">0</p></div>
         <div class="px-3 py-1"><p class="text-[11px] text-slate-400 font-semibold">☑️ Done</p><p id="statDone" class="text-2xl font-bold text-slate-700 mt-1">0</p></div>
@@ -139,7 +139,7 @@
             <option value="Done">Done</option>
             <option value="In Progress">In Progress</option>
             <option value="Survey">Survey</option>
-            <option value="Cancle">Cancle</option>
+            <option value="Cancel">Cancel</option>
           </select>
 
           <!-- FILTER LAYANAN PA -->
@@ -221,9 +221,9 @@
           </div>
           <div id="detailColLeft" class="divide-y divide-slate-100 flex-1"></div>
           <div class="p-4 bg-slate-50 border-t border-slate-100">
-            <a href="#" onclick="showDashboardView()" class="text-sky-500 hover:underline font-medium">
+            <button id="btnBackDetail" onclick="showDashboardView()" class="text-sky-500 hover:underline font-medium">
               &larr; Kembali ke Dashboard
-            </a>
+            </button>
           </div>
         </div>
 
@@ -251,8 +251,8 @@
     <form id="dataForm" onsubmit="handleFormSubmit(event)" class="p-5 overflow-y-auto space-y-4 text-xs flex-1">
       <div id="formFieldsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
       
-      <div id="saveLoading" class="hidden text-center py-2 text-teal-600 font-semibold flex items-center justify-center gap-2">
-        <div class="w-4 h-4 border-2 border-teal-600 border-t-transparent rounded-full animate-spin"></div>
+      <div id="saveLoading" class="hidden text-center py-2 text-teal-600 font-semibold flex flex-col items-center justify-center gap-2">
+        <div class="w-5 h-5 border-2 border-teal-600 border-t-transparent rounded-full animate-spin"></div>
         <span id="loadingText">Menyimpan ke Google Sheets...</span>
       </div>
     </form>
@@ -386,7 +386,7 @@ async function fetchData() {
   populateLayananFilter();
   populateTahunFilter();
   renderTableHeader();
-  renderTable(); // Menghitung otomatis statistik berdasarkan filter
+  renderTable();
 }
 
 function renderTableHeader() {
@@ -456,11 +456,10 @@ function populateTahunFilter() {
   });
 }
 
-// Fungsi renderStats sekarang menerima data yang terfilter
 function renderStats(dataSet) {
   const dataToCalculate = dataSet || allData;
   document.getElementById('statTotal').textContent = dataToCalculate.length;
-  let cancleCount = 0, surveyCount = 0, progCount = 0, doneCount = 0;
+  let cancelCount = 0, surveyCount = 0, progCount = 0, doneCount = 0;
   
   dataToCalculate.forEach(d => {
     let statusKey = Object.keys(d).find(k => k.toLowerCase().includes('status')) || '';
@@ -469,7 +468,7 @@ function renderStats(dataSet) {
     if (st === 'done') {
       doneCount++;
     } else if (st.includes('cancle') || st.includes('cancel')) {
-      cancleCount++;
+      cancelCount++;
     } else if (st.includes('survey')) {
       surveyCount++;
     } else if (st.includes('progress') || st.includes('proses')) {
@@ -477,7 +476,7 @@ function renderStats(dataSet) {
     }
   });
 
-  document.getElementById('statCancle').textContent = cancleCount;
+  document.getElementById('statCancel').textContent = cancelCount;
   document.getElementById('statSurvey').textContent = surveyCount;
   document.getElementById('statProgress').textContent = progCount;
   document.getElementById('statDone').textContent = doneCount;
@@ -509,7 +508,7 @@ function renderTable() {
     
     let statusKey = Object.keys(d).find(k => k.toLowerCase().includes('status')) || '';
     let statusVal = statusKey ? String(d[statusKey]).toLowerCase() : '';
-    let matchSt = !st || statusVal.includes(st) || (st.includes('cancle') && statusVal.includes('cancel'));
+    let matchSt = !st || statusVal.includes(st) || (st.includes('cancel') && statusVal.includes('cancle'));
 
     const valLayanan = getKolom(d, 'layanan pa').toLowerCase();
     const matchLay = !lay || valLayanan === lay;
@@ -520,7 +519,6 @@ function renderTable() {
     return matchQ && matchSt && matchLay && matchTh;
   });
 
-  // Perbarui Metric Cards agar angkanya ikut berubah sesuai filter tahun/pencarian
   renderStats(filtered);
 
   const totalItems = filtered.length;
@@ -616,6 +614,11 @@ function showDetailByIndex(index) {
   if (index >= 0 && index < allData.length) {
     showDetailView(allData[index]);
   }
+}
+
+function showDashboardView() {
+  document.getElementById('detailView').classList.add('hidden');
+  document.getElementById('dashboardView').classList.remove('hidden');
 }
 
 function showDetailView(d) {
@@ -738,6 +741,7 @@ function openCreateModal() {
 
 function closeFormModal() {
   document.getElementById('formModal').classList.add('hidden');
+  document.getElementById('saveLoading').classList.add('hidden');
 }
 
 async function handleFormSubmit(e) {
@@ -770,14 +774,16 @@ async function handleFormSubmit(e) {
       alert('✅ ' + resJson.message);
       closeFormModal();
       await fetchData();
-      
-      if (currentAction === 'create') showDashboardView();
-      else showDetailView(rowObj);
+      if (currentAction === 'update' && currentActiveData) {
+        const updatedRecord = allData.find(item => getKolom(item, 'id') === getKolom(rowObj, 'id'));
+        if (updatedRecord) showDetailView(updatedRecord);
+      }
     } else {
-      alert('❌ Gagal: ' + resJson.message);
+      alert('❌ Gagal: ' + (resJson.message || 'Terjadi kesalahan'));
     }
   } catch (err) {
-    alert('❌ Terjadi kesalahan koneksi.');
+    alert('❌ Error koneksi saat menyimpan data!');
+    console.error(err);
   } finally {
     document.getElementById('saveLoading').classList.add('hidden');
   }
@@ -785,64 +791,47 @@ async function handleFormSubmit(e) {
 
 async function confirmDelete() {
   if (!currentActiveData) return;
-  const targetId = getKolom(currentActiveData, 'id');
+  const idVal = getKolom(currentActiveData, 'id');
 
-  if (targetId === '-') {
-    alert('❌ Kolom ID tidak ditemukan pada baris data ini!');
-    return;
-  }
+  if (!confirm(`Apakah Anda yakin ingin menghapus data dengan ID: ${idVal}?`)) return;
 
-  if (confirm(`Apakah Anda yakin ingin menghapus data dengan ID: ${targetId}?`)) {
-    const payload = {
-      action: 'delete',
-      id: targetId
-    };
+  try {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'delete', data: { ID: idVal } })
+    });
+    const resJson = await response.json();
 
-    try {
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify(payload)
-      });
-
-      const resJson = await response.json();
-
-      if (resJson.status === 'success') {
-        alert('✅ ' + resJson.message);
-        await fetchData();
-        showDashboardView();
-      } else {
-        alert('❌ Gagal menghapus: ' + resJson.message);
-      }
-    } catch (err) {
-      console.error('Error delete:', err);
-      alert('❌ Terjadi kesalahan saat menghapus data.');
+    if (resJson.status === 'success') {
+      alert('✅ Data berhasil dihapus!');
+      showDashboardView();
+      await fetchData();
+    } else {
+      alert('❌ Gagal menghapus: ' + (resJson.message || 'Terjadi kesalahan'));
     }
+  } catch (e) {
+    alert('❌ Error koneksi saat menghapus data!');
   }
-}
-
-function showDashboardView() {
-  document.getElementById('detailView').classList.add('hidden');
-  document.getElementById('dashboardView').classList.remove('hidden');
-}
-
-function toggleSidebar() {
-  const sidebar = document.getElementById('sidebar');
-  sidebar.classList.toggle('-ml-64');
 }
 
 function exportData() {
-  if (allData.length === 0) {
+  if (!allData || allData.length === 0) {
     alert('Tidak ada data untuk diexport!');
     return;
   }
-  const worksheet = XLSX.utils.json_to_sheet(allData);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap PA");
-  XLSX.writeFile(workbook, `Rekap_PA_${new Date().toISOString().slice(0,10)}.xlsx`);
+  const ws = XLSX.utils.json_to_sheet(allData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "RekapPekerjaan");
+  XLSX.writeFile(wb, `Rekap_Pekerjaan_${new Date().toISOString().slice(0,10)}.xlsx`);
 }
 
-window.addEventListener('DOMContentLoaded', init);
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  sb.classList.toggle('-ml-64');
+}
+
+window.onload = init;
 </script>
 </body>
 </html>
