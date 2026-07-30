@@ -1,848 +1,1006 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>APLIKASI REKAP PEKERJAAN</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-<style>
-  * { font-family: 'Open Sans', sans-serif; }
-  .bg-inspekta-sidebar { background-color: #2b7a83; }
-  .bg-inspekta-header { background-color: #009da5; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aplikasi Rekap Pekerjaan - WINSONS</title>
   
-  .badge-done { background-color: #009da5; color: white; }
-  .badge-approved { background-color: #28a745; color: white; }
-  .badge-waiting { background-color: #fd7e14; color: white; }
-  .badge-draft { background-color: #6c757d; color: white; }
-  .badge-progress { background-color: #17a2b8; color: white; }
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- SheetJS untuk Export Excel -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <!-- SweetAlert2 untuk Notifikasi Modern -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-  ::-webkit-scrollbar { height: 6px; width: 6px; }
-  ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-
-  @media print {
-    aside, header, #btnBackDetail, #btnExportPdf, #btnEditData, #btnDeleteData { display: none !important; }
-    main { padding: 0 !important; }
-  }
-</style>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    
+    @media print {
+      body * { visibility: hidden; }
+      #detailView, #detailView * { visibility: visible; }
+      #detailView { position: absolute; left: 0; top: 0; width: 100%; }
+      .no-print { display: none !important; }
+    }
+  </style>
 </head>
-<body class="bg-slate-100 text-slate-700 min-h-screen flex flex-col antialiased">
+<body class="bg-slate-100 text-slate-800 antialiased min-h-screen">
 
-<!-- LOGIN SCREEN -->
-<div id="loginScreen" class="fixed inset-0 z-50 bg-inspekta-sidebar flex items-center justify-center p-4">
-  <div class="w-full max-w-sm">
-    <div class="text-center mb-6">
-      <div class="w-12 h-12 rounded-full bg-white text-teal-700 flex items-center justify-center font-bold text-2xl mx-auto mb-3">+</div>
-      <h1 class="font-bold text-2xl text-white tracking-wide">WINSONS</h1>
-      <p class="text-teal-100 text-xs mt-1">Aplikasi Rekap Pekerjaan</p>
-    </div>
-    <div class="bg-white rounded-lg shadow-xl p-5">
-      <div class="space-y-3">
-        <div>
-          <label class="block text-slate-600 font-semibold mb-1 text-xs">Username</label>
-          <input id="loginUsername" type="text" placeholder="Username" class="w-full px-3 py-2 border border-slate-300 rounded outline-none focus:border-teal-500 text-xs" onkeydown="if(event.key==='Enter') document.getElementById('loginPassword').focus()">
-        </div>
-        <div>
-          <label class="block text-slate-600 font-semibold mb-1 text-xs">Password</label>
-          <input id="loginPassword" type="password" placeholder="Password" class="w-full px-3 py-2 border border-slate-300 rounded outline-none focus:border-teal-500 text-xs" onkeydown="if(event.key==='Enter') doLoginSubmit()">
-        </div>
-      </div>
-      <button id="loginBtn" onclick="doLoginSubmit()" class="w-full mt-4 bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold px-4 py-2.5 rounded shadow-sm transition">Masuk</button>
-      <p id="loginError" class="hidden text-xs text-rose-600 mt-3 text-center font-medium"></p>
-    </div>
-  </div>
-</div>
-
-<div id="appRoot" class="hidden flex flex-1 min-h-screen">
-  
-  <!-- SIDEBAR KIRI -->
-  <aside id="sidebar" class="w-64 bg-inspekta-sidebar text-white flex flex-col shrink-0 transition-all duration-300">
-    <div class="p-4 flex items-center gap-3 border-b border-teal-600/40">
-      <div class="w-8 h-8 rounded-full bg-white text-teal-700 flex items-center justify-center font-bold text-lg">+</div>
-      <span class="font-bold text-xl tracking-wide">WINSONS</span>
-    </div>
-
-    <div class="p-4 border-b border-teal-600/40 flex items-center gap-3">
-      <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold">👤</div>
-      <div class="text-xs overflow-hidden">
-        <p id="sidebarUserName" class="font-semibold truncate text-white">Administrator</p>
-        <p id="sidebarUserRole" class="text-teal-100 font-medium text-[11px] mt-1">PLN / Icon Plus</p>
-      </div>
-    </div>
-
-    <nav class="flex-1 p-2 space-y-1 text-xs">
-      <a href="#" onclick="showDashboardView()" class="flex items-center gap-3 px-3 py-2.5 rounded bg-teal-800/80 font-semibold text-white">
-        <span>📊</span> Dashboard Rekap PA
-      </a>
-    </nav>
-
-    <!-- FOOTER SIDEBAR KIRI -->
-    <div class="p-3 border-t border-teal-600/40 space-y-3">
-      <button onclick="logout()" class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded bg-teal-800/60 hover:bg-teal-800 text-white text-xs font-semibold transition">
-        🚪 Logout
-      </button>
-      <div class="text-center text-[11px] text-teal-100/80 leading-snug">
-        <p class="font-medium">Versi Beta 1.3</p>
-        <p class="text-teal-200/90 font-semibold mt-0.5">Builder by Indah Syafani</p>
-      </div>
-    </div>
-  </aside>
-
-  <!-- KONTEN UTAMA -->
-  <div class="flex-1 flex flex-col min-w-0">
-    
-    <header class="bg-white border-b border-slate-200 px-6 py-2.5 flex items-center justify-between shadow-sm">
-      <button onclick="toggleSidebar()" class="text-slate-600 hover:text-slate-800 text-lg">☰</button>
-      <div class="flex items-center gap-3 text-xs">
-        <span class="font-semibold text-slate-700">Aplikasi Rekap Pekerjaan</span>
-      </div>
-    </header>
-
-    <!-- 1. DASHBOARD VIEW -->
-    <main id="dashboardView" class="p-6 space-y-5 overflow-y-auto">
-      <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-normal text-slate-600">PEKERJAAN ICON</h1>
-        <div class="flex gap-2">
-          <button onclick="openCreateModal()" class="bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold px-4 py-2 rounded shadow-sm flex items-center gap-1">
-            ➕ Tambah PA Baru
-          </button>
-          <button onclick="exportData()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded shadow-sm">
-            Export Excel
-          </button>
-        </div>
-      </div>
-
-      <!-- METRIC CARDS (Dapat Di-filter Berdasarkan Tahun) -->
-      <div class="bg-white p-4 rounded border border-slate-200 shadow-sm grid grid-cols-2 md:grid-cols-5 divide-y md:divide-y-0 md:divide-x divide-slate-200 text-slate-600">
-        <div class="px-3 py-1"><p class="text-[11px] text-slate-400 font-semibold">📋 Total Pekerjaan</p><p id="statTotal" class="text-2xl font-bold text-slate-700 mt-1">0</p></div>
-        <div class="px-3 py-1"><p class="text-[11px] text-slate-400 font-semibold">📄 Cancel</p><p id="statCancle" class="text-2xl font-bold text-slate-700 mt-1">0</p></div>
-        <div class="px-3 py-1"><p class="text-[11px] text-slate-400 font-semibold">📄 Survey</p><p id="statSurvey" class="text-2xl font-bold text-slate-700 mt-1">0</p></div>
-        <div class="px-3 py-1"><p class="text-[11px] text-slate-400 font-semibold">🔄 In Progress</p><p id="statProgress" class="text-2xl font-bold text-slate-700 mt-1">0</p></div>
-        <div class="px-3 py-1"><p class="text-[11px] text-slate-400 font-semibold">☑️ Done</p><p id="statDone" class="text-2xl font-bold text-slate-700 mt-1">0</p></div>
-      </div>
-
-      <!-- FILTER PANEL -->
-      <div class="bg-white p-4 rounded border border-slate-200 shadow-sm flex flex-col md:flex-row gap-3 justify-between items-center text-xs">
-        <div class="flex flex-wrap gap-2 w-full md:w-auto flex-1 items-center">
-          <input id="searchInput" type="text" onkeyup="resetAndRenderTable()" placeholder="Cari di semua kolom..." class="px-3 py-2 border border-slate-300 rounded outline-none focus:border-teal-500 w-full md:w-48">
-          
-          <!-- FILTER TAHUN -->
-          <select id="tahunFilter" onchange="resetAndRenderTable()" class="px-2 py-2 border border-slate-300 rounded text-slate-600 outline-none font-semibold text-teal-700 bg-teal-50/50 border-teal-300">
-            <option value="">-- Semua Tahun --</option>
-          </select>
-
-          <!-- FILTER STATUS -->
-          <select id="statusFilter" onchange="resetAndRenderTable()" class="px-2 py-2 border border-slate-300 rounded text-slate-600 outline-none">
-            <option value="">-- Semua Status --</option>
-            <option value="Done">Done</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Survey">Survey</option>
-            <option value="Cancle">Cancle</option>
-          </select>
-
-          <!-- FILTER LAYANAN PA -->
-          <select id="layananFilter" onchange="resetAndRenderTable()" class="px-2 py-2 border border-slate-300 rounded text-slate-600 outline-none">
-            <option value="">-- Semua Layanan PA --</option>
-          </select>
-
-          <button onclick="resetAndRenderTable()" class="bg-slate-700 hover:bg-slate-800 text-white font-semibold px-4 py-2 rounded">Cari Data</button>
-        </div>
-
-        <!-- PILIHAN JUMLAH BARIS -->
-        <div class="flex items-center gap-2 whitespace-nowrap">
-          <span class="text-slate-500 font-semibold">Tampilkan:</span>
-          <select id="rowsPerPageSelect" onchange="changeRowsPerPage()" class="px-2 py-1.5 border border-slate-300 rounded outline-none text-slate-600">
-            <option value="10" selected>10 baris</option>
-            <option value="25">25 baris</option>
-            <option value="50">50 baris</option>
-            <option value="100">100 baris</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- TABEL DASHBOARD -->
-      <div class="bg-white rounded border border-slate-200 shadow-sm overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full text-xs text-left border-collapse table-fixed">
-            <thead>
-              <tr id="tableHeaderRow" class="bg-inspekta-header text-white font-semibold">
-                <th class="py-2.5 px-3 border-r border-teal-600/30 w-12 text-center shrink-0">#</th>
-                <th class="py-2.5 px-3 border-r border-teal-600/30 w-[140px] shrink-0">ID</th>
-                <th class="py-2.5 px-3 border-r border-teal-600/30 w-[300px] shrink-0">NAMA PEKERJAAN</th>
-                <th class="py-2.5 px-3 border-r border-teal-600/30 w-[160px] shrink-0">SO</th>
-                <th class="py-2.5 px-3 border-r border-teal-600/30 w-[160px] shrink-0">PTL</th>
-                <th class="py-2.5 px-3 text-center w-[100px] shrink-0">Aksi</th>
-              </tr>
-            </thead>
-            <tbody id="tableBody" class="divide-y divide-slate-200"></tbody>
-          </table>
-        </div>
-        <div id="loadingState" class="py-12 text-center">
-          <div class="inline-block w-6 h-6 border-2 border-teal-600 border-t-transparent rounded-full animate-spin"></div>
-          <p class="text-xs text-slate-400 mt-2">Menghubungkan ke Spreadsheet...</p>
-        </div>
-
-        <!-- PAGINASI -->
-        <div class="p-3 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-600 gap-3">
-          <div id="paginationInfo" class="font-medium text-slate-500">
-            Menampilkan 0 - 0 dari 0 data
-          </div>
-          <div id="paginationControls" class="flex items-center gap-1"></div>
-        </div>
-      </div>
-    </main>
-
-    <!-- 2. DETAIL VIEW -->
-    <main id="detailView" class="hidden p-6 space-y-4 overflow-y-auto">
-      <div class="flex items-center justify-between pb-2 border-b border-slate-200">
-        <div>
-          <span id="detTitle" class="text-xl font-medium text-slate-600">Detail Rekap PA</span>
-          <span class="text-xl italic font-light text-slate-400 ml-2">Informasi Lengkap</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <button id="btnEditData" onclick="openFormModal('update')" class="bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold px-3 py-1.5 rounded shadow-sm flex items-center gap-1">
-            ✏️ Edit
-          </button>
-          <button id="btnDeleteData" onclick="confirmDelete()" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold px-3 py-1.5 rounded shadow-sm flex items-center gap-1">
-            🗑️ Hapus
-          </button>
-          <button id="btnExportPdf" onclick="window.print()" class="bg-amber-400 hover:bg-amber-500 text-slate-800 text-xs font-semibold px-3 py-1.5 rounded shadow-sm flex items-center gap-1">
-            📄 PDF
-          </button>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 text-xs">
-        <div class="bg-white rounded border border-slate-200 shadow-sm overflow-hidden flex flex-col">
-          <div class="p-3 border-b border-slate-200 font-semibold text-slate-700 text-sm">
-            Informasi Utama / Data Pengajuan
-          </div>
-          <div id="detailColLeft" class="divide-y divide-slate-100 flex-1"></div>
-          <div class="p-4 bg-slate-50 border-t border-slate-100">
-            <a href="#" onclick="showDashboardView()" class="text-sky-500 hover:underline font-medium">
-              &larr; Kembali ke Dashboard
-            </a>
-          </div>
-        </div>
-
-        <div class="bg-white rounded border border-slate-200 shadow-sm overflow-hidden flex flex-col self-start">
-          <div class="p-3 border-b border-slate-200 font-semibold text-slate-700 text-sm">
-            Rincian Tambahan / Status
-          </div>
-          <div id="detailColRight" class="divide-y divide-slate-100"></div>
-        </div>
-      </div>
-    </main>
-
-  </div>
-</div><!-- /#appRoot -->
-
-<!-- MODAL FORM -->
-<div id="formModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-  <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
-    
-    <div class="px-5 py-3.5 bg-inspekta-header text-white flex items-center justify-between">
-      <h3 id="modalTitle" class="font-bold text-sm">Form Data Rekap PA</h3>
-      <button onclick="closeFormModal()" class="text-white hover:text-slate-200 text-lg font-bold">&times;</button>
-    </div>
-
-    <form id="dataForm" onsubmit="handleFormSubmit(event)" class="p-5 overflow-y-auto space-y-4 text-xs flex-1">
-      <div id="formFieldsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+  <!-- ==================== TAMPILAN LOGIN ==================== -->
+  <div id="loginView" class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 border border-slate-200 relative overflow-hidden">
+      <div class="absolute -top-10 -right-10 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl"></div>
       
-      <div id="saveLoading" class="hidden text-center py-2 text-teal-600 font-semibold flex items-center justify-center gap-2">
-        <div class="w-4 h-4 border-2 border-teal-600 border-t-transparent rounded-full animate-spin"></div>
-        <span id="loadingText">Menyimpan ke Google Sheets...</span>
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-600 text-white rounded-2xl shadow-lg mb-4">
+          <i class="fa-solid fa-hard-hat text-3xl"></i>
+        </div>
+        <h1 class="text-2xl font-bold text-slate-900 tracking-tight">WINSONS SYSTEM</h1>
+        <p class="text-slate-500 text-sm mt-1">Rekapitulasi Pekerjaan & Dokumen</p>
       </div>
-    </form>
 
-    <div class="px-5 py-3 bg-slate-100 border-t border-slate-200 flex justify-end gap-2 text-xs">
-      <button type="button" onclick="closeFormModal()" class="px-4 py-2 bg-slate-300 hover:bg-slate-400 text-slate-700 font-semibold rounded">
-        Batal
-      </button>
-      <button type="submit" form="dataForm" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded">
-        💾 Simpan
-      </button>
+      <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-5">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">Username</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+              <i class="fa-solid fa-user"></i>
+            </span>
+            <input type="text" id="loginUsername" required class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:ring-2 focus:ring-blue-500 focus:bg-white focus:outline-none transition-all" placeholder="Masukkan username">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">Password</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+              <i class="fa-solid fa-lock"></i>
+            </span>
+            <input type="password" id="loginPassword" required class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:ring-2 focus:ring-blue-500 focus:bg-white focus:outline-none transition-all" placeholder="••••••••">
+          </div>
+        </div>
+
+        <button type="submit" id="loginBtn" class="w-full py-3.5 px-4 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/30 transition-all flex items-center justify-center space-x-2">
+          <span>Masuk Sistem</span>
+          <i class="fa-solid fa-arrow-right text-sm"></i>
+        </button>
+      </form>
+
+      <div class="mt-8 text-center text-xs text-slate-400">
+        &copy; 2026 PT WINSONS PRATAMA CEMERLANG. All rights reserved.
+      </div>
     </div>
-
   </div>
-</div>
 
-<script>
-const API_URL = 'https://script.google.com/macros/s/AKfycbyaqlvcAlxf1pj4a59KD6Ab1riSyMIy3bICU-7xGJhywywr5z91doxdiWE-P1Zq3Cgk/exec';
 
-let allData = [];
-let headersList = [];
-let currentActiveData = null;
-let currentAction = 'create'; 
-
-let currentPage = 1;
-let rowsPerPage = 10;
-
-let currentUser = null;
-
-const userSessionStorage = {
-  get: (key) => localStorage.getItem(key),
-  set: (key, val) => localStorage.setItem(key, val),
-  remove: (key) => localStorage.removeItem(key)
-};
-
-async function init() {
-  try {
-    const session = userSessionStorage.get('session_user');
-    if (session) {
-      currentUser = JSON.parse(session);
-      showApp();
-      await fetchData();
-      return;
-    }
-  } catch (e) {}
-  showLoginScreen();
-}
-
-function showLoginScreen() {
-  document.getElementById('appRoot').classList.add('hidden');
-  document.getElementById('loginScreen').classList.remove('hidden');
-}
-
-function showApp() {
-  document.getElementById('loginScreen').classList.add('hidden');
-  document.getElementById('appRoot').classList.remove('hidden');
-  document.getElementById('sidebarUserName').textContent = currentUser.nama || currentUser.username;
-  document.getElementById('sidebarUserRole').textContent = currentUser.role || 'User';
-}
-
-async function doLoginSubmit() {
-  const username = document.getElementById('loginUsername').value.trim();
-  const password = document.getElementById('loginPassword').value;
-  const errEl = document.getElementById('loginError');
-  errEl.classList.add('hidden');
-
-  if (!username || !password) {
-    errEl.textContent = 'Username dan password wajib diisi';
-    errEl.classList.remove('hidden');
-    return;
-  }
-
-  const btn = document.getElementById('loginBtn');
-  btn.textContent = 'Memeriksa...';
-  btn.disabled = true;
-
-  try {
-    const res = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'login', data: { username, password } })
-    });
-    const json = await res.json();
-    if (json.status === 'success') {
-      currentUser = json.user;
-      try { userSessionStorage.set('session_user', JSON.stringify(currentUser)); } catch (e) {}
-      document.getElementById('loginPassword').value = '';
-      showApp();
-      await fetchData();
-    } else {
-      errEl.textContent = json.message || 'Username atau password salah';
-      errEl.classList.remove('hidden');
-    }
-  } catch (e) {
-    errEl.textContent = 'Gagal terhubung ke server. Cek koneksi.';
-    errEl.classList.remove('hidden');
-  }
-  btn.textContent = 'Masuk';
-  btn.disabled = false;
-}
-
-async function logout() {
-  currentUser = null;
-  try { userSessionStorage.remove('session_user'); } catch (e) {}
-  document.getElementById('loginUsername').value = '';
-  document.getElementById('loginPassword').value = '';
-  showLoginScreen();
-}
-
-async function fetchData() {
-  document.getElementById('loadingState').classList.remove('hidden');
-  try {
-    const fetchUrl = API_URL + (API_URL.includes('?') ? '&' : '?') + 't=' + new Date().getTime();
-    const res = await fetch(fetchUrl, { method: 'GET', redirect: 'follow' });
-    const json = await res.json();
+  <!-- ==================== MAIN DASHBOARD ==================== -->
+  <div id="mainDashboard" class="hidden min-h-screen flex flex-col md:flex-row">
     
-    if (json.status === 'success' && json.data) {
-      allData = json.data;
-    } else if (Array.isArray(json)) {
-      allData = json;
-    }
-
-    if (allData.length > 0) {
-      headersList = Object.keys(allData[0]);
-    }
-  } catch (e) {
-    console.error("Gagal koneksi ke Spreadsheet:", e);
-  }
-  
-  document.getElementById('loadingState').classList.add('hidden');
-  populateLayananFilter();
-  populateTahunFilter();
-  renderTableHeader();
-  renderTable(); // Menghitung otomatis statistik berdasarkan filter
-}
-
-function renderTableHeader() {
-  const tr = document.getElementById('tableHeaderRow');
-  tr.innerHTML = `
-    <th class="py-2.5 px-3 border-r border-teal-600/30 w-12 text-center shrink-0">#</th>
-    <th class="py-2.5 px-3 border-r border-teal-600/30 w-[140px] shrink-0">ID</th>
-    <th class="py-2.5 px-3 border-r border-teal-600/30 w-[300px] shrink-0">NAMA PEKERJAAN</th>
-    <th class="py-2.5 px-3 border-r border-teal-600/30 w-[160px] shrink-0">SO</th>
-    <th class="py-2.5 px-3 border-r border-teal-600/30 w-[160px] shrink-0">PTL</th>
-    <th class="py-2.5 px-3 text-center w-[100px] shrink-0">Aksi</th>
-  `;
-}
-
-function getKolom(obj, searchKey) {
-  if (!obj) return '-';
-  const key = Object.keys(obj).find(k => k.trim().toLowerCase() === searchKey.toLowerCase());
-  return key && obj[key] !== undefined && obj[key] !== '' ? obj[key] : '-';
-}
-
-function populateLayananFilter() {
-  const select = document.getElementById('layananFilter');
-  select.innerHTML = '<option value="">-- Semua Layanan PA --</option>';
-
-  const layananSet = new Set();
-  allData.forEach(d => {
-    const val = getKolom(d, 'layanan pa');
-    if (val && val !== '-') {
-      layananSet.add(val);
-    }
-  });
-
-  layananSet.forEach(layanan => {
-    const opt = document.createElement('option');
-    opt.value = layanan;
-    opt.textContent = layanan;
-    select.appendChild(opt);
-  });
-}
-
-function extractYearFromRecord(d) {
-  for (let k in d) {
-    if (k.toLowerCase().includes('tgl') || k.toLowerCase().includes('tanggal') || k.toLowerCase().includes('tahun')) {
-      let val = String(d[k]);
-      let m = val.match(/\b(20\d{2})\b/);
-      if (m) return m[1];
-    }
-  }
-  return null;
-}
-
-function populateTahunFilter() {
-  const select = document.getElementById('tahunFilter');
-  select.innerHTML = '<option value="">-- Semua Tahun --</option>';
-
-  const tahunSet = new Set();
-  allData.forEach(d => {
-    let yr = extractYearFromRecord(d);
-    if (yr) tahunSet.add(yr);
-  });
-
-  Array.from(tahunSet).sort((a,b) => b - a).forEach(tahun => {
-    const opt = document.createElement('option');
-    opt.value = tahun;
-    opt.textContent = tahun;
-    select.appendChild(opt);
-  });
-}
-
-// Fungsi renderStats sekarang menerima data yang terfilter
-function renderStats(dataSet) {
-  const dataToCalculate = dataSet || allData;
-  document.getElementById('statTotal').textContent = dataToCalculate.length;
-  let cancleCount = 0, surveyCount = 0, progCount = 0, doneCount = 0;
-  
-  dataToCalculate.forEach(d => {
-    let statusKey = Object.keys(d).find(k => k.toLowerCase().includes('status')) || '';
-    let st = statusKey ? String(d[statusKey]).trim().toLowerCase() : '';
-
-    if (st === 'done') {
-      doneCount++;
-    } else if (st.includes('cancle') || st.includes('cancel')) {
-      cancleCount++;
-    } else if (st.includes('survey')) {
-      surveyCount++;
-    } else if (st.includes('progress') || st.includes('proses')) {
-      progCount++;
-    }
-  });
-
-  document.getElementById('statCancle').textContent = cancleCount;
-  document.getElementById('statSurvey').textContent = surveyCount;
-  document.getElementById('statProgress').textContent = progCount;
-  document.getElementById('statDone').textContent = doneCount;
-}
-
-function resetAndRenderTable() {
-  currentPage = 1;
-  renderTable();
-}
-
-function changeRowsPerPage() {
-  rowsPerPage = parseInt(document.getElementById('rowsPerPageSelect').value);
-  currentPage = 1;
-  renderTable();
-}
-
-function renderTable() {
-  const tbody = document.getElementById('tableBody');
-  const q = document.getElementById('searchInput').value.toLowerCase();
-  const st = document.getElementById('statusFilter').value.toLowerCase();
-  const lay = document.getElementById('layananFilter').value.toLowerCase();
-  const th = document.getElementById('tahunFilter').value;
-
-  tbody.innerHTML = '';
-
-  const filtered = allData.filter(d => {
-    const textAll = Object.values(d).join(' ').toLowerCase();
-    const matchQ = !q || textAll.includes(q);
-    
-    let statusKey = Object.keys(d).find(k => k.toLowerCase().includes('status')) || '';
-    let statusVal = statusKey ? String(d[statusKey]).toLowerCase() : '';
-    let matchSt = !st || statusVal.includes(st) || (st.includes('cancle') && statusVal.includes('cancel'));
-
-    const valLayanan = getKolom(d, 'layanan pa').toLowerCase();
-    const matchLay = !lay || valLayanan === lay;
-
-    let recYear = extractYearFromRecord(d);
-    let matchTh = !th || (recYear && recYear === th);
-
-    return matchQ && matchSt && matchLay && matchTh;
-  });
-
-  // Perbarui Metric Cards agar angkanya ikut berubah sesuai filter tahun/pencarian
-  renderStats(filtered);
-
-  const totalItems = filtered.length;
-  const totalPages = Math.ceil(totalItems / rowsPerPage) || 1;
-  
-  if (currentPage > totalPages) currentPage = totalPages;
-
-  const startIndex = (currentPage - 1) * rowsPerPage;
-  const endIndex = Math.min(startIndex + rowsPerPage, totalItems);
-
-  const pageData = filtered.slice(startIndex, endIndex);
-
-  if (pageData.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400 font-medium">Data tidak ditemukan.</td></tr>`;
-  } else {
-    pageData.forEach((d, i) => {
-      const realIndex = startIndex + i + 1;
-      let rowHtml = `<tr class="${i % 2 === 0 ? 'bg-white' : 'bg-slate-50'} hover:bg-slate-100 transition">`;
-      rowHtml += `<td class="py-2.5 px-3 border-r border-slate-200 text-slate-500 text-center truncate">${realIndex}</td>`;
-
-      const valID = getKolom(d, 'id');
-      const valNamaPekerjaan = getKolom(d, 'nama pekerjaan');
-      const valSO = getKolom(d, 'so');
-      const valPTL = getKolom(d, 'ptl');
-
-      rowHtml += `<td class="py-2.5 px-3 border-r border-slate-200 text-slate-700 font-semibold truncate" title="${valID}">${valID}</td>`;
-      rowHtml += `<td class="py-2.5 px-3 border-r border-slate-200 text-slate-700 font-medium truncate" title="${valNamaPekerjaan}">${valNamaPekerjaan}</td>`;
-      rowHtml += `<td class="py-2.5 px-3 border-r border-slate-200 text-slate-700 truncate" title="${valSO}">${valSO}</td>`;
-      rowHtml += `<td class="py-2.5 px-3 border-r border-slate-200 text-slate-700 truncate" title="${valPTL}">${valPTL}</td>`;
-
-      const dataIndex = allData.indexOf(d);
-
-      rowHtml += `
-        <td class="py-2.5 px-3 text-center truncate">
-          <button onclick="showDetailByIndex(${dataIndex})" class="text-teal-600 hover:underline font-semibold">
-            Lihat Detail
-          </button>
-        </td>
-      </tr>`;
-
-      tbody.innerHTML += rowHtml;
-    });
-  }
-
-  renderPaginationUI(totalItems, totalPages, startIndex, endIndex);
-}
-
-function renderPaginationUI(totalItems, totalPages, startIndex, endIndex) {
-  const info = document.getElementById('paginationInfo');
-  const controls = document.getElementById('paginationControls');
-
-  if (totalItems === 0) {
-    info.textContent = "Menampilkan 0 - 0 dari 0 data";
-    controls.innerHTML = '';
-    return;
-  }
-
-  info.textContent = `Menampilkan ${startIndex + 1} - ${endIndex} dari ${totalItems} data`;
-
-  let buttonsHtml = '';
-
-  buttonsHtml += `
-    <button onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled class="px-2.5 py-1 rounded bg-slate-200 text-slate-400 cursor-not-allowed"' : 'class="px-2.5 py-1 rounded bg-white border border-slate-300 text-slate-700 hover:bg-slate-100"'}>
-      &laquo; Prev
-    </button>
-  `;
-
-  for (let p = 1; p <= totalPages; p++) {
-    if (p === currentPage) {
-      buttonsHtml += `<button class="px-3 py-1 rounded bg-teal-600 text-white font-bold">${p}</button>`;
-    } else if (p === 1 || p === totalPages || (p >= currentPage - 1 && p <= currentPage + 1)) {
-      buttonsHtml += `<button onclick="goToPage(${p})" class="px-3 py-1 rounded bg-white border border-slate-300 text-slate-700 hover:bg-slate-100">${p}</button>`;
-    } else if (p === currentPage - 2 || p === currentPage + 2) {
-      buttonsHtml += `<span class="px-1 text-slate-400">...</span>`;
-    }
-  }
-
-  buttonsHtml += `
-    <button onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled class="px-2.5 py-1 rounded bg-slate-200 text-slate-400 cursor-not-allowed"' : 'class="px-2.5 py-1 rounded bg-white border border-slate-300 text-slate-700 hover:bg-slate-100"'}>
-      Next &raquo;
-    </button>
-  `;
-
-  controls.innerHTML = buttonsHtml;
-}
-
-function goToPage(page) {
-  currentPage = page;
-  renderTable();
-}
-
-function showDetailByIndex(index) {
-  if (index >= 0 && index < allData.length) {
-    showDetailView(allData[index]);
-  }
-}
-
-function showDetailView(d) {
-  currentActiveData = d;
-  
-  document.getElementById('dashboardView').classList.add('hidden');
-  document.getElementById('detailView').classList.remove('hidden');
-
-  const colLeft = document.getElementById('detailColLeft');
-  const colRight = document.getElementById('detailColRight');
-
-  colLeft.innerHTML = '';
-  colRight.innerHTML = '';
-
-  const totalKeys = headersList.length;
-  const half = Math.ceil(totalKeys / 2);
-
-  headersList.forEach((key, idx) => {
-    let val = d[key] !== undefined && d[key] !== null ? d[key] : '-';
-    let keyLower = key.toLowerCase();
-
-    let isTextOnly = keyLower.includes('sid') || 
-                     keyLower.includes('no') || 
-                     keyLower.includes('id') || 
-                     keyLower.includes('kode') || 
-                     keyLower.includes('nomor') || 
-                     keyLower.includes('kontrak');
-
-    const isDate = keyLower.includes('tgl') || keyLower.includes('tanggal');
-
-    if (isDate && val && val !== '-') {
-      let parts = String(val).split('-');
-      if (parts.length === 3 && parts[0].length === 4) {
-        val = `${parts[2]}-${parts[1]}-${parts[0]}`;
-      } else {
-        let dateObj = new Date(val);
-        if (!isNaN(dateObj.getTime())) {
-          let day = String(dateObj.getDate()).padStart(2, '0');
-          let month = String(dateObj.getMonth() + 1).padStart(2, '0');
-          let year = dateObj.getFullYear();
-          val = `${day}-${month}-${year}`;
-        }
-      }
-    } 
-    else if (typeof val === 'number' && val > 1000 && !isTextOnly) {
-      val = 'Rp ' + val.toLocaleString('id-ID');
-    }
-
-    const itemHtml = `
-      <div class="grid grid-cols-3 p-2.5">
-        <span class="text-slate-500 font-medium">${key}</span>
-        <span class="col-span-2 text-slate-800 font-semibold">${val}</span>
-      </div>`;
-
-    if (idx < half) {
-      colLeft.innerHTML += itemHtml;
-    } else {
-      colRight.innerHTML += itemHtml;
-    }
-  });
-}
-
-function openFormModal(action) {
-  currentAction = action;
-  const container = document.getElementById('formFieldsContainer');
-  container.innerHTML = '';
-
-  document.getElementById('modalTitle').textContent = action === 'create' ? '➕ Tambah Data PA Baru' : '✏️ Edit Data Rekap PA';
-
-  headersList.forEach((key) => {
-    if (key.toUpperCase() === 'DIUBAH OLEH') return;
-
-    let val = '';
-    if (action === 'update' && currentActiveData) {
-      val = currentActiveData[key] !== undefined && currentActiveData[key] !== null ? currentActiveData[key] : '';
-    }
-
-    const keyLower = key.toLowerCase();
-    const isID = key.toUpperCase() === 'ID';
-    const isDate = keyLower.includes('tgl') || keyLower.includes('tanggal');
-
-    let inputType = 'text';
-    let inputAttr = `class="w-full px-3 py-1.5 border border-slate-300 rounded focus:border-teal-500 outline-none"`;
-    
-    if (isID) {
-      inputAttr = `readonly class="w-full px-3 py-1.5 border border-slate-200 rounded bg-slate-100 text-slate-500 cursor-not-allowed"`;
-    } else if (isDate) {
-      inputType = 'date';
-      
-      if (val) {
-        let parts = String(val).split('-');
-        if (parts.length === 3 && parts[0].length === 2) {
-          val = `${parts[2]}-${parts[1]}-${parts[0]}`;
-        } else {
-          let d = new Date(val);
-          if (!isNaN(d.getTime())) {
-            let year = d.getFullYear();
-            let month = String(d.getMonth() + 1).padStart(2, '0');
-            let day = String(d.getDate()).padStart(2, '0');
-            val = `${year}-${month}-${day}`;
-          }
-        }
-      }
-    }
-
-    const inputGroup = `
+    <!-- Sidebar -->
+    <aside id="sidebar" class="w-full md:w-64 bg-slate-900 text-slate-300 flex-shrink-0 flex flex-col justify-between transition-all duration-300">
       <div>
-        <label class="block text-slate-600 font-semibold mb-1">${key}</label>
-        <input type="${inputType}" name="${key}" value="${val}" ${inputAttr}>
-      </div>`;
-    container.innerHTML += inputGroup;
-  });
+        <div class="p-6 border-b border-slate-800 flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold">
+              <i class="fa-solid fa-layer-group"></i>
+            </div>
+            <div>
+              <h2 class="font-bold text-white tracking-wide">WINSONS</h2>
+              <p class="text-xs text-slate-400">Dashboard v6.0</p>
+            </div>
+          </div>
+        </div>
 
-  document.getElementById('formModal').classList.remove('hidden');
-}
+        <nav class="p-4 space-y-1">
+          <button onclick="showDashboardView()" class="w-full flex items-center space-x-3 px-4 py-3 bg-blue-600/20 text-blue-400 rounded-xl font-medium text-sm text-left">
+            <i class="fa-solid fa-table-cells w-5"></i>
+            <span>Data Pekerjaan</span>
+          </button>
+        </nav>
+      </div>
 
-function openCreateModal() {
-  openFormModal('create');
-}
+      <!-- User Profile & Logout -->
+      <div class="p-4 border-t border-slate-800">
+        <div class="flex items-center justify-between bg-slate-800/50 p-3 rounded-xl mb-3">
+          <div class="truncate">
+            <p id="userDisplayName" class="text-sm font-semibold text-white truncate">User</p>
+            <p id="userDisplayRole" class="text-xs text-slate-400 capitalize">Role</p>
+          </div>
+        </div>
+        <button onclick="handleLogout()" class="w-full py-2.5 px-4 bg-rose-600/10 hover:bg-rose-600/20 text-rose-400 rounded-xl font-medium text-xs flex items-center justify-center space-x-2 transition">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          <span>Keluar Sesi</span>
+        </button>
+      </div>
+    </aside>
 
-function closeFormModal() {
-  document.getElementById('formModal').classList.add('hidden');
-}
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden">
+      
+      <!-- Top Navbar -->
+      <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <button class="text-slate-500 hover:text-slate-700 text-lg md:hidden">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <span class="text-sm font-medium text-slate-600">Aplikasi Rekap Pekerjaan</span>
+        </div>
+      </header>
 
-async function handleFormSubmit(e) {
-  e.preventDefault();
-  const form = document.getElementById('dataForm');
-  const formData = new FormData(form);
-  const rowObj = {};
+      <!-- VIEW 1: TABEL DASHBOARD UTAMA -->
+      <div id="tableView" class="flex-1 p-6 overflow-y-auto custom-scrollbar space-y-5">
+        
+        <!-- Header Page Title & Action Buttons -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 class="text-2xl font-bold text-slate-800">Data Pekerjaan</h1>
+            <p class="text-xs text-slate-500">Kelola rekapitulasi pengajuan dan status pekerjaan</p>
+          </div>
 
-  formData.forEach((value, key) => {
-    rowObj[key] = value;
-  });
+          <div class="flex items-center space-x-3">
+            <button onclick="fetchData(true)" class="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-sm transition" title="Refresh Data">
+              <i class="fa-solid fa-rotate"></i>
+            </button>
+            <button onclick="exportToExcel()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-medium text-sm shadow-sm flex items-center space-x-2 transition">
+              <i class="fa-solid fa-file-excel"></i>
+              <span>Export Excel</span>
+            </button>
+            <button onclick="openFormModal()" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium text-sm shadow-sm flex items-center space-x-2 transition">
+              <i class="fa-solid fa-plus"></i>
+              <span>Tambah Data</span>
+            </button>
+          </div>
+        </div>
 
-  rowObj['DIUBAH OLEH'] = currentUser ? (currentUser.nama || currentUser.username) : '';
+        <!-- ==================== KARTU RINGKASAN STATISTIK (STAT CARDS) ==================== -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 md:p-6">
+          <div class="grid grid-cols-2 md:grid-cols-5 divide-y md:divide-y-0 md:divide-x divide-slate-200 gap-4 md:gap-0">
+            
+            <!-- Item 1: Total Data -->
+            <div class="flex flex-col justify-center px-2 md:px-4 pt-2 md:pt-0">
+              <div class="flex items-center space-x-1.5 text-slate-400 font-medium text-xs mb-2">
+                <span>📋</span>
+                <span>Total Data</span>
+              </div>
+              <span id="statTotal" class="text-2xl md:text-3xl font-bold text-slate-800">0</span>
+            </div>
 
-  const payload = { action: currentAction, data: rowObj };
+            <!-- Item 2: Cancle -->
+            <div class="flex flex-col justify-center px-2 md:px-6 pt-2 md:pt-0">
+              <div class="flex items-center space-x-1.5 text-slate-400 font-medium text-xs mb-2">
+                <span>📄</span>
+                <span>Cancle</span>
+              </div>
+              <span id="statCancle" class="text-2xl md:text-3xl font-bold text-slate-800">0</span>
+            </div>
 
-  document.getElementById('loadingText').textContent = 'Menyimpan data ke Spreadsheet...';
-  document.getElementById('saveLoading').classList.remove('hidden');
+            <!-- Item 3: Survey -->
+            <div class="flex flex-col justify-center px-2 md:px-6 pt-2 md:pt-0">
+              <div class="flex items-center space-x-1.5 text-slate-400 font-medium text-xs mb-2">
+                <span>📄</span>
+                <span>Survey</span>
+              </div>
+              <span id="statSurvey" class="text-2xl md:text-3xl font-bold text-slate-800">0</span>
+            </div>
 
-  try {
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify(payload)
+            <!-- Item 4: In Progress -->
+            <div class="flex flex-col justify-center px-2 md:px-6 pt-2 md:pt-0">
+              <div class="flex items-center space-x-1.5 text-slate-400 font-medium text-xs mb-2">
+                <span class="text-blue-500">🔄</span>
+                <span class="text-blue-600">In Progress</span>
+              </div>
+              <span id="statInProgress" class="text-2xl md:text-3xl font-bold text-slate-800">0</span>
+            </div>
+
+            <!-- Item 5: Done -->
+            <div class="flex flex-col justify-center px-2 md:px-6 pt-2 md:pt-0">
+              <div class="flex items-center space-x-1.5 text-slate-400 font-medium text-xs mb-2">
+                <span class="text-purple-600">☑️</span>
+                <span class="text-purple-600">Done</span>
+              </div>
+              <span id="statDone" class="text-2xl md:text-3xl font-bold text-slate-800">0</span>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- BILAH KONTROL FILTER & PENCARIAN -->
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
+          
+          <!-- Bagian Filter Kiri -->
+          <div class="flex flex-wrap items-center gap-3 w-full md:w-auto flex-1">
+            
+            <!-- Input Cari Semua Kolom -->
+            <div class="w-full sm:w-64">
+              <input 
+                type="text" 
+                id="searchInput" 
+                onkeyup="handleFilterChange()"
+                class="w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-slate-700 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
+                placeholder="Cari di semua kolom..."
+              >
+            </div>
+
+            <!-- Select Status -->
+            <div class="w-full sm:w-auto">
+              <select id="statusFilter" onchange="handleFilterChange()" class="w-full bg-white border border-slate-300 text-slate-700 rounded-md px-3 py-2 focus:outline-none focus:border-blue-500">
+                <option value="ALL">-- Semua Status --</option>
+              </select>
+            </div>
+
+            <!-- Select Layanan PA -->
+            <div class="w-full sm:w-auto">
+              <select id="layananFilter" onchange="handleFilterChange()" class="w-full bg-white border border-slate-300 text-slate-700 rounded-md px-3 py-2 focus:outline-none focus:border-blue-500">
+                <option value="ALL">-- Semua Layanan PA --</option>
+              </select>
+            </div>
+
+            <!-- Select Tahun Disposisi -->
+            <div class="w-full sm:w-auto">
+              <select id="tahunFilter" onchange="handleFilterChange()" class="w-full bg-white border border-slate-300 text-slate-700 rounded-md px-3 py-2 focus:outline-none focus:border-blue-500">
+                <option value="ALL">-- Semua Tahun Disposisi --</option>
+              </select>
+            </div>
+
+            <!-- Tombol Cari Data -->
+            <button 
+              onclick="handleFilterChange()" 
+              class="px-5 py-2 bg-[#2d3748] hover:bg-[#1a202c] text-white font-medium rounded-md shadow-sm transition flex items-center justify-center space-x-1.5"
+            >
+              <span>Cari Data</span>
+            </button>
+
+          </div>
+
+          <!-- Bagian Tampilkan Baris (Sisi Kanan) -->
+          <div class="flex items-center space-x-2 w-full md:w-auto justify-end border-t md:border-t-0 pt-3 md:pt-0 border-slate-100">
+            <span class="text-slate-600 font-medium whitespace-nowrap">Tampilkan:</span>
+            <select id="pageSizeSelect" onchange="changePageSize()" class="bg-white border border-slate-300 text-slate-700 rounded-md px-3 py-2 focus:outline-none focus:border-blue-500">
+              <option value="10">10 baris</option>
+              <option value="25">25 baris</option>
+              <option value="50">50 baris</option>
+              <option value="100">100 baris</option>
+              <option value="ALL">Semua baris</option>
+            </select>
+          </div>
+
+        </div>
+
+        <!-- Data Table Container (ID, NAMA PEKERJAAN, SO, PTL, AKSI) -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto custom-scrollbar max-h-[calc(100vh-380px)]">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead class="bg-slate-800 text-slate-200 sticky top-0 z-10 font-semibold tracking-wider uppercase">
+                <tr>
+                  <th class="px-4 py-3.5 whitespace-nowrap w-28">ID</th>
+                  <th class="px-4 py-3.5 whitespace-nowrap min-w-[280px]">NAMA PEKERJAAN</th>
+                  <th class="px-4 py-3.5 whitespace-nowrap">SO</th>
+                  <th class="px-4 py-3.5 whitespace-nowrap">PTL</th>
+                  <th class="px-4 py-3.5 text-center whitespace-nowrap w-36">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody" class="divide-y divide-slate-100">
+                <!-- Row Di-render Dinamis -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Table Footer Status & Pagination Nav -->
+          <div class="p-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-500 gap-3">
+            <span id="recordCount">Menampilkan 0 data</span>
+            
+            <div id="paginationControls" class="flex items-center space-x-1">
+              <!-- Tombol Halaman di-render dinamis -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+
+      <!-- VIEW 2: DETAIL REKAP PA -->
+      <div id="detailView" class="hidden flex-1 p-6 overflow-y-auto custom-scrollbar space-y-6">
+        
+        <!-- Detail Header Bar -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 no-print">
+          <div>
+            <h1 class="text-2xl font-normal text-slate-700 inline-block">Detail Rekap PA</h1>
+            <span class="text-xl italic font-light text-slate-400 ml-2">Informasi Lengkap</span>
+          </div>
+
+          <div class="flex items-center space-x-2">
+            <button onclick="editCurrentDetail()" class="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white rounded-lg text-xs font-semibold shadow flex items-center space-x-1.5 transition">
+              <i class="fa-solid fa-pen-to-square"></i>
+              <span>Edit</span>
+            </button>
+            <button onclick="deleteCurrentDetail()" class="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-lg text-xs font-semibold shadow flex items-center space-x-1.5 transition">
+              <i class="fa-solid fa-trash-can"></i>
+              <span>Hapus</span>
+            </button>
+            <button onclick="window.print()" class="px-4 py-2 bg-amber-400 hover:bg-amber-500 text-white rounded-lg text-xs font-semibold shadow flex items-center space-x-1.5 transition">
+              <i class="fa-solid fa-file-pdf"></i>
+              <span>PDF</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 2 Column Layout for PA Detail -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+          
+          <!-- CARD LEFT: Informasi Utama / Data Pengajuan -->
+          <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="px-5 py-3.5 bg-slate-50 border-b border-slate-200">
+              <h3 class="font-bold text-slate-700 text-sm">Informasi Utama / Data Pengajuan</h3>
+            </div>
+            <table class="w-full text-xs divide-y divide-slate-100">
+              <tbody id="detailMainTable" class="divide-y divide-slate-100">
+                <!-- Data Utama di-render dinamis -->
+              </tbody>
+            </table>
+            
+            <div class="p-4 bg-slate-50/50 border-t border-slate-100 no-print">
+              <a href="#" onclick="showDashboardView()" class="text-sky-500 hover:text-sky-600 font-medium text-xs flex items-center space-x-1">
+                <span>&larr; Kembali ke Dashboard</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- CARD RIGHT: Rincian Tambahan / Status -->
+          <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="px-5 py-3.5 bg-slate-50 border-b border-slate-200">
+              <h3 class="font-bold text-slate-700 text-sm">Rincian Tambahan / Status</h3>
+            </div>
+            <table class="w-full text-xs divide-y divide-slate-100">
+              <tbody id="detailSecondaryTable" class="divide-y divide-slate-100">
+                <!-- Data Tambahan di-render dinamis -->
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+
+  <!-- ==================== MODAL FORM (CREATE / EDIT) ==================== -->
+  <div id="formModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+      
+      <div class="px-6 py-4 bg-slate-900 text-white flex justify-between items-center">
+        <h3 id="modalTitle" class="font-bold text-base">Tambah Data Pekerjaan Baru</h3>
+        <button onclick="closeFormModal()" class="text-slate-400 hover:text-white text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form id="dataForm" onsubmit="handleFormSubmit(event)" class="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-4">
+        <input type="hidden" id="formRowId">
+        <div id="dynamicFormFields" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Form fields di-generate secara dinamis -->
+        </div>
+
+        <div class="pt-4 border-t border-slate-200 flex justify-end space-x-3">
+          <button type="button" onclick="closeFormModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-medium text-xs transition">
+            Batal
+          </button>
+          <button type="submit" id="saveBtn" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium text-xs shadow-md transition flex items-center space-x-2">
+            <i class="fa-solid fa-floppy-disk"></i>
+            <span>Simpan Data</span>
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+
+  <!-- ==================== JAVASCRIPT LOGIC ==================== -->
+  <script>
+    // ================= CONFIGURATION =================
+    const API_URL = "https://script.google.com/macros/s/AKfycbw5PNQsGn4SBKHR2LxQqwGt0721uJOCTo2QY0Iic8NaxlMKvMZwqFKPWt8BWDdv_rEb/exec";
+
+    let currentUser = null;
+    let rawData = [];
+    let filteredData = [];
+    let tableHeaders = [];
+    let selectedDetailRow = null;
+
+    // Variables for Pagination
+    let currentPage = 1;
+    let pageSize = 10;
+
+    // Pengelompokan Kolom untuk Halaman Detail
+    const MAIN_KEYS = [
+      'ID', 'NAMA PEKERJAAN', 'TGL DISPOSISI', 'SO', 'SID', 'IO', 
+      'PTL', 'LAYANAN PA', 'PENARIKAN', 'TESCOM', 'TANGGAL TOKEN KABEL'
+    ];
+
+    const SECONDARY_KEYS = [
+      'TANGGAL BAI', 'PENGAMBILAN KABEL', 'PENGEMBALIAN KABEL', 'LABEL KABEL', 
+      'SUBMIT DOK AKTIVASI', 'SUBMIT DOC TESCOM', 'STATUS', 'PKT/BAPS', 
+      'PEMBAYARAN MANDOR', 'DIUBAH OLEH'
+    ];
+
+    // ================= INITIALIZATION =================
+    document.addEventListener('DOMContentLoaded', () => {
+      checkSession();
     });
 
-    const resJson = await response.json();
-
-    if (resJson.status === 'success') {
-      alert('✅ ' + resJson.message);
-      closeFormModal();
-      await fetchData();
-      
-      if (currentAction === 'create') showDashboardView();
-      else showDetailView(rowObj);
-    } else {
-      alert('❌ Gagal: ' + resJson.message);
+    function checkSession() {
+      const savedUser = localStorage.getItem('winsons_user');
+      if (savedUser) {
+        currentUser = JSON.parse(savedUser);
+        showDashboard();
+      } else {
+        showLogin();
+      }
     }
-  } catch (err) {
-    alert('❌ Terjadi kesalahan koneksi.');
-  } finally {
-    document.getElementById('saveLoading').classList.add('hidden');
-  }
-}
 
-async function confirmDelete() {
-  if (!currentActiveData) return;
-  const targetId = getKolom(currentActiveData, 'id');
+    function showLogin() {
+      document.getElementById('loginView').classList.remove('hidden');
+      document.getElementById('mainDashboard').classList.add('hidden');
+    }
 
-  if (targetId === '-') {
-    alert('❌ Kolom ID tidak ditemukan pada baris data ini!');
-    return;
-  }
+    function showDashboard() {
+      document.getElementById('loginView').classList.add('hidden');
+      document.getElementById('mainDashboard').classList.remove('hidden');
+      
+      document.getElementById('userDisplayName').innerText = currentUser.nama || currentUser.username;
+      document.getElementById('userDisplayRole').innerText = currentUser.role || 'Operator';
+      
+      fetchData();
+    }
 
-  if (confirm(`Apakah Anda yakin ingin menghapus data dengan ID: ${targetId}?`)) {
-    const payload = {
-      action: 'delete',
-      id: targetId
-    };
+    function showDashboardView() {
+      document.getElementById('tableView').classList.remove('hidden');
+      document.getElementById('detailView').classList.add('hidden');
+      selectedDetailRow = null;
+    }
 
-    try {
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify(payload)
+    // ================= LOGIN & LOGOUT =================
+    async function handleLogin(e) {
+      e.preventDefault();
+      const userVal = document.getElementById('loginUsername').value.trim();
+      const passVal = document.getElementById('loginPassword').value.trim();
+      const btn = document.getElementById('loginBtn');
+
+      if (!userVal || !passVal) return;
+
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i><span>Memverifikasi...</span>`;
+
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'login',
+            data: { username: userVal, password: passVal }
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.status === 'success') {
+          currentUser = result.user;
+          localStorage.setItem('winsons_user', JSON.stringify(currentUser));
+          Swal.fire({
+            icon: 'success',
+            title: 'Login Berhasil',
+            text: `Selamat datang, ${currentUser.nama || currentUser.username}!`,
+            timer: 1500,
+            showConfirmButton: false
+          });
+          showDashboard();
+        } else {
+          Swal.fire('Gagal Login', result.message || 'Username atau password salah', 'error');
+        }
+      } catch (err) {
+        console.error("Login error:", err);
+        Swal.fire('Kesalahan Sistem', 'Tidak dapat terhubung ke server backend.', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<span>Masuk Sistem</span><i class="fa-solid fa-arrow-right text-sm"></i>`;
+      }
+    }
+
+    function handleLogout() {
+      Swal.fire({
+        title: 'Keluar Sesi?',
+        text: 'Anda harus login kembali untuk mengakses data.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#e11d48',
+        confirmButtonText: 'Ya, Keluar'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          localStorage.removeItem('winsons_user');
+          currentUser = null;
+          showLogin();
+        }
+      });
+    }
+
+    // ================= FETCH & RENDER DATA =================
+    async function fetchData(forceRefresh = false) {
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="5" class="text-center py-12 text-slate-400">
+            <i class="fa-solid fa-spinner animate-spin text-2xl mb-2 block"></i>
+            Memuat data rekapitulasi...
+          </td>
+        </tr>`;
+
+      try {
+        const response = await fetch(API_URL);
+        const json = await response.json();
+
+        if (json.status === 'success' && Array.isArray(json.data)) {
+          rawData = json.data;
+          populateFilterOptions();
+          applyFilters(); // Melakukan filter sekaligus memperbarui summary cards berdasar data hasil filter
+        } else {
+          tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-rose-500">Gagal memuat data dari spreadsheet.</td></tr>`;
+        }
+      } catch (error) {
+        console.error("Fetch data error:", error);
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-rose-500">Terjadi kesalahan koneksi jaringan.</td></tr>`;
+      }
+    }
+
+    // MEMPERBARUI ANGKA-ANGKA PADA SUMMARY CARDS (BERDASARKAN DATA HASIL FILTER)
+    function updateSummaryCards() {
+      const dataToCount = filteredData;
+      const total = dataToCount.length;
+      let countCancle = 0;
+      let countSurvey = 0;
+      let countInProgress = 0;
+      let countDone = 0;
+
+      dataToCount.forEach(item => {
+        const st = (item.STATUS || item.Status || '').trim().toLowerCase();
+        
+        if (st.includes('cancle') || st.includes('cancel')) {
+          countCancle++;
+        } else if (st.includes('survey')) {
+          countSurvey++;
+        } else if (st.includes('progress') || st.includes('in progress')) {
+          countInProgress++;
+        } else if (st.includes('done') || st.includes('selesai')) {
+          countDone++;
+        }
       });
 
-      const resJson = await response.json();
-
-      if (resJson.status === 'success') {
-        alert('✅ ' + resJson.message);
-        await fetchData();
-        showDashboardView();
-      } else {
-        alert('❌ Gagal menghapus: ' + resJson.message);
-      }
-    } catch (err) {
-      console.error('Error delete:', err);
-      alert('❌ Terjadi kesalahan saat menghapus data.');
+      document.getElementById('statTotal').innerText = total;
+      document.getElementById('statCancle').innerText = countCancle;
+      document.getElementById('statSurvey').innerText = countSurvey;
+      document.getElementById('statInProgress').innerText = countInProgress;
+      document.getElementById('statDone').innerText = countDone;
     }
-  }
-}
 
-function showDashboardView() {
-  document.getElementById('detailView').classList.add('hidden');
-  document.getElementById('dashboardView').classList.remove('hidden');
-}
+    // Mengisi Dropdown Status, Layanan PA, dan Tahun Disposisi Secara Dinamis
+    function populateFilterOptions() {
+      if (rawData.length === 0) return;
 
-function toggleSidebar() {
-  const sidebar = document.getElementById('sidebar');
-  sidebar.classList.toggle('-ml-64');
-}
+      let keysSet = new Set();
+      let statusSet = new Set();
+      let layananSet = new Set();
+      let tahunSet = new Set();
 
-function exportData() {
-  if (allData.length === 0) {
-    alert('Tidak ada data untuk diexport!');
-    return;
-  }
-  const worksheet = XLSX.utils.json_to_sheet(allData);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap PA");
-  XLSX.writeFile(workbook, `Rekap_PA_${new Date().toISOString().slice(0,10)}.xlsx`);
-}
+      rawData.forEach(item => {
+        Object.keys(item).forEach(k => keysSet.add(k));
 
-window.addEventListener('DOMContentLoaded', init);
-</script>
+        const statusVal = item.STATUS || item.Status;
+        if (statusVal) statusSet.add(statusVal);
+
+        const layananVal = item['LAYANAN PA'] || item['LAYANAN_PA'] || item.Layanan;
+        if (layananVal) layananSet.add(layananVal);
+
+        // Ekstrak Tahun dari TGL DISPOSISI
+        const tglDisposisi = item['TGL DISPOSISI'] || item['TGL_DISPOSISI'] || item['TANGGAL DISPOSISI'] || item.TGL_DISPOSISI || '';
+        if (tglDisposisi) {
+          const matchYear = String(tglDisposisi).match(/\b(20\d{2})\b/);
+          if (matchYear) {
+            tahunSet.add(matchYear[1]);
+          } else {
+            const dateObj = new Date(tglDisposisi);
+            if (!isNaN(dateObj.getFullYear())) {
+              tahunSet.add(String(dateObj.getFullYear()));
+            }
+          }
+        }
+      });
+
+      tableHeaders = Array.from(keysSet);
+
+      // Populate Status Select
+      const statusFilter = document.getElementById('statusFilter');
+      statusFilter.innerHTML = `<option value="ALL">-- Semua Status --</option>`;
+      Array.from(statusSet).sort().forEach(st => {
+        statusFilter.innerHTML += `<option value="${st}">${st}</option>`;
+      });
+
+      // Populate Layanan PA Select
+      const layananFilter = document.getElementById('layananFilter');
+      layananFilter.innerHTML = `<option value="ALL">-- Semua Layanan PA --</option>`;
+      Array.from(layananSet).sort().forEach(ly => {
+        layananFilter.innerHTML += `<option value="${ly}">${ly}</option>`;
+      });
+
+      // Populate Tahun Disposisi Select
+      const tahunFilter = document.getElementById('tahunFilter');
+      tahunFilter.innerHTML = `<option value="ALL">-- Semua Tahun Disposisi --</option>`;
+      Array.from(tahunSet).sort((a, b) => b - a).forEach(th => {
+        tahunFilter.innerHTML += `<option value="${th}">${th}</option>`;
+      });
+
+      renderFormFields();
+    }
+
+    // Filter Logic
+    function applyFilters() {
+      const search = document.getElementById('searchInput').value.toLowerCase().trim();
+      const selectedStatus = document.getElementById('statusFilter').value;
+      const selectedLayanan = document.getElementById('layananFilter').value;
+      const selectedTahun = document.getElementById('tahunFilter').value;
+
+      filteredData = rawData.filter(item => {
+        // Filter Status
+        if (selectedStatus !== 'ALL') {
+          const itemStatus = item.STATUS || item.Status || '';
+          if (itemStatus !== selectedStatus) return false;
+        }
+
+        // Filter Layanan PA
+        if (selectedLayanan !== 'ALL') {
+          const itemLayanan = item['LAYANAN PA'] || item['LAYANAN_PA'] || item.Layanan || '';
+          if (itemLayanan !== selectedLayanan) return false;
+        }
+
+        // Filter Tahun Disposisi
+        if (selectedTahun !== 'ALL') {
+          const tglDisposisi = item['TGL DISPOSISI'] || item['TGL_DISPOSISI'] || item['TANGGAL DISPOSISI'] || item.TGL_DISPOSISI || '';
+          let itemYear = '';
+          const matchYear = String(tglDisposisi).match(/\b(20\d{2})\b/);
+          if (matchYear) {
+            itemYear = matchYear[1];
+          } else {
+            const dateObj = new Date(tglDisposisi);
+            if (!isNaN(dateObj.getFullYear())) {
+              itemYear = String(dateObj.getFullYear());
+            }
+          }
+          if (itemYear !== selectedTahun) return false;
+        }
+
+        // Search Input di semua kolom
+        if (search) {
+          return Object.values(item).some(val => 
+            String(val).toLowerCase().includes(search)
+          );
+        }
+
+        return true;
+      });
+
+      currentPage = 1;
+      updateSummaryCards(); // Memperbarui angka kartu statistik sesuai data terfilter
+      renderTableBody();
+    }
+
+    function handleFilterChange() {
+      applyFilters();
+    }
+
+    function changePageSize() {
+      const val = document.getElementById('pageSizeSelect').value;
+      pageSize = val === 'ALL' ? 'ALL' : parseInt(val);
+      currentPage = 1;
+      renderTableBody();
+    }
+
+    // RENDER TABEL UTAMA DENGAN PAGINATION
+    function renderTableBody() {
+      const tbody = document.getElementById('tableBody');
+      const totalCount = filteredData.length;
+
+      if (totalCount === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-400">Tidak ada data yang cocok dengan pencarian / filter.</td></tr>`;
+        document.getElementById('recordCount').innerText = `Menampilkan 0 data`;
+        document.getElementById('paginationControls').innerHTML = '';
+        return;
+      }
+
+      // Hitung Data Terpotong untuk Pagination
+      let displayData = [];
+      let startIdx = 0;
+      let endIdx = totalCount;
+
+      if (pageSize !== 'ALL') {
+        startIdx = (currentPage - 1) * pageSize;
+        endIdx = Math.min(startIdx + pageSize, totalCount);
+        displayData = filteredData.slice(startIdx, endIdx);
+      } else {
+        displayData = filteredData;
+      }
+
+      tbody.innerHTML = '';
+      displayData.forEach((row) => {
+        const rowId = row.ID || row.id || '-';
+        const namaPekerjaan = row['NAMA PEKERJAAN'] || row.NAMA_PEKERJAAN || row['Nama Pekerjaan'] || '-';
+        const so = row.SO || row.so || '-';
+        const ptl = row.PTL || row.ptl || '-';
+
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
+        tr.innerHTML = `
+          <td class="px-4 py-3 font-medium text-slate-700 whitespace-nowrap">${rowId}</td>
+          <td class="px-4 py-3 text-slate-800 font-semibold">${namaPekerjaan}</td>
+          <td class="px-4 py-3 text-slate-600 whitespace-nowrap">${so}</td>
+          <td class="px-4 py-3 text-slate-600 whitespace-nowrap">${ptl}</td>
+          <td class="px-4 py-3 text-center whitespace-nowrap space-x-1">
+            <button onclick='viewDetail(${JSON.stringify(row).replace(/'/g, "&apos;")})' class="px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg text-xs font-semibold transition" title="Lihat Detail">
+              <i class="fa-solid fa-eye"></i> Detail
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('recordCount').innerText = `Menampilkan ${startIdx + 1} - ${endIdx} dari ${totalCount} data`;
+      renderPaginationControls(totalCount);
+    }
+
+    function renderPaginationControls(totalCount) {
+      const container = document.getElementById('paginationControls');
+      container.innerHTML = '';
+
+      if (pageSize === 'ALL') return;
+
+      const totalPages = Math.ceil(totalCount / pageSize);
+      if (totalPages <= 1) return;
+
+      // Prev Button
+      const prevBtn = document.createElement('button');
+      prevBtn.className = `px-2.5 py-1 rounded-md text-xs font-medium border ${currentPage === 1 ? 'border-slate-200 text-slate-300 cursor-not-allowed' : 'border-slate-300 text-slate-600 hover:bg-slate-100'}`;
+      prevBtn.innerHTML = `<i class="fa-solid fa-chevron-left"></i>`;
+      prevBtn.disabled = currentPage === 1;
+      prevBtn.onclick = () => { if (currentPage > 1) { currentPage--; renderTableBody(); } };
+      container.appendChild(prevBtn);
+
+      // Page Numbers
+      for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+          const pageBtn = document.createElement('button');
+          pageBtn.className = `px-3 py-1 rounded-md text-xs font-medium border ${i === currentPage ? 'bg-blue-600 border-blue-600 text-white' : 'border-slate-300 text-slate-600 hover:bg-slate-100'}`;
+          pageBtn.innerText = i;
+          pageBtn.onclick = () => { currentPage = i; renderTableBody(); };
+          container.appendChild(pageBtn);
+        } else if (i === currentPage - 2 || i === currentPage + 2) {
+          const dots = document.createElement('span');
+          dots.className = "px-1 text-slate-400";
+          dots.innerText = "...";
+          container.appendChild(dots);
+        }
+      }
+
+      // Next Button
+      const nextBtn = document.createElement('button');
+      nextBtn.className = `px-2.5 py-1 rounded-md text-xs font-medium border ${currentPage === totalPages ? 'border-slate-200 text-slate-300 cursor-not-allowed' : 'border-slate-300 text-slate-600 hover:bg-slate-100'}`;
+      nextBtn.innerHTML = `<i class="fa-solid fa-chevron-right"></i>`;
+      nextBtn.disabled = currentPage === totalPages;
+      nextBtn.onclick = () => { if (currentPage < totalPages) { currentPage++; renderTableBody(); } };
+      container.appendChild(nextBtn);
+    }
+
+    // ================= DETAIL VIEW LOGIC =================
+    function viewDetail(row) {
+      selectedDetailRow = row;
+      document.getElementById('tableView').classList.add('hidden');
+      document.getElementById('detailView').classList.remove('hidden');
+
+      const mainTbody = document.getElementById('detailMainTable');
+      const secTbody = document.getElementById('detailSecondaryTable');
+
+      mainTbody.innerHTML = '';
+      secTbody.innerHTML = '';
+
+      MAIN_KEYS.forEach(key => {
+        const val = row[key] || getCaseInsensitiveValue(row, key) || '-';
+        mainTbody.innerHTML += `
+          <tr>
+            <td class="px-4 py-3 font-semibold text-slate-500 w-2/5 bg-slate-50/50">${key}</td>
+            <td class="px-4 py-3 text-slate-800 font-medium">${val}</td>
+          </tr>`;
+      });
+
+      SECONDARY_KEYS.forEach(key => {
+        const val = row[key] || getCaseInsensitiveValue(row, key) || '-';
+        let badgeStyle = '';
+
+        if (key === 'STATUS') {
+          const st = String(val).toLowerCase();
+          if (st.includes('done') || st.includes('selesai')) badgeStyle = 'bg-purple-100 text-purple-700 font-semibold px-2 py-0.5 rounded';
+          else if (st.includes('cancle') || st.includes('cancel')) badgeStyle = 'bg-rose-100 text-rose-700 font-semibold px-2 py-0.5 rounded';
+          else if (st.includes('progress')) badgeStyle = 'bg-blue-100 text-blue-700 font-semibold px-2 py-0.5 rounded';
+          else if (st.includes('survey')) badgeStyle = 'bg-amber-100 text-amber-700 font-semibold px-2 py-0.5 rounded';
+        }
+
+        secTbody.innerHTML += `
+          <tr>
+            <td class="px-4 py-3 font-semibold text-slate-500 w-2/5 bg-slate-50/50">${key}</td>
+            <td class="px-4 py-3 text-slate-800 font-medium"><span class="${badgeStyle}">${val}</span></td>
+          </tr>`;
+      });
+    }
+
+    function getCaseInsensitiveValue(obj, key) {
+      const foundKey = Object.keys(obj).find(k => k.toLowerCase() === key.toLowerCase());
+      return foundKey ? obj[foundKey] : null;
+    }
+
+    function editCurrentDetail() {
+      if (!selectedDetailRow) return;
+      openFormModal(selectedDetailRow);
+    }
+
+    async function deleteCurrentDetail() {
+      if (!selectedDetailRow) return;
+      const rowId = selectedDetailRow.ID || selectedDetailRow.id;
+
+      Swal.fire({
+        title: 'Hapus Data Ini?',
+        text: `Data dengan ID "${rowId}" akan dihapus permanen.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#e11d48',
+        confirmButtonText: 'Ya, Hapus'
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          Swal.showLoading();
+          try {
+            const response = await fetch(API_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+              body: JSON.stringify({ action: 'delete', id: rowId })
+            });
+
+            const res = await response.json();
+            if (res.status === 'success') {
+              Swal.fire('Terhapus!', 'Data berhasil dihapus.', 'success');
+              showDashboardView();
+              fetchData();
+            } else {
+              Swal.fire('Gagal!', res.message || 'Gagal menghapus data.', 'error');
+            }
+          } catch (err) {
+            Swal.fire('Error!', 'Tidak dapat terhubung ke server.', 'error');
+          }
+        }
+      });
+    }
+
+    // ================= MODAL & FORM HANDLER =================
+    function renderFormFields() {
+      const container = document.getElementById('dynamicFormFields');
+      container.innerHTML = '';
+
+      const fields = tableHeaders.length > 0 ? tableHeaders : [...MAIN_KEYS, ...SECONDARY_KEYS];
+
+      fields.forEach(field => {
+        if (field.toLowerCase() === 'diubah oleh') return;
+
+        const isReadOnly = field.toUpperCase() === 'ID';
+        container.innerHTML += `
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">${field}</label>
+            <input 
+              type="text" 
+              name="${field}" 
+              id="field_${field.replace(/\s+/g, '_')}" 
+              ${isReadOnly ? 'placeholder="Otomatis saat simpan" readonly class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-xs text-slate-500 cursor-not-allowed"' : 'class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none"'} 
+            >
+          </div>
+        `;
+      });
+    }
+
+    function openFormModal(data = null) {
+      const modal = document.getElementById('formModal');
+      const title = document.getElementById('modalTitle');
+      const form = document.getElementById('dataForm');
+      form.reset();
+
+      if (data) {
+        title.innerText = `Edit Data Pekerjaan (ID: ${data.ID || data.id})`;
+        document.getElementById('formRowId').value = data.ID || data.id;
+
+        Object.keys(data).forEach(key => {
+          const input = document.getElementById(`field_${key.replace(/\s+/g, '_')}`);
+          if (input) input.value = data[key];
+        });
+      } else {
+        title.innerText = "Tambah Data Pekerjaan Baru";
+        document.getElementById('formRowId').value = "";
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeFormModal() {
+      document.getElementById('formModal').classList.add('hidden');
+    }
+
+    async function handleFormSubmit(e) {
+      e.preventDefault();
+      const saveBtn = document.getElementById('saveBtn');
+      const isEdit = !!document.getElementById('formRowId').value;
+
+      const formData = {};
+      const inputs = document.querySelectorAll('#dynamicFormFields input');
+      inputs.forEach(input => {
+        const fieldName = input.name;
+        formData[fieldName] = input.value.trim();
+      });
+
+      if (currentUser) {
+        formData['DIUBAH OLEH'] = currentUser.nama || currentUser.username;
+      }
+
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i><span>Menyimpan...</span>`;
+
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: isEdit ? 'update' : 'create',
+            data: formData
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.status === 'success') {
+          Swal.fire('Berhasil!', `Data berhasil ${isEdit ? 'diperbarui' : 'ditambahkan'}.`, 'success');
+          closeFormModal();
+          showDashboardView();
+          fetchData();
+        } else {
+          Swal.fire('Gagal!', result.message || 'Gagal menyimpan data.', 'error');
+        }
+      } catch (err) {
+        console.error("Submit form error:", err);
+        Swal.fire('Error!', 'Terjadi kesalahan saat terhubung ke server.', 'error');
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i><span>Simpan Data</span>`;
+      }
+    }
+
+    // ================= EXPORT EXCEL =================
+    function exportToExcel() {
+      if (filteredData.length === 0) {
+        Swal.fire('Perhatian', 'Tidak ada data untuk diexport.', 'warning');
+        return;
+      }
+
+      const worksheet = XLSX.utils.json_to_sheet(filteredData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Data Pekerjaan");
+      XLSX.writeFile(workbook, `Rekap_Pekerjaan_WINSONS_${new Date().toISOString().slice(0,10)}.xlsx`);
+    }
+  </script>
 </body>
 </html>
