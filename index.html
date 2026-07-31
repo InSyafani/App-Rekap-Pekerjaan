@@ -104,7 +104,8 @@
           </button>
         </nav>
       </div>
-     <!-- User Profile & Logout -->
+
+      <!-- User Profile & Logout -->
       <div class="p-4 border-t border-slate-800 space-y-3">
         <!-- Profile Card -->
         <div class="flex items-center justify-between bg-slate-800/50 p-3 rounded-xl">
@@ -120,7 +121,7 @@
           <span>Keluar Sesi</span>
         </button>
 
-        <!-- Builder Credit Footer (Estetis & Minimalis) -->
+        <!-- Builder Credit Footer -->
         <div class="pt-2 text-center">
           <p class="text-[11px] font-medium text-slate-400/80 tracking-wide">
             Built with <span class="text-rose-500">♥</span> <span class="text-slate-300 font-semibold">Indah Syafani</span>
@@ -171,7 +172,6 @@
         <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 md:p-6">
           <div class="grid grid-cols-2 md:grid-cols-5 divide-y md:divide-y-0 md:divide-x divide-slate-200 gap-4 md:gap-0">
             
-            <!-- Item 1: Total Data -->
             <div class="flex flex-col justify-center px-2 md:px-4 pt-2 md:pt-0">
               <div class="flex items-center space-x-1.5 text-slate-400 font-medium text-xs mb-2">
                 <span>📋</span>
@@ -180,7 +180,6 @@
               <span id="statTotal" class="text-2xl md:text-3xl font-bold text-slate-800">0</span>
             </div>
 
-            <!-- Item 2: Cancle -->
             <div class="flex flex-col justify-center px-2 md:px-6 pt-2 md:pt-0">
               <div class="flex items-center space-x-1.5 text-slate-400 font-medium text-xs mb-2">
                 <span>📄</span>
@@ -189,7 +188,6 @@
               <span id="statCancle" class="text-2xl md:text-3xl font-bold text-slate-800">0</span>
             </div>
 
-            <!-- Item 3: Survey -->
             <div class="flex flex-col justify-center px-2 md:px-6 pt-2 md:pt-0">
               <div class="flex items-center space-x-1.5 text-slate-400 font-medium text-xs mb-2">
                 <span>📄</span>
@@ -198,7 +196,6 @@
               <span id="statSurvey" class="text-2xl md:text-3xl font-bold text-slate-800">0</span>
             </div>
 
-            <!-- Item 4: In Progress -->
             <div class="flex flex-col justify-center px-2 md:px-6 pt-2 md:pt-0">
               <div class="flex items-center space-x-1.5 text-slate-400 font-medium text-xs mb-2">
                 <span class="text-blue-500">🔄</span>
@@ -207,7 +204,6 @@
               <span id="statInProgress" class="text-2xl md:text-3xl font-bold text-slate-800">0</span>
             </div>
 
-            <!-- Item 5: Done -->
             <div class="flex flex-col justify-center px-2 md:px-6 pt-2 md:pt-0">
               <div class="flex items-center space-x-1.5 text-slate-400 font-medium text-xs mb-2">
                 <span class="text-purple-600">☑️</span>
@@ -222,10 +218,7 @@
         <!-- BILAH KONTROL FILTER & PENCARIAN -->
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
           
-          <!-- Bagian Filter Kiri -->
           <div class="flex flex-wrap items-center gap-3 w-full md:w-auto flex-1">
-            
-            <!-- Input Cari Semua Kolom -->
             <div class="w-full sm:w-64">
               <input 
                 type="text" 
@@ -236,38 +229,32 @@
               >
             </div>
 
-            <!-- Select Status -->
             <div class="w-full sm:w-auto">
               <select id="statusFilter" onchange="handleFilterChange()" class="w-full bg-white border border-slate-300 text-slate-700 rounded-md px-3 py-2 focus:outline-none focus:border-blue-500">
                 <option value="ALL">-- Semua Status --</option>
               </select>
             </div>
 
-            <!-- Select Layanan PA -->
             <div class="w-full sm:w-auto">
               <select id="layananFilter" onchange="handleFilterChange()" class="w-full bg-white border border-slate-300 text-slate-700 rounded-md px-3 py-2 focus:outline-none focus:border-blue-500">
                 <option value="ALL">-- Semua Layanan PA --</option>
               </select>
             </div>
 
-            <!-- Select Tahun Disposisi -->
             <div class="w-full sm:w-auto">
               <select id="tahunFilter" onchange="handleFilterChange()" class="w-full bg-white border border-slate-300 text-slate-700 rounded-md px-3 py-2 focus:outline-none focus:border-blue-500">
                 <option value="ALL">-- Semua Tahun Disposisi --</option>
               </select>
             </div>
 
-            <!-- Tombol Cari Data -->
             <button 
               onclick="handleFilterChange()" 
               class="px-5 py-2 bg-[#2d3748] hover:bg-[#1a202c] text-white font-medium rounded-md shadow-sm transition flex items-center justify-center space-x-1.5"
             >
               <span>Cari Data</span>
             </button>
-
           </div>
 
-          <!-- Bagian Tampilkan Baris (Sisi Kanan) -->
           <div class="flex items-center space-x-2 w-full md:w-auto justify-end border-t md:border-t-0 pt-3 md:pt-0 border-slate-100">
             <span class="text-slate-600 font-medium whitespace-nowrap">Tampilkan:</span>
             <select id="pageSizeSelect" onchange="changePageSize()" class="bg-white border border-slate-300 text-slate-700 rounded-md px-3 py-2 focus:outline-none focus:border-blue-500">
@@ -281,7 +268,7 @@
 
         </div>
 
-        <!-- Data Table Container (ID, NAMA PEKERJAAN, SO, PTL, AKSI) -->
+        <!-- Data Table Container -->
         <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
           <div class="overflow-x-auto custom-scrollbar max-h-[calc(100vh-380px)]">
             <table class="w-full text-left border-collapse text-xs">
@@ -300,13 +287,9 @@
             </table>
           </div>
 
-          <!-- Table Footer Status & Pagination Nav -->
           <div class="p-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-500 gap-3">
             <span id="recordCount">Menampilkan 0 data</span>
-            
-            <div id="paginationControls" class="flex items-center space-x-1">
-              <!-- Tombol Halaman di-render dinamis -->
-            </div>
+            <div id="paginationControls" class="flex items-center space-x-1"></div>
           </div>
         </div>
 
@@ -316,7 +299,6 @@
       <!-- VIEW 2: DETAIL REKAP PA -->
       <div id="detailView" class="hidden flex-1 p-6 overflow-y-auto custom-scrollbar space-y-6">
         
-        <!-- Detail Header Bar -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 no-print">
           <div>
             <h1 class="text-2xl font-normal text-slate-700 inline-block">Detail Rekap PA</h1>
@@ -339,18 +321,15 @@
           </div>
         </div>
 
-        <!-- 2 Column Layout for PA Detail -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
           
-          <!-- CARD LEFT: Informasi Utama / Data Pengajuan -->
+          <!-- CARD LEFT: Informasi Utama -->
           <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
             <div class="px-5 py-3.5 bg-slate-50 border-b border-slate-200">
               <h3 class="font-bold text-slate-700 text-sm">Informasi Utama / Data Pengajuan</h3>
             </div>
             <table class="w-full text-xs divide-y divide-slate-100">
-              <tbody id="detailMainTable" class="divide-y divide-slate-100">
-                <!-- Data Utama di-render dinamis -->
-              </tbody>
+              <tbody id="detailMainTable" class="divide-y divide-slate-100"></tbody>
             </table>
             
             <div class="p-4 bg-slate-50/50 border-t border-slate-100 no-print">
@@ -360,15 +339,13 @@
             </div>
           </div>
 
-          <!-- CARD RIGHT: Rincian Tambahan / Status -->
+          <!-- CARD RIGHT: Rincian Tambahan -->
           <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
             <div class="px-5 py-3.5 bg-slate-50 border-b border-slate-200">
               <h3 class="font-bold text-slate-700 text-sm">Rincian Tambahan / Status</h3>
             </div>
             <table class="w-full text-xs divide-y divide-slate-100">
-              <tbody id="detailSecondaryTable" class="divide-y divide-slate-100">
-                <!-- Data Tambahan di-render dinamis -->
-              </tbody>
+              <tbody id="detailSecondaryTable" class="divide-y divide-slate-100"></tbody>
             </table>
           </div>
 
@@ -423,11 +400,9 @@
     let tableHeaders = [];
     let selectedDetailRow = null;
 
-    // Variables for Pagination
     let currentPage = 1;
     let pageSize = 10;
 
-    // Pengelompokan Kolom untuk Halaman Detail
     const MAIN_KEYS = [
       'ID', 'NAMA PEKERJAAN', 'TGL DISPOSISI', 'SO', 'SID', 'IO', 
       'PTL', 'LAYANAN PA', 'PENARIKAN', 'TESCOM', 'TANGGAL TOKEN KABEL'
@@ -439,7 +414,77 @@
       'PEMBAYARAN MANDOR', 'DIUBAH OLEH'
     ];
 
-    // ================= INITIALIZATION =================
+    // Helper Fungsi Cek Kolom/Nilai Tanggal
+    function isDateField(key) {
+      const lowerKey = String(key).toLowerCase();
+      return lowerKey.includes('tgl') || lowerKey.includes('tanggal') || lowerKey.includes('date');
+    }
+
+    // Helper Konversi Nilai Tanggal ke format YYYY-MM-DD (Untuk Input Date)
+    function formatDateForInput(val) {
+      if (!val) return '';
+      const strVal = String(val).trim();
+      
+      // Jika format YYYY-MM-DD
+      if (/^\d{4}-\d{2}-\d{2}$/.test(strVal)) return strVal;
+
+      // Jika format ISO (misal 2026-07-31T00:00:00.000Z)
+      if (strVal.includes('T')) return strVal.split('T')[0];
+
+      // Jika format DD/MM/YYYY atau DD-MM-YYYY
+      if (/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}$/.test(strVal)) {
+        const parts = strVal.split(/[\/\-]/);
+        const day = parts[0].padStart(2, '0');
+        const month = parts[1].padStart(2, '0');
+        const year = parts[2];
+        return `${year}-${month}-${day}`;
+      }
+
+      const d = new Date(strVal);
+      if (!isNaN(d.getTime())) {
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      }
+
+      return strVal;
+    }
+
+    // Helper Konversi Nilai Tanggal ke Format DD/MM/YYYY (Untuk Tampilan Detail)
+    function formatDateForDisplay(val) {
+      if (!val) return '-';
+      const strVal = String(val).trim();
+
+      let dateObj = null;
+
+      if (/^\d{4}-\d{2}-\d{2}$/.test(strVal)) {
+        const [y, m, d] = strVal.split('-');
+        return `${d.padStart(2, '0')}/${m.padStart(2, '0')}/${y}`;
+      }
+
+      if (/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}$/.test(strVal)) {
+        const parts = strVal.split(/[\/\-]/);
+        return `${parts[0].padStart(2, '0')}/${parts[1].padStart(2, '0')}/${parts[2]}`;
+      }
+
+      if (strVal.includes('T')) {
+        const datePart = strVal.split('T')[0];
+        const [y, m, d] = datePart.split('-');
+        return `${d.padStart(2, '0')}/${m.padStart(2, '0')}/${y}`;
+      }
+
+      const parsed = new Date(strVal);
+      if (!isNaN(parsed.getTime())) {
+        const day = String(parsed.getDate()).padStart(2, '0');
+        const month = String(parsed.getMonth() + 1).padStart(2, '0');
+        const year = parsed.getFullYear();
+        return `${day}/${month}/${year}`;
+      }
+
+      return strVal;
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       checkSession();
     });
@@ -557,7 +602,7 @@
         if (json.status === 'success' && Array.isArray(json.data)) {
           rawData = json.data;
           populateFilterOptions();
-          applyFilters(); // Melakukan filter sekaligus memperbarui summary cards berdasar data hasil filter
+          applyFilters();
         } else {
           tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-rose-500">Gagal memuat data dari spreadsheet.</td></tr>`;
         }
@@ -567,7 +612,6 @@
       }
     }
 
-    // MEMPERBARUI ANGKA-ANGKA PADA SUMMARY CARDS (BERDASARKAN DATA HASIL FILTER)
     function updateSummaryCards() {
       const dataToCount = filteredData;
       const total = dataToCount.length;
@@ -597,7 +641,6 @@
       document.getElementById('statDone').innerText = countDone;
     }
 
-    // Mengisi Dropdown Status, Layanan PA, dan Tahun Disposisi Secara Dinamis
     function populateFilterOptions() {
       if (rawData.length === 0) return;
 
@@ -615,7 +658,6 @@
         const layananVal = item['LAYANAN PA'] || item['LAYANAN_PA'] || item.Layanan;
         if (layananVal) layananSet.add(layananVal);
 
-        // Ekstrak Tahun dari TGL DISPOSISI
         const tglDisposisi = item['TGL DISPOSISI'] || item['TGL_DISPOSISI'] || item['TANGGAL DISPOSISI'] || item.TGL_DISPOSISI || '';
         if (tglDisposisi) {
           const matchYear = String(tglDisposisi).match(/\b(20\d{2})\b/);
@@ -632,21 +674,18 @@
 
       tableHeaders = Array.from(keysSet);
 
-      // Populate Status Select
       const statusFilter = document.getElementById('statusFilter');
       statusFilter.innerHTML = `<option value="ALL">-- Semua Status --</option>`;
       Array.from(statusSet).sort().forEach(st => {
         statusFilter.innerHTML += `<option value="${st}">${st}</option>`;
       });
 
-      // Populate Layanan PA Select
       const layananFilter = document.getElementById('layananFilter');
       layananFilter.innerHTML = `<option value="ALL">-- Semua Layanan PA --</option>`;
       Array.from(layananSet).sort().forEach(ly => {
         layananFilter.innerHTML += `<option value="${ly}">${ly}</option>`;
       });
 
-      // Populate Tahun Disposisi Select
       const tahunFilter = document.getElementById('tahunFilter');
       tahunFilter.innerHTML = `<option value="ALL">-- Semua Tahun Disposisi --</option>`;
       Array.from(tahunSet).sort((a, b) => b - a).forEach(th => {
@@ -656,7 +695,6 @@
       renderFormFields();
     }
 
-    // Filter Logic
     function applyFilters() {
       const search = document.getElementById('searchInput').value.toLowerCase().trim();
       const selectedStatus = document.getElementById('statusFilter').value;
@@ -664,19 +702,16 @@
       const selectedTahun = document.getElementById('tahunFilter').value;
 
       filteredData = rawData.filter(item => {
-        // Filter Status
         if (selectedStatus !== 'ALL') {
           const itemStatus = item.STATUS || item.Status || '';
           if (itemStatus !== selectedStatus) return false;
         }
 
-        // Filter Layanan PA
         if (selectedLayanan !== 'ALL') {
           const itemLayanan = item['LAYANAN PA'] || item['LAYANAN_PA'] || item.Layanan || '';
           if (itemLayanan !== selectedLayanan) return false;
         }
 
-        // Filter Tahun Disposisi
         if (selectedTahun !== 'ALL') {
           const tglDisposisi = item['TGL DISPOSISI'] || item['TGL_DISPOSISI'] || item['TANGGAL DISPOSISI'] || item.TGL_DISPOSISI || '';
           let itemYear = '';
@@ -692,7 +727,6 @@
           if (itemYear !== selectedTahun) return false;
         }
 
-        // Search Input di semua kolom
         if (search) {
           return Object.values(item).some(val => 
             String(val).toLowerCase().includes(search)
@@ -703,7 +737,7 @@
       });
 
       currentPage = 1;
-      updateSummaryCards(); // Memperbarui angka kartu statistik sesuai data terfilter
+      updateSummaryCards();
       renderTableBody();
     }
 
@@ -718,170 +752,290 @@
       renderTableBody();
     }
 
-    // RENDER TABEL UTAMA DENGAN PAGINATION
     function renderTableBody() {
       const tbody = document.getElementById('tableBody');
       const totalCount = filteredData.length;
 
       if (totalCount === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-400">Tidak ada data yang cocok dengan pencarian / filter.</td></tr>`;
-        document.getElementById('recordCount').innerText = `Menampilkan 0 data`;
-        document.getElementById('paginationControls').innerHTML = '';
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-400">Tidak ada data yang cocok dengan filter.</td></tr>`;
+        document.getElementById('recordCount').innerText = "Menampilkan 0 data";
+        document.getElementById('paginationControls').innerHTML = "";
         return;
       }
 
-      // Hitung Data Terpotong untuk Pagination
-      let displayData = [];
-      let startIdx = 0;
-      let endIdx = totalCount;
+      let pagedData = [];
+      let totalPages = 1;
 
-      if (pageSize !== 'ALL') {
-        startIdx = (currentPage - 1) * pageSize;
-        endIdx = Math.min(startIdx + pageSize, totalCount);
-        displayData = filteredData.slice(startIdx, endIdx);
+      if (pageSize === 'ALL') {
+        pagedData = filteredData;
       } else {
-        displayData = filteredData;
+        totalPages = Math.ceil(totalCount / pageSize);
+        if (currentPage > totalPages) currentPage = totalPages;
+        const startIndex = (currentPage - 1) * pageSize;
+        pagedData = filteredData.slice(startIndex, startIndex + pageSize);
       }
 
-      tbody.innerHTML = '';
-      displayData.forEach((row) => {
-        const rowId = row.ID || row.id || '-';
-        const namaPekerjaan = row['NAMA PEKERJAAN'] || row.NAMA_PEKERJAAN || row['Nama Pekerjaan'] || '-';
-        const so = row.SO || row.so || '-';
-        const ptl = row.PTL || row.ptl || '-';
+      let html = '';
+      pagedData.forEach((item, idx) => {
+        const itemID = item.ID || item.id || '-';
+        const namaPekerjaan = item['NAMA PEKERJAAN'] || item['Nama Pekerjaan'] || item.NAMA_PEKERJAAN || '-';
+        const soVal = item.SO || item.so || '-';
+        const ptlVal = item.PTL || item.ptl || '-';
 
-        const tr = document.createElement('tr');
-        tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
-        tr.innerHTML = `
-          <td class="px-4 py-3 font-medium text-slate-700 whitespace-nowrap">${rowId}</td>
-          <td class="px-4 py-3 text-slate-800 font-semibold">${namaPekerjaan}</td>
-          <td class="px-4 py-3 text-slate-600 whitespace-nowrap">${so}</td>
-          <td class="px-4 py-3 text-slate-600 whitespace-nowrap">${ptl}</td>
-          <td class="px-4 py-3 text-center whitespace-nowrap space-x-1">
-            <button onclick='viewDetail(${JSON.stringify(row).replace(/'/g, "&apos;")})' class="px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg text-xs font-semibold transition" title="Lihat Detail">
-              <i class="fa-solid fa-eye"></i> Detail
-            </button>
-          </td>
+        html += `
+          <tr class="hover:bg-slate-50 border-b border-slate-100 transition">
+            <td class="px-4 py-3 font-semibold text-slate-700 whitespace-nowrap">${itemID}</td>
+            <td class="px-4 py-3 font-medium text-slate-800">${namaPekerjaan}</td>
+            <td class="px-4 py-3 text-slate-600 whitespace-nowrap">${soVal}</td>
+            <td class="px-4 py-3 text-slate-600 whitespace-nowrap">${ptlVal}</td>
+            <td class="px-4 py-3 text-center whitespace-nowrap">
+              <button onclick="viewDetail('${itemID}')" class="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg font-semibold text-xs transition inline-flex items-center space-x-1">
+                <i class="fa-solid fa-eye text-xs"></i>
+                <span>Detail</span>
+              </button>
+            </td>
+          </tr>
         `;
-        tbody.appendChild(tr);
       });
 
-      document.getElementById('recordCount').innerText = `Menampilkan ${startIdx + 1} - ${endIdx} dari ${totalCount} data`;
-      renderPaginationControls(totalCount);
+      tbody.innerHTML = html;
+
+      // Update Label Total Data
+      const startText = pageSize === 'ALL' ? 1 : ((currentPage - 1) * pageSize) + 1;
+      const endText = pageSize === 'ALL' ? totalCount : Math.min(currentPage * pageSize, totalCount);
+      document.getElementById('recordCount').innerText = `Menampilkan ${startText} - ${endText} dari ${totalCount} data`;
+
+      renderPaginationControls(totalPages);
     }
 
-    function renderPaginationControls(totalCount) {
+    function renderPaginationControls(totalPages) {
       const container = document.getElementById('paginationControls');
-      container.innerHTML = '';
+      if (pageSize === 'ALL' || totalPages <= 1) {
+        container.innerHTML = '';
+        return;
+      }
 
-      if (pageSize === 'ALL') return;
+      let html = '';
+      html += `<button onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} class="px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-600 text-xs font-medium hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">&larr;</button>`;
 
-      const totalPages = Math.ceil(totalCount / pageSize);
-      if (totalPages <= 1) return;
-
-      // Prev Button
-      const prevBtn = document.createElement('button');
-      prevBtn.className = `px-2.5 py-1 rounded-md text-xs font-medium border ${currentPage === 1 ? 'border-slate-200 text-slate-300 cursor-not-allowed' : 'border-slate-300 text-slate-600 hover:bg-slate-100'}`;
-      prevBtn.innerHTML = `<i class="fa-solid fa-chevron-left"></i>`;
-      prevBtn.disabled = currentPage === 1;
-      prevBtn.onclick = () => { if (currentPage > 1) { currentPage--; renderTableBody(); } };
-      container.appendChild(prevBtn);
-
-      // Page Numbers
       for (let i = 1; i <= totalPages; i++) {
         if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
-          const pageBtn = document.createElement('button');
-          pageBtn.className = `px-3 py-1 rounded-md text-xs font-medium border ${i === currentPage ? 'bg-blue-600 border-blue-600 text-white' : 'border-slate-300 text-slate-600 hover:bg-slate-100'}`;
-          pageBtn.innerText = i;
-          pageBtn.onclick = () => { currentPage = i; renderTableBody(); };
-          container.appendChild(pageBtn);
+          const activeClass = i === currentPage ? 'bg-blue-600 text-white font-bold border-blue-600' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50';
+          html += `<button onclick="goToPage(${i})" class="px-3 py-1.5 border rounded-lg text-xs transition ${activeClass}">${i}</button>`;
         } else if (i === currentPage - 2 || i === currentPage + 2) {
-          const dots = document.createElement('span');
-          dots.className = "px-1 text-slate-400";
-          dots.innerText = "...";
-          container.appendChild(dots);
+          html += `<span class="px-1 text-slate-400">...</span>`;
         }
       }
 
-      // Next Button
-      const nextBtn = document.createElement('button');
-      nextBtn.className = `px-2.5 py-1 rounded-md text-xs font-medium border ${currentPage === totalPages ? 'border-slate-200 text-slate-300 cursor-not-allowed' : 'border-slate-300 text-slate-600 hover:bg-slate-100'}`;
-      nextBtn.innerHTML = `<i class="fa-solid fa-chevron-right"></i>`;
-      nextBtn.disabled = currentPage === totalPages;
-      nextBtn.onclick = () => { if (currentPage < totalPages) { currentPage++; renderTableBody(); } };
-      container.appendChild(nextBtn);
+      html += `<button onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} class="px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-600 text-xs font-medium hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">&rarr;</button>`;
+
+      container.innerHTML = html;
     }
 
-    // ================= DETAIL VIEW LOGIC =================
-    function viewDetail(row) {
-      selectedDetailRow = row;
-      document.getElementById('tableView').classList.add('hidden');
-      document.getElementById('detailView').classList.remove('hidden');
+    function goToPage(page) {
+      currentPage = page;
+      renderTableBody();
+    }
+
+    // ================= VIEW DETAIL DATA =================
+    function viewDetail(id) {
+      const item = rawData.find(d => String(d.ID) === String(id) || String(d.id) === String(id));
+      if (!item) return;
+
+      selectedDetailRow = item;
 
       const mainTbody = document.getElementById('detailMainTable');
       const secTbody = document.getElementById('detailSecondaryTable');
 
-      mainTbody.innerHTML = '';
-      secTbody.innerHTML = '';
-
+      let mainHtml = '';
       MAIN_KEYS.forEach(key => {
-        const val = row[key] || getCaseInsensitiveValue(row, key) || '-';
-        mainTbody.innerHTML += `
-          <tr>
-            <td class="px-4 py-3 font-semibold text-slate-500 w-2/5 bg-slate-50/50">${key}</td>
-            <td class="px-4 py-3 text-slate-800 font-medium">${val}</td>
-          </tr>`;
-      });
+        const matchedKey = Object.keys(item).find(k => k.trim().toLowerCase() === key.toLowerCase());
+        let val = matchedKey ? item[matchedKey] : '-';
+        if (val === '' || val === null || val === undefined) val = '-';
 
-      SECONDARY_KEYS.forEach(key => {
-        const val = row[key] || getCaseInsensitiveValue(row, key) || '-';
-        let badgeStyle = '';
-
-        if (key === 'STATUS') {
-          const st = String(val).toLowerCase();
-          if (st.includes('done') || st.includes('selesai')) badgeStyle = 'bg-purple-100 text-purple-700 font-semibold px-2 py-0.5 rounded';
-          else if (st.includes('cancle') || st.includes('cancel')) badgeStyle = 'bg-rose-100 text-rose-700 font-semibold px-2 py-0.5 rounded';
-          else if (st.includes('progress')) badgeStyle = 'bg-blue-100 text-blue-700 font-semibold px-2 py-0.5 rounded';
-          else if (st.includes('survey')) badgeStyle = 'bg-amber-100 text-amber-700 font-semibold px-2 py-0.5 rounded';
+        // Terapkan Format DD/MM/YYYY jika kolom bernilai tanggal
+        if (val !== '-' && isDateField(key)) {
+          val = formatDateForDisplay(val);
         }
 
-        secTbody.innerHTML += `
+        mainHtml += `
           <tr>
-            <td class="px-4 py-3 font-semibold text-slate-500 w-2/5 bg-slate-50/50">${key}</td>
-            <td class="px-4 py-3 text-slate-800 font-medium"><span class="${badgeStyle}">${val}</span></td>
-          </tr>`;
+            <td class="px-4 py-2.5 bg-slate-50/70 text-slate-500 font-semibold w-2/5 border-r border-slate-100">${key}</td>
+            <td class="px-4 py-2.5 text-slate-800 font-medium">${val}</td>
+          </tr>
+        `;
       });
+      mainTbody.innerHTML = mainHtml;
+
+      let secHtml = '';
+      SECONDARY_KEYS.forEach(key => {
+        const matchedKey = Object.keys(item).find(k => k.trim().toLowerCase() === key.toLowerCase());
+        let val = matchedKey ? item[matchedKey] : '-';
+        if (val === '' || val === null || val === undefined) val = '-';
+
+        // Terapkan Format DD/MM/YYYY jika kolom bernilai tanggal
+        if (val !== '-' && isDateField(key)) {
+          val = formatDateForDisplay(val);
+        }
+
+        secHtml += `
+          <tr>
+            <td class="px-4 py-2.5 bg-slate-50/70 text-slate-500 font-semibold w-2/5 border-r border-slate-100">${key}</td>
+            <td class="px-4 py-2.5 text-slate-800 font-medium">${val}</td>
+          </tr>
+        `;
+      });
+      secTbody.innerHTML = secHtml;
+
+      document.getElementById('tableView').classList.add('hidden');
+      document.getElementById('detailView').classList.remove('hidden');
     }
 
-    function getCaseInsensitiveValue(obj, key) {
-      const foundKey = Object.keys(obj).find(k => k.toLowerCase() === key.toLowerCase());
-      return foundKey ? obj[foundKey] : null;
+    // ================= FORM MODAL (CREATE / EDIT) =================
+    function renderFormFields() {
+      const container = document.getElementById('dynamicFormFields');
+      if (!tableHeaders || tableHeaders.length === 0) return;
+
+      let html = '';
+      tableHeaders.forEach(key => {
+        const isID = key.toUpperCase() === 'ID';
+        const inputType = isDateField(key) ? 'date' : 'text';
+
+        html += `
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">${key}</label>
+            <input 
+              type="${inputType}" 
+              id="field_${key}" 
+              name="${key}" 
+              ${isID ? 'placeholder="Otomatis / Isi ID"' : ''} 
+              class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-blue-500 focus:bg-white focus:outline-none transition-all"
+            >
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function openFormModal(editData = null) {
+      document.getElementById('dataForm').reset();
+      document.getElementById('formRowId').value = '';
+
+      if (editData) {
+        document.getElementById('modalTitle').innerText = `Edit Data - ID ${editData.ID || editData.id || ''}`;
+        document.getElementById('formRowId').value = editData.ID || editData.id || '';
+
+        tableHeaders.forEach(key => {
+          const matchedKey = Object.keys(editData).find(k => k.trim().toLowerCase() === key.toLowerCase());
+          const el = document.getElementById(`field_${key}`);
+          if (el) {
+            let val = matchedKey ? editData[matchedKey] : '';
+            if (isDateField(key)) {
+              val = formatDateForInput(val);
+            }
+            el.value = val;
+          }
+        });
+      } else {
+        document.getElementById('modalTitle').innerText = 'Tambah Data Pekerjaan Baru';
+      }
+
+      document.getElementById('formModal').classList.remove('hidden');
+    }
+
+    function closeFormModal() {
+      document.getElementById('formModal').classList.add('hidden');
     }
 
     function editCurrentDetail() {
-      if (!selectedDetailRow) return;
-      openFormModal(selectedDetailRow);
+      if (selectedDetailRow) {
+        openFormModal(selectedDetailRow);
+      }
     }
 
-    async function deleteCurrentDetail() {
+    // ================= SUBMIT DATA (CREATE / EDIT) =================
+    async function handleFormSubmit(e) {
+      e.preventDefault();
+      const saveBtn = document.getElementById('saveBtn');
+      const rowId = document.getElementById('formRowId').value;
+      const isEdit = Boolean(rowId);
+
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i><span>Menyimpan...</span>`;
+
+      const formData = {};
+      tableHeaders.forEach(key => {
+        const el = document.getElementById(`field_${key}`);
+        if (el) {
+          formData[key] = el.value;
+        }
+      });
+
+      formData['DIUBAH OLEH'] = currentUser ? (currentUser.nama || currentUser.username) : 'System';
+
+      const payload = {
+        action: isEdit ? 'update' : 'create',
+        data: formData
+      };
+
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+
+        if (result.status === 'success') {
+          closeFormModal();
+          Swal.fire({
+            icon: 'success',
+            title: 'Berhasil',
+            text: isEdit ? 'Data berhasil diperbarui!' : 'Data baru berhasil ditambahkan!',
+            timer: 1500,
+            showConfirmButton: false
+          });
+          fetchData();
+          if (isEdit && selectedDetailRow) {
+            showDashboardView();
+          }
+        } else {
+          Swal.fire('Gagal', result.message || 'Gagal menyimpan data.', 'error');
+        }
+      } catch (err) {
+        console.error("Submit error:", err);
+        Swal.fire('Kesalahan', 'Terjadi masalah saat menyimpan data.', 'error');
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i><span>Simpan Data</span>`;
+      }
+    }
+
+    // ================= HAPUS DATA =================
+    function deleteCurrentDetail() {
       if (!selectedDetailRow) return;
-      const rowId = selectedDetailRow.ID || selectedDetailRow.id;
+
+      const targetID = selectedDetailRow.ID || selectedDetailRow.id;
 
       Swal.fire({
-        title: 'Hapus Data Ini?',
-        text: `Data dengan ID "${rowId}" akan dihapus permanen.`,
+        title: 'Hapus Data Pekerjaan?',
+        text: `Apakah Anda yakin ingin menghapus data dengan ID ${targetID}?`,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#e11d48',
         confirmButtonText: 'Ya, Hapus'
       }).then(async (result) => {
         if (result.isConfirmed) {
-          Swal.showLoading();
           try {
             const response = await fetch(API_URL, {
               method: 'POST',
               headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-              body: JSON.stringify({ action: 'delete', id: rowId })
+              body: JSON.stringify({
+                action: 'delete',
+                id: targetID
+              })
             });
 
             const res = await response.json();
@@ -890,125 +1044,28 @@
               showDashboardView();
               fetchData();
             } else {
-              Swal.fire('Gagal!', res.message || 'Gagal menghapus data.', 'error');
+              Swal.fire('Gagal', res.message || 'Gagal menghapus data.', 'error');
             }
           } catch (err) {
-            Swal.fire('Error!', 'Tidak dapat terhubung ke server.', 'error');
+            console.error("Delete error:", err);
+            Swal.fire('Kesalahan', 'Tidak dapat menghapus data.', 'error');
           }
         }
       });
     }
 
-    // ================= MODAL & FORM HANDLER =================
-    function renderFormFields() {
-      const container = document.getElementById('dynamicFormFields');
-      container.innerHTML = '';
-
-      const fields = tableHeaders.length > 0 ? tableHeaders : [...MAIN_KEYS, ...SECONDARY_KEYS];
-
-      fields.forEach(field => {
-        if (field.toLowerCase() === 'diubah oleh') return;
-
-        const isReadOnly = field.toUpperCase() === 'ID';
-        container.innerHTML += `
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">${field}</label>
-            <input 
-              type="text" 
-              name="${field}" 
-              id="field_${field.replace(/\s+/g, '_')}" 
-              ${isReadOnly ? 'placeholder="Otomatis saat simpan" readonly class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-xs text-slate-500 cursor-not-allowed"' : 'class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none"'} 
-            >
-          </div>
-        `;
-      });
-    }
-
-    function openFormModal(data = null) {
-      const modal = document.getElementById('formModal');
-      const title = document.getElementById('modalTitle');
-      const form = document.getElementById('dataForm');
-      form.reset();
-
-      if (data) {
-        title.innerText = `Edit Data Pekerjaan (ID: ${data.ID || data.id})`;
-        document.getElementById('formRowId').value = data.ID || data.id;
-
-        Object.keys(data).forEach(key => {
-          const input = document.getElementById(`field_${key.replace(/\s+/g, '_')}`);
-          if (input) input.value = data[key];
-        });
-      } else {
-        title.innerText = "Tambah Data Pekerjaan Baru";
-        document.getElementById('formRowId').value = "";
-      }
-
-      modal.classList.remove('hidden');
-    }
-
-    function closeFormModal() {
-      document.getElementById('formModal').classList.add('hidden');
-    }
-
-    async function handleFormSubmit(e) {
-      e.preventDefault();
-      const saveBtn = document.getElementById('saveBtn');
-      const isEdit = !!document.getElementById('formRowId').value;
-
-      const formData = {};
-      const inputs = document.querySelectorAll('#dynamicFormFields input');
-      inputs.forEach(input => {
-        const fieldName = input.name;
-        formData[fieldName] = input.value.trim();
-      });
-
-      if (currentUser) {
-        formData['DIUBAH OLEH'] = currentUser.nama || currentUser.username;
-      }
-
-      saveBtn.disabled = true;
-      saveBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i><span>Menyimpan...</span>`;
-
-      try {
-        const response = await fetch(API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({
-            action: isEdit ? 'update' : 'create',
-            data: formData
-          })
-        });
-
-        const result = await response.json();
-
-        if (result.status === 'success') {
-          Swal.fire('Berhasil!', `Data berhasil ${isEdit ? 'diperbarui' : 'ditambahkan'}.`, 'success');
-          closeFormModal();
-          showDashboardView();
-          fetchData();
-        } else {
-          Swal.fire('Gagal!', result.message || 'Gagal menyimpan data.', 'error');
-        }
-      } catch (err) {
-        console.error("Submit form error:", err);
-        Swal.fire('Error!', 'Terjadi kesalahan saat terhubung ke server.', 'error');
-      } finally {
-        saveBtn.disabled = false;
-        saveBtn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i><span>Simpan Data</span>`;
-      }
-    }
-
     // ================= EXPORT EXCEL =================
     function exportToExcel() {
       if (filteredData.length === 0) {
-        Swal.fire('Perhatian', 'Tidak ada data untuk diexport.', 'warning');
+        Swal.fire('Peringatan', 'Tidak ada data untuk diexport.', 'warning');
         return;
       }
 
       const worksheet = XLSX.utils.json_to_sheet(filteredData);
       const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Data Pekerjaan");
-      XLSX.writeFile(workbook, `Rekap_Pekerjaan_WINSONS_${new Date().toISOString().slice(0,10)}.xlsx`);
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap Pekerjaan");
+
+      XLSX.writeFile(workbook, `Rekap_Pekerjaan_WINSONS_${new Date().toISOString().slice(0, 10)}.xlsx`);
     }
   </script>
 </body>
