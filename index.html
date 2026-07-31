@@ -168,10 +168,9 @@
           </div>
         </div>
 
-        <!-- ==================== KARTU RINGKASAN STATISTIK (STAT CARDS) ==================== -->
+        <!-- STAT CARDS -->
         <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 md:p-6">
           <div class="grid grid-cols-2 md:grid-cols-5 divide-y md:divide-y-0 md:divide-x divide-slate-200 gap-4 md:gap-0">
-            
             <div class="flex flex-col justify-center px-2 md:px-4 pt-2 md:pt-0">
               <div class="flex items-center space-x-1.5 text-slate-400 font-medium text-xs mb-2">
                 <span>📋</span>
@@ -211,13 +210,11 @@
               </div>
               <span id="statDone" class="text-2xl md:text-3xl font-bold text-slate-800">0</span>
             </div>
-
           </div>
         </div>
 
-        <!-- BILAH KONTROL FILTER & PENCARIAN -->
+        <!-- FILTER & SEARCH BAR -->
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
-          
           <div class="flex flex-wrap items-center gap-3 w-full md:w-auto flex-1">
             <div class="w-full sm:w-64">
               <input 
@@ -265,10 +262,9 @@
               <option value="ALL">Semua baris</option>
             </select>
           </div>
-
         </div>
 
-        <!-- Data Table Container -->
+        <!-- DATA TABLE -->
         <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
           <div class="overflow-x-auto custom-scrollbar max-h-[calc(100vh-380px)]">
             <table class="w-full text-left border-collapse text-xs">
@@ -425,13 +421,9 @@
       if (!val) return '';
       const strVal = String(val).trim();
       
-      // Jika format YYYY-MM-DD
       if (/^\d{4}-\d{2}-\d{2}$/.test(strVal)) return strVal;
-
-      // Jika format ISO (misal 2026-07-31T00:00:00.000Z)
       if (strVal.includes('T')) return strVal.split('T')[0];
 
-      // Jika format DD/MM/YYYY atau DD-MM-YYYY
       if (/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}$/.test(strVal)) {
         const parts = strVal.split(/[\/\-]/);
         const day = parts[0].padStart(2, '0');
@@ -451,12 +443,10 @@
       return strVal;
     }
 
-    // Helper Konversi Nilai Tanggal ke Format DD/MM/YYYY (Untuk Tampilan Detail)
+    // Helper Konversi Nilai Tanggal ke Format DD/MM/YYYY
     function formatDateForDisplay(val) {
       if (!val) return '-';
       const strVal = String(val).trim();
-
-      let dateObj = null;
 
       if (/^\d{4}-\d{2}-\d{2}$/.test(strVal)) {
         const [y, m, d] = strVal.split('-');
@@ -695,6 +685,10 @@
       renderFormFields();
     }
 
+    function handleFilterChange() {
+      applyFilters();
+    }
+
     function applyFilters() {
       const search = document.getElementById('searchInput').value.toLowerCase().trim();
       const selectedStatus = document.getElementById('statusFilter').value;
@@ -738,245 +732,273 @@
 
       currentPage = 1;
       updateSummaryCards();
-      renderTableBody();
-    }
-
-    function handleFilterChange() {
-      applyFilters();
+      renderTable();
     }
 
     function changePageSize() {
-      const val = document.getElementById('pageSizeSelect').value;
-      pageSize = val === 'ALL' ? 'ALL' : parseInt(val);
+      const sizeVal = document.getElementById('pageSizeSelect').value;
+      pageSize = sizeVal === 'ALL' ? filteredData.length : parseInt(sizeVal);
       currentPage = 1;
-      renderTableBody();
+      renderTable();
     }
 
-    function renderTableBody() {
+    function renderTable() {
       const tbody = document.getElementById('tableBody');
-      const totalCount = filteredData.length;
+      tbody.innerHTML = '';
 
-      if (totalCount === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-400">Tidak ada data yang cocok dengan filter.</td></tr>`;
-        document.getElementById('recordCount').innerText = "Menampilkan 0 data";
-        document.getElementById('paginationControls').innerHTML = "";
+      if (filteredData.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="text-center py-8 text-slate-400">
+              Tidak ada data yang sesuai dengan filter/pencarian.
+            </td>
+          </tr>`;
+        document.getElementById('recordCount').innerText = 'Menampilkan 0 data';
+        document.getElementById('paginationControls').innerHTML = '';
         return;
       }
 
-      let pagedData = [];
-      let totalPages = 1;
+      const totalItems = filteredData.length;
+      let startIdx = 0;
+      let endIdx = totalItems;
 
-      if (pageSize === 'ALL') {
-        pagedData = filteredData;
-      } else {
-        totalPages = Math.ceil(totalCount / pageSize);
-        if (currentPage > totalPages) currentPage = totalPages;
-        const startIndex = (currentPage - 1) * pageSize;
-        pagedData = filteredData.slice(startIndex, startIndex + pageSize);
+      if (pageSize !== totalItems) {
+        startIdx = (currentPage - 1) * pageSize;
+        endIdx = Math.min(startIdx + pageSize, totalItems);
       }
 
-      let html = '';
-      pagedData.forEach((item, idx) => {
-        const itemID = item.ID || item.id || '-';
-        const namaPekerjaan = item['NAMA PEKERJAAN'] || item['Nama Pekerjaan'] || item.NAMA_PEKERJAAN || '-';
-        const soVal = item.SO || item.so || '-';
-        const ptlVal = item.PTL || item.ptl || '-';
+      const paginatedData = filteredData.slice(startIdx, endIdx);
 
-        html += `
-          <tr class="hover:bg-slate-50 border-b border-slate-100 transition">
-            <td class="px-4 py-3 font-semibold text-slate-700 whitespace-nowrap">${itemID}</td>
-            <td class="px-4 py-3 font-medium text-slate-800">${namaPekerjaan}</td>
-            <td class="px-4 py-3 text-slate-600 whitespace-nowrap">${soVal}</td>
-            <td class="px-4 py-3 text-slate-600 whitespace-nowrap">${ptlVal}</td>
-            <td class="px-4 py-3 text-center whitespace-nowrap">
-              <button onclick="viewDetail('${itemID}')" class="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg font-semibold text-xs transition inline-flex items-center space-x-1">
-                <i class="fa-solid fa-eye text-xs"></i>
-                <span>Detail</span>
-              </button>
-            </td>
-          </tr>
+      paginatedData.forEach((row, index) => {
+        const actualIndex = startIdx + index;
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
+
+        const idVal = row.ID || row.id || '-';
+        const namaPekerjaan = row['NAMA PEKERJAAN'] || row['NAMA_PEKERJAAN'] || row.Nama || '-';
+        const soVal = row.SO || row.so || '-';
+        const ptlVal = row.PTL || row.ptl || '-';
+
+        tr.innerHTML = `
+          <td class="px-4 py-3 font-semibold text-slate-700">${idVal}</td>
+          <td class="px-4 py-3 text-slate-800 font-medium">${namaPekerjaan}</td>
+          <td class="px-4 py-3 text-slate-600">${soVal}</td>
+          <td class="px-4 py-3 text-slate-600">${ptlVal}</td>
+          <td class="px-4 py-3 text-center">
+            <button onclick="viewDetail(${actualIndex})" class="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg text-xs font-semibold transition">
+              Detail
+            </button>
+          </td>
         `;
+
+        tbody.appendChild(tr);
       });
 
-      tbody.innerHTML = html;
-
-      // Update Label Total Data
-      const startText = pageSize === 'ALL' ? 1 : ((currentPage - 1) * pageSize) + 1;
-      const endText = pageSize === 'ALL' ? totalCount : Math.min(currentPage * pageSize, totalCount);
-      document.getElementById('recordCount').innerText = `Menampilkan ${startText} - ${endText} dari ${totalCount} data`;
-
-      renderPaginationControls(totalPages);
+      document.getElementById('recordCount').innerText = `Menampilkan ${startIdx + 1} - ${endIdx} dari ${totalItems} data`;
+      renderPaginationControls(totalItems);
     }
 
-    function renderPaginationControls(totalPages) {
+    function renderPaginationControls(totalItems) {
       const container = document.getElementById('paginationControls');
-      if (pageSize === 'ALL' || totalPages <= 1) {
-        container.innerHTML = '';
-        return;
-      }
+      container.innerHTML = '';
 
-      let html = '';
-      html += `<button onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} class="px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-600 text-xs font-medium hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">&larr;</button>`;
+      if (pageSize >= totalItems) return;
+
+      const totalPages = Math.ceil(totalItems / pageSize);
+
+      const prevBtn = document.createElement('button');
+      prevBtn.className = `px-3 py-1 rounded-md text-xs font-medium border ${currentPage === 1 ? 'border-slate-200 text-slate-300 cursor-not-allowed' : 'border-slate-300 text-slate-600 hover:bg-slate-100'}`;
+      prevBtn.innerText = 'Prev';
+      prevBtn.disabled = currentPage === 1;
+      prevBtn.onclick = () => { if (currentPage > 1) { currentPage--; renderTable(); } };
+      container.appendChild(prevBtn);
 
       for (let i = 1; i <= totalPages; i++) {
-        if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
-          const activeClass = i === currentPage ? 'bg-blue-600 text-white font-bold border-blue-600' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50';
-          html += `<button onclick="goToPage(${i})" class="px-3 py-1.5 border rounded-lg text-xs transition ${activeClass}">${i}</button>`;
-        } else if (i === currentPage - 2 || i === currentPage + 2) {
-          html += `<span class="px-1 text-slate-400">...</span>`;
+        if (totalPages > 7 && Math.abs(i - currentPage) > 2 && i !== 1 && i !== totalPages) {
+          if (i === 2 || i === totalPages - 1) {
+            const dots = document.createElement('span');
+            dots.className = 'px-1 text-slate-400';
+            dots.innerText = '...';
+            container.appendChild(dots);
+          }
+          continue;
         }
+
+        const pageBtn = document.createElement('button');
+        pageBtn.className = `px-3 py-1 rounded-md text-xs font-medium border ${i === currentPage ? 'bg-blue-600 border-blue-600 text-white' : 'border-slate-300 text-slate-600 hover:bg-slate-100'}`;
+        pageBtn.innerText = i;
+        pageBtn.onclick = () => { currentPage = i; renderTable(); };
+        container.appendChild(pageBtn);
       }
 
-      html += `<button onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} class="px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-600 text-xs font-medium hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">&rarr;</button>`;
-
-      container.innerHTML = html;
+      const nextBtn = document.createElement('button');
+      nextBtn.className = `px-3 py-1 rounded-md text-xs font-medium border ${currentPage === totalPages ? 'border-slate-200 text-slate-300 cursor-not-allowed' : 'border-slate-300 text-slate-600 hover:bg-slate-100'}`;
+      nextBtn.innerText = 'Next';
+      nextBtn.disabled = currentPage === totalPages;
+      nextBtn.onclick = () => { if (currentPage < totalPages) { currentPage++; renderTable(); } };
+      container.appendChild(nextBtn);
     }
 
-    function goToPage(page) {
-      currentPage = page;
-      renderTableBody();
-    }
+    // ================= DETAIL VIEW =================
+    function viewDetail(index) {
+      selectedDetailRow = filteredData[index];
+      if (!selectedDetailRow) return;
 
-    // ================= VIEW DETAIL DATA =================
-    function viewDetail(id) {
-      const item = rawData.find(d => String(d.ID) === String(id) || String(d.id) === String(id));
-      if (!item) return;
+      const mainTable = document.getElementById('detailMainTable');
+      const secondaryTable = document.getElementById('detailSecondaryTable');
 
-      selectedDetailRow = item;
+      mainTable.innerHTML = '';
+      secondaryTable.innerHTML = '';
 
-      const mainTbody = document.getElementById('detailMainTable');
-      const secTbody = document.getElementById('detailSecondaryTable');
-
-      let mainHtml = '';
       MAIN_KEYS.forEach(key => {
-        const matchedKey = Object.keys(item).find(k => k.trim().toLowerCase() === key.toLowerCase());
-        let val = matchedKey ? item[matchedKey] : '-';
-        if (val === '' || val === null || val === undefined) val = '-';
+        const tr = document.createElement('tr');
+        let val = selectedDetailRow[key] || '-';
 
-        // Terapkan Format DD/MM/YYYY jika kolom bernilai tanggal
-        if (val !== '-' && isDateField(key)) {
+        if (isDateField(key)) {
           val = formatDateForDisplay(val);
         }
 
-        mainHtml += `
-          <tr>
-            <td class="px-4 py-2.5 bg-slate-50/70 text-slate-500 font-semibold w-2/5 border-r border-slate-100">${key}</td>
-            <td class="px-4 py-2.5 text-slate-800 font-medium">${val}</td>
-          </tr>
+        tr.innerHTML = `
+          <td class="px-5 py-3 font-semibold text-slate-600 w-1/3 bg-slate-50/50">${key}</td>
+          <td class="px-5 py-3 text-slate-800">${val}</td>
         `;
+        mainTable.appendChild(tr);
       });
-      mainTbody.innerHTML = mainHtml;
 
-      let secHtml = '';
       SECONDARY_KEYS.forEach(key => {
-        const matchedKey = Object.keys(item).find(k => k.trim().toLowerCase() === key.toLowerCase());
-        let val = matchedKey ? item[matchedKey] : '-';
-        if (val === '' || val === null || val === undefined) val = '-';
+        const tr = document.createElement('tr');
+        let val = selectedDetailRow[key] || '-';
 
-        // Terapkan Format DD/MM/YYYY jika kolom bernilai tanggal
-        if (val !== '-' && isDateField(key)) {
+        if (isDateField(key)) {
           val = formatDateForDisplay(val);
         }
 
-        secHtml += `
-          <tr>
-            <td class="px-4 py-2.5 bg-slate-50/70 text-slate-500 font-semibold w-2/5 border-r border-slate-100">${key}</td>
-            <td class="px-4 py-2.5 text-slate-800 font-medium">${val}</td>
-          </tr>
+        tr.innerHTML = `
+          <td class="px-5 py-3 font-semibold text-slate-600 w-1/3 bg-slate-50/50">${key}</td>
+          <td class="px-5 py-3 text-slate-800">${val}</td>
         `;
+        secondaryTable.appendChild(tr);
       });
-      secTbody.innerHTML = secHtml;
 
       document.getElementById('tableView').classList.add('hidden');
       document.getElementById('detailView').classList.remove('hidden');
     }
 
-    // ================= FORM MODAL (CREATE / EDIT) =================
+    // ================= MODAL & DYNAMIC FORM =================
     function renderFormFields() {
       const container = document.getElementById('dynamicFormFields');
-      if (!tableHeaders || tableHeaders.length === 0) return;
+      container.innerHTML = '';
 
-      let html = '';
-      tableHeaders.forEach(key => {
-        const isID = key.toUpperCase() === 'ID';
-        const inputType = isDateField(key) ? 'date' : 'text';
+      const allKeys = [...MAIN_KEYS, ...SECONDARY_KEYS];
 
-        html += `
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">${key}</label>
-            <input 
-              type="${inputType}" 
-              id="field_${key}" 
-              name="${key}" 
-              ${isID ? 'placeholder="Otomatis / Isi ID"' : ''} 
-              class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-blue-500 focus:bg-white focus:outline-none transition-all"
-            >
-          </div>
+      allKeys.forEach(key => {
+        const div = document.createElement('div');
+        const inputId = `field_${key.replace(/[^a-zA-Z0-9]/g, '_')}`;
+
+        const isDate = isDateField(key);
+        const inputType = isDate ? 'date' : 'text';
+
+        const upperKey = key.toUpperCase().trim();
+        const isReadonly = upperKey === 'ID' || upperKey === 'DIUBAH OLEH' || upperKey === 'DIRUBAH OLEH';
+
+        const readonlyAttr = isReadonly ? 'readonly' : '';
+        const readonlyStyle = isReadonly ? 'bg-slate-100 text-slate-500 cursor-not-allowed select-none' : 'bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:bg-white';
+
+        div.innerHTML = `
+          <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
+            ${key} ${isReadonly ? '<span class="text-blue-500 font-normal lowercase">(otomatis)</span>' : ''}
+          </label>
+          <input 
+            type="${inputType}" 
+            id="${inputId}" 
+            data-key="${key}"
+            ${readonlyAttr}
+            class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none transition-all ${readonlyStyle}" 
+            placeholder="${isReadonly ? 'Otomatis diisi oleh sistem' : 'Masukkan ' + key}"
+          />
         `;
+        container.appendChild(div);
       });
-
-      container.innerHTML = html;
     }
 
     function openFormModal(editData = null) {
-      document.getElementById('dataForm').reset();
-      document.getElementById('formRowId').value = '';
+      const modal = document.getElementById('formModal');
+      const title = document.getElementById('modalTitle');
+      const rowIdInput = document.getElementById('formRowId');
 
       if (editData) {
-        document.getElementById('modalTitle').innerText = `Edit Data - ID ${editData.ID || editData.id || ''}`;
-        document.getElementById('formRowId').value = editData.ID || editData.id || '';
+        title.innerText = 'Edit Data Pekerjaan';
+        rowIdInput.value = editData.ID || editData.id || '';
 
-        tableHeaders.forEach(key => {
-          const matchedKey = Object.keys(editData).find(k => k.trim().toLowerCase() === key.toLowerCase());
-          const el = document.getElementById(`field_${key}`);
-          if (el) {
-            let val = matchedKey ? editData[matchedKey] : '';
-            if (isDateField(key)) {
-              val = formatDateForInput(val);
-            }
-            el.value = val;
+        const inputs = document.querySelectorAll('#dynamicFormFields input');
+        inputs.forEach(input => {
+          const key = input.getAttribute('data-key');
+          let val = editData[key] || '';
+
+          if (isDateField(key)) {
+            input.value = formatDateForInput(val);
+          } else if (key.toUpperCase().trim() === 'DIUBAH OLEH' || key.toUpperCase().trim() === 'DIRUBAH OLEH') {
+            // Saat Edit, otomatis diperbarui dengan user yang melakukan perubahan
+            input.value = currentUser ? (currentUser.nama || currentUser.username) : 'System';
+          } else {
+            input.value = val;
           }
         });
       } else {
-        document.getElementById('modalTitle').innerText = 'Tambah Data Pekerjaan Baru';
+        title.innerText = 'Tambah Data Pekerjaan Baru';
+        rowIdInput.value = '';
+
+        const inputs = document.querySelectorAll('#dynamicFormFields input');
+        inputs.forEach(input => {
+          const key = input.getAttribute('data-key');
+          const upperKey = key.toUpperCase().trim();
+
+          if (upperKey === 'ID') {
+            // Mengisi ID secara otomatis (contoh: PA-YYYYMMDD-XXXX)
+            const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+            const randomNum = Math.floor(1000 + Math.random() * 9000);
+            input.value = `PA-${dateStr}-${randomNum}`;
+          } else if (upperKey === 'DIUBAH OLEH' || upperKey === 'DIRUBAH OLEH') {
+            // Mengisi nama user yang login otomatis
+            input.value = currentUser ? (currentUser.nama || currentUser.username) : 'System';
+          } else {
+            input.value = '';
+          }
+        });
       }
 
-      document.getElementById('formModal').classList.remove('hidden');
+      modal.classList.remove('hidden');
     }
 
     function closeFormModal() {
       document.getElementById('formModal').classList.add('hidden');
     }
 
-    function editCurrentDetail() {
-      if (selectedDetailRow) {
-        openFormModal(selectedDetailRow);
-      }
-    }
-
-    // ================= SUBMIT DATA (CREATE / EDIT) =================
     async function handleFormSubmit(e) {
       e.preventDefault();
-      const saveBtn = document.getElementById('saveBtn');
+      const btn = document.getElementById('saveBtn');
       const rowId = document.getElementById('formRowId').value;
-      const isEdit = Boolean(rowId);
 
-      saveBtn.disabled = true;
-      saveBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i><span>Menyimpan...</span>`;
+      const formDataObj = {};
+      const inputs = document.querySelectorAll('#dynamicFormFields input');
 
-      const formData = {};
-      tableHeaders.forEach(key => {
-        const el = document.getElementById(`field_${key}`);
-        if (el) {
-          formData[key] = el.value;
-        }
+      inputs.forEach(input => {
+        const key = input.getAttribute('data-key');
+        formDataObj[key] = input.value.trim();
       });
 
-      formData['DIUBAH OLEH'] = currentUser ? (currentUser.nama || currentUser.username) : 'System';
+      // Memastikan field 'DIUBAH OLEH' / 'DIRUBAH OLEH' terisi nama user aktif
+      if (currentUser) {
+        if ('DIUBAH OLEH' in formDataObj) formDataObj['DIUBAH OLEH'] = currentUser.nama || currentUser.username;
+        if ('DIRUBAH OLEH' in formDataObj) formDataObj['DIRUBAH OLEH'] = currentUser.nama || currentUser.username;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i><span>Menyimpan...</span>`;
 
       const payload = {
-        action: isEdit ? 'update' : 'create',
-        data: formData
+        action: rowId ? 'update' : 'create',
+        data: formDataObj
       };
 
       try {
@@ -989,39 +1011,44 @@
         const result = await response.json();
 
         if (result.status === 'success') {
-          closeFormModal();
           Swal.fire({
             icon: 'success',
             title: 'Berhasil',
-            text: isEdit ? 'Data berhasil diperbarui!' : 'Data baru berhasil ditambahkan!',
+            text: rowId ? 'Data berhasil diperbarui!' : 'Data baru berhasil ditambahkan!',
             timer: 1500,
             showConfirmButton: false
           });
+          closeFormModal();
           fetchData();
-          if (isEdit && selectedDetailRow) {
-            showDashboardView();
-          }
         } else {
           Swal.fire('Gagal', result.message || 'Gagal menyimpan data.', 'error');
         }
       } catch (err) {
-        console.error("Submit error:", err);
-        Swal.fire('Kesalahan', 'Terjadi masalah saat menyimpan data.', 'error');
+        console.error("Save error:", err);
+        Swal.fire('Kesalahan Sistem', 'Tidak dapat mengirim data ke backend.', 'error');
       } finally {
-        saveBtn.disabled = false;
-        saveBtn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i><span>Simpan Data</span>`;
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i><span>Simpan Data</span>`;
       }
     }
 
-    // ================= HAPUS DATA =================
-    function deleteCurrentDetail() {
+    function editCurrentDetail() {
+      if (!selectedDetailRow) return;
+      openFormModal(selectedDetailRow);
+    }
+
+    async function deleteCurrentDetail() {
       if (!selectedDetailRow) return;
 
-      const targetID = selectedDetailRow.ID || selectedDetailRow.id;
+      const rowId = selectedDetailRow.ID || selectedDetailRow.id;
+      if (!rowId) {
+        Swal.fire('Error', 'ID data tidak ditemukan.', 'error');
+        return;
+      }
 
       Swal.fire({
-        title: 'Hapus Data Pekerjaan?',
-        text: `Apakah Anda yakin ingin menghapus data dengan ID ${targetID}?`,
+        title: 'Hapus Data Ini?',
+        text: `Data dengan ID "${rowId}" akan dihapus secara permanen.`,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#e11d48',
@@ -1034,38 +1061,40 @@
               headers: { 'Content-Type': 'text/plain;charset=utf-8' },
               body: JSON.stringify({
                 action: 'delete',
-                id: targetID
+                id: rowId
               })
             });
 
             const res = await response.json();
+
             if (res.status === 'success') {
               Swal.fire('Terhapus!', 'Data berhasil dihapus.', 'success');
               showDashboardView();
               fetchData();
             } else {
-              Swal.fire('Gagal', res.message || 'Gagal menghapus data.', 'error');
+              Swal.fire('Gagal', res.message || 'Tidak dapat menghapus data.', 'error');
             }
           } catch (err) {
             console.error("Delete error:", err);
-            Swal.fire('Kesalahan', 'Tidak dapat menghapus data.', 'error');
+            Swal.fire('Error', 'Terjadi kesalahan sistem saat menghapus data.', 'error');
           }
         }
       });
     }
 
-    // ================= EXPORT EXCEL =================
+    // ================= EXPORT TO EXCEL =================
     function exportToExcel() {
       if (filteredData.length === 0) {
         Swal.fire('Peringatan', 'Tidak ada data untuk diexport.', 'warning');
         return;
       }
 
-      const worksheet = XLSX.utils.json_to_sheet(filteredData);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap Pekerjaan");
+      const ws = XLSX.utils.json_to_sheet(filteredData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Data Pekerjaan");
 
-      XLSX.writeFile(workbook, `Rekap_Pekerjaan_WINSONS_${new Date().toISOString().slice(0, 10)}.xlsx`);
+      const dateStr = new Date().toISOString().slice(0, 10);
+      XLSX.writeFile(wb, `Rekap_Pekerjaan_WINSONS_${dateStr}.xlsx`);
     }
   </script>
 </body>
