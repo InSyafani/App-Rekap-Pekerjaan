@@ -737,7 +737,11 @@
 
     function changePageSize() {
       const sizeVal = document.getElementById('pageSizeSelect').value;
-      pageSize = sizeVal === 'ALL' ? filteredData.length : parseInt(sizeVal);
+      if (sizeVal === 'ALL') {
+        pageSize = filteredData.length || 10;
+      } else {
+        pageSize = parseInt(sizeVal, 10);
+      }
       currentPage = 1;
       renderTable();
     }
@@ -747,175 +751,161 @@
       tbody.innerHTML = '';
 
       if (filteredData.length === 0) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="5" class="text-center py-8 text-slate-400">
-              Tidak ada data yang sesuai dengan filter/pencarian.
-            </td>
-          </tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-400">Tidak ada data yang sesuai.</td></tr>`;
         document.getElementById('recordCount').innerText = 'Menampilkan 0 data';
         document.getElementById('paginationControls').innerHTML = '';
         return;
       }
 
-      const totalItems = filteredData.length;
-      let startIdx = 0;
-      let endIdx = totalItems;
+      const startIndex = (currentPage - 1) * pageSize;
+      const endIndex = Math.min(startIndex + pageSize, filteredData.length);
+      const paginatedItems = filteredData.slice(startIndex, endIndex);
 
-      if (pageSize !== totalItems) {
-        startIdx = (currentPage - 1) * pageSize;
-        endIdx = Math.min(startIdx + pageSize, totalItems);
-      }
-
-      const paginatedData = filteredData.slice(startIdx, endIdx);
-
-      paginatedData.forEach((row, index) => {
-        const actualIndex = startIdx + index;
+      paginatedItems.forEach((row, index) => {
         const tr = document.createElement('tr');
         tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
 
-        const idVal = row.ID || row.id || '-';
+        const rowId = row.ID || row.id || (startIndex + index + 1);
         const namaPekerjaan = row['NAMA PEKERJAAN'] || row['NAMA_PEKERJAAN'] || row.Nama || '-';
-        const soVal = row.SO || row.so || '-';
-        const ptlVal = row.PTL || row.ptl || '-';
+        const so = row.SO || row.so || '-';
+        const ptl = row.PTL || row.ptl || '-';
 
         tr.innerHTML = `
-          <td class="px-4 py-3 font-semibold text-slate-700">${idVal}</td>
-          <td class="px-4 py-3 text-slate-800 font-medium">${namaPekerjaan}</td>
-          <td class="px-4 py-3 text-slate-600">${soVal}</td>
-          <td class="px-4 py-3 text-slate-600">${ptlVal}</td>
-          <td class="px-4 py-3 text-center">
-            <button onclick="viewDetail(${actualIndex})" class="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg text-xs font-semibold transition">
-              Detail
+          <td class="px-4 py-3 font-medium text-slate-900 whitespace-nowrap">${rowId}</td>
+          <td class="px-4 py-3 font-medium text-slate-700 max-w-xs truncate">${namaPekerjaan}</td>
+          <td class="px-4 py-3 text-slate-600 whitespace-nowrap">${so}</td>
+          <td class="px-4 py-3 text-slate-600 whitespace-nowrap">${ptl}</td>
+          <td class="px-4 py-3 text-center whitespace-nowrap space-x-1">
+            <button onclick="viewDetail(${startIndex + index})" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition" title="Lihat Detail">
+              <i class="fa-solid fa-eye text-sm"></i>
+            </button>
+            <button onclick="editRow(${startIndex + index})" class="p-1.5 text-amber-600 hover:bg-amber-50 rounded transition" title="Edit">
+              <i class="fa-solid fa-pen-to-square text-sm"></i>
+            </button>
+            <button onclick="deleteRow(${startIndex + index})" class="p-1.5 text-rose-600 hover:bg-rose-50 rounded transition" title="Hapus">
+              <i class="fa-solid fa-trash-can text-sm"></i>
             </button>
           </td>
         `;
-
         tbody.appendChild(tr);
       });
 
-      document.getElementById('recordCount').innerText = `Menampilkan ${startIdx + 1} - ${endIdx} dari ${totalItems} data`;
-      renderPaginationControls(totalItems);
+      document.getElementById('recordCount').innerText = `Menampilkan ${startIndex + 1} - ${endIndex} dari ${filteredData.length} data`;
+      renderPagination();
     }
 
-    function renderPaginationControls(totalItems) {
+    function renderPagination() {
       const container = document.getElementById('paginationControls');
       container.innerHTML = '';
 
-      if (pageSize >= totalItems) return;
-
-      const totalPages = Math.ceil(totalItems / pageSize);
+      const totalPages = Math.ceil(filteredData.length / pageSize);
+      if (totalPages <= 1) return;
 
       const prevBtn = document.createElement('button');
-      prevBtn.className = `px-3 py-1 rounded-md text-xs font-medium border ${currentPage === 1 ? 'border-slate-200 text-slate-300 cursor-not-allowed' : 'border-slate-300 text-slate-600 hover:bg-slate-100'}`;
-      prevBtn.innerText = 'Prev';
+      prevBtn.className = `px-2.5 py-1 rounded border text-xs font-medium ${currentPage === 1 ? 'border-slate-200 text-slate-300 cursor-not-allowed' : 'border-slate-300 text-slate-600 hover:bg-slate-100'}`;
+      prevBtn.innerHTML = `<i class="fa-solid fa-chevron-left"></i>`;
       prevBtn.disabled = currentPage === 1;
       prevBtn.onclick = () => { if (currentPage > 1) { currentPage--; renderTable(); } };
       container.appendChild(prevBtn);
 
       for (let i = 1; i <= totalPages; i++) {
-        if (totalPages > 7 && Math.abs(i - currentPage) > 2 && i !== 1 && i !== totalPages) {
-          if (i === 2 || i === totalPages - 1) {
-            const dots = document.createElement('span');
-            dots.className = 'px-1 text-slate-400';
-            dots.innerText = '...';
-            container.appendChild(dots);
-          }
-          continue;
+        if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+          const pageBtn = document.createElement('button');
+          pageBtn.className = `px-3 py-1 rounded border text-xs font-medium ${i === currentPage ? 'bg-blue-600 text-white border-blue-600' : 'border-slate-300 text-slate-600 hover:bg-slate-100'}`;
+          pageBtn.innerText = i;
+          pageBtn.onclick = () => { currentPage = i; renderTable(); };
+          container.appendChild(pageBtn);
+        } else if (i === currentPage - 2 || i === currentPage + 2) {
+          const dots = document.createElement('span');
+          dots.className = "px-1 text-slate-400";
+          dots.innerText = "...";
+          container.appendChild(dots);
         }
-
-        const pageBtn = document.createElement('button');
-        pageBtn.className = `px-3 py-1 rounded-md text-xs font-medium border ${i === currentPage ? 'bg-blue-600 border-blue-600 text-white' : 'border-slate-300 text-slate-600 hover:bg-slate-100'}`;
-        pageBtn.innerText = i;
-        pageBtn.onclick = () => { currentPage = i; renderTable(); };
-        container.appendChild(pageBtn);
       }
 
       const nextBtn = document.createElement('button');
-      nextBtn.className = `px-3 py-1 rounded-md text-xs font-medium border ${currentPage === totalPages ? 'border-slate-200 text-slate-300 cursor-not-allowed' : 'border-slate-300 text-slate-600 hover:bg-slate-100'}`;
-      nextBtn.innerText = 'Next';
+      nextBtn.className = `px-2.5 py-1 rounded border text-xs font-medium ${currentPage === totalPages ? 'border-slate-200 text-slate-300 cursor-not-allowed' : 'border-slate-300 text-slate-600 hover:bg-slate-100'}`;
+      nextBtn.innerHTML = `<i class="fa-solid fa-chevron-right"></i>`;
       nextBtn.disabled = currentPage === totalPages;
       nextBtn.onclick = () => { if (currentPage < totalPages) { currentPage++; renderTable(); } };
       container.appendChild(nextBtn);
     }
 
-    // ================= DETAIL VIEW =================
-    function viewDetail(index) {
-      selectedDetailRow = filteredData[index];
-      if (!selectedDetailRow) return;
+    // ================= DETAIL VIEW LOGIC =================
+    function viewDetail(filteredIndex) {
+      const rowData = filteredData[filteredIndex];
+      selectedDetailRow = rowData;
 
-      const mainTable = document.getElementById('detailMainTable');
-      const secondaryTable = document.getElementById('detailSecondaryTable');
+      const mainTbody = document.getElementById('detailMainTable');
+      const secTbody = document.getElementById('detailSecondaryTable');
 
-      mainTable.innerHTML = '';
-      secondaryTable.innerHTML = '';
+      mainTbody.innerHTML = '';
+      secTbody.innerHTML = '';
 
       MAIN_KEYS.forEach(key => {
+        let val = rowData[key] !== undefined ? rowData[key] : '-';
+        if (isDateField(key)) val = formatDateForDisplay(val);
+
         const tr = document.createElement('tr');
-        let val = selectedDetailRow[key] || '-';
-
-        if (isDateField(key)) {
-          val = formatDateForDisplay(val);
-        }
-
         tr.innerHTML = `
-          <td class="px-5 py-3 font-semibold text-slate-600 w-1/3 bg-slate-50/50">${key}</td>
-          <td class="px-5 py-3 text-slate-800">${val}</td>
+          <td class="px-4 py-2.5 font-semibold text-slate-600 bg-slate-50/50 w-1/3">${key}</td>
+          <td class="px-4 py-2.5 text-slate-800">${val}</td>
         `;
-        mainTable.appendChild(tr);
+        mainTbody.appendChild(tr);
       });
 
       SECONDARY_KEYS.forEach(key => {
+        let val = rowData[key] !== undefined ? rowData[key] : '-';
+        if (isDateField(key)) val = formatDateForDisplay(val);
+
         const tr = document.createElement('tr');
-        let val = selectedDetailRow[key] || '-';
-
-        if (isDateField(key)) {
-          val = formatDateForDisplay(val);
-        }
-
         tr.innerHTML = `
-          <td class="px-5 py-3 font-semibold text-slate-600 w-1/3 bg-slate-50/50">${key}</td>
-          <td class="px-5 py-3 text-slate-800">${val}</td>
+          <td class="px-4 py-2.5 font-semibold text-slate-600 bg-slate-50/50 w-1/3">${key}</td>
+          <td class="px-4 py-2.5 text-slate-800">${val}</td>
         `;
-        secondaryTable.appendChild(tr);
+        secTbody.appendChild(tr);
       });
 
       document.getElementById('tableView').classList.add('hidden');
       document.getElementById('detailView').classList.remove('hidden');
     }
 
-    // ================= MODAL & DYNAMIC FORM =================
+    function editCurrentDetail() {
+      if (!selectedDetailRow) return;
+      const index = filteredData.findIndex(item => item === selectedDetailRow);
+      if (index !== -1) editRow(index);
+    }
+
+    function deleteCurrentDetail() {
+      if (!selectedDetailRow) return;
+      const index = filteredData.findIndex(item => item === selectedDetailRow);
+      if (index !== -1) deleteRow(index);
+    }
+
+    // ================= FORM MODAL LOGIC =================
     function renderFormFields() {
       const container = document.getElementById('dynamicFormFields');
       container.innerHTML = '';
 
-      const allKeys = [...MAIN_KEYS, ...SECONDARY_KEYS];
+      if (tableHeaders.length === 0) {
+        tableHeaders = [...MAIN_KEYS, ...SECONDARY_KEYS];
+      }
 
-      allKeys.forEach(key => {
+      tableHeaders.forEach(header => {
+        if (header.toUpperCase() === 'ID') return; // Skip ID jika auto-generated
+
         const div = document.createElement('div');
-        const inputId = `field_${key.replace(/[^a-zA-Z0-9]/g, '_')}`;
-
-        const isDate = isDateField(key);
+        const isDate = isDateField(header);
         const inputType = isDate ? 'date' : 'text';
 
-        const upperKey = key.toUpperCase().trim();
-        const isReadonly = upperKey === 'ID' || upperKey === 'DIUBAH OLEH' || upperKey === 'DIRUBAH OLEH';
-
-        const readonlyAttr = isReadonly ? 'readonly' : '';
-        const readonlyStyle = isReadonly ? 'bg-slate-100 text-slate-500 cursor-not-allowed select-none' : 'bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:bg-white';
-
         div.innerHTML = `
-          <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
-            ${key} ${isReadonly ? '<span class="text-blue-500 font-normal lowercase">(otomatis)</span>' : ''}
-          </label>
+          <label class="block text-xs font-medium text-slate-700 mb-1">${header}</label>
           <input 
             type="${inputType}" 
-            id="${inputId}" 
-            data-key="${key}"
-            ${readonlyAttr}
-            class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none transition-all ${readonlyStyle}" 
-            placeholder="${isReadonly ? 'Otomatis diisi oleh sistem' : 'Masukkan ' + key}"
-          />
+            name="${header}" 
+            id="field_${header}"
+            class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
+          >
         `;
         container.appendChild(div);
       });
@@ -923,48 +913,29 @@
 
     function openFormModal(editData = null) {
       const modal = document.getElementById('formModal');
+      const form = document.getElementById('dataForm');
       const title = document.getElementById('modalTitle');
-      const rowIdInput = document.getElementById('formRowId');
+
+      form.reset();
 
       if (editData) {
         title.innerText = 'Edit Data Pekerjaan';
-        rowIdInput.value = editData.ID || editData.id || '';
+        document.getElementById('formRowId').value = editData.ID || editData.id || '';
 
-        const inputs = document.querySelectorAll('#dynamicFormFields input');
-        inputs.forEach(input => {
-          const key = input.getAttribute('data-key');
-          let val = editData[key] || '';
-
-          if (isDateField(key)) {
-            input.value = formatDateForInput(val);
-          } else if (key.toUpperCase().trim() === 'DIUBAH OLEH' || key.toUpperCase().trim() === 'DIRUBAH OLEH') {
-            // Saat Edit, otomatis diperbarui dengan user yang melakukan perubahan
-            input.value = currentUser ? (currentUser.nama || currentUser.username) : 'System';
-          } else {
-            input.value = val;
+        tableHeaders.forEach(header => {
+          const input = document.getElementById(`field_${header}`);
+          if (input) {
+            let val = editData[header] !== undefined ? editData[header] : '';
+            if (isDateField(header)) {
+              input.value = formatDateForInput(val);
+            } else {
+              input.value = val;
+            }
           }
         });
       } else {
         title.innerText = 'Tambah Data Pekerjaan Baru';
-        rowIdInput.value = '';
-
-        const inputs = document.querySelectorAll('#dynamicFormFields input');
-        inputs.forEach(input => {
-          const key = input.getAttribute('data-key');
-          const upperKey = key.toUpperCase().trim();
-
-          if (upperKey === 'ID') {
-            // Mengisi ID secara otomatis (contoh: PA-YYYYMMDD-XXXX)
-            const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-            const randomNum = Math.floor(1000 + Math.random() * 9000);
-            input.value = `PA-${dateStr}-${randomNum}`;
-          } else if (upperKey === 'DIUBAH OLEH' || upperKey === 'DIRUBAH OLEH') {
-            // Mengisi nama user yang login otomatis
-            input.value = currentUser ? (currentUser.nama || currentUser.username) : 'System';
-          } else {
-            input.value = '';
-          }
-        });
+        document.getElementById('formRowId').value = '';
       }
 
       modal.classList.remove('hidden');
@@ -974,127 +945,136 @@
       document.getElementById('formModal').classList.add('hidden');
     }
 
+    function editRow(filteredIndex) {
+      const item = filteredData[filteredIndex];
+      openFormModal(item);
+    }
+
+    // ================= MODIFIKASI SKENARIO 2: REDIRECT / SIMPAN DATA =================
     async function handleFormSubmit(e) {
       e.preventDefault();
-      const btn = document.getElementById('saveBtn');
+      const saveBtn = document.getElementById('saveBtn');
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i><span>Menyimpan...</span>`;
+
+      const formData = {};
       const rowId = document.getElementById('formRowId').value;
+      if (rowId) formData['ID'] = rowId;
 
-      const formDataObj = {};
-      const inputs = document.querySelectorAll('#dynamicFormFields input');
-
-      inputs.forEach(input => {
-        const key = input.getAttribute('data-key');
-        formDataObj[key] = input.value.trim();
+      tableHeaders.forEach(header => {
+        if (header.toUpperCase() !== 'ID') {
+          const input = document.getElementById(`field_${header}`);
+          if (input) formData[header] = input.value;
+        }
       });
 
-      // Memastikan field 'DIUBAH OLEH' / 'DIRUBAH OLEH' terisi nama user aktif
       if (currentUser) {
-        if ('DIUBAH OLEH' in formDataObj) formDataObj['DIUBAH OLEH'] = currentUser.nama || currentUser.username;
-        if ('DIRUBAH OLEH' in formDataObj) formDataObj['DIRUBAH OLEH'] = currentUser.nama || currentUser.username;
+        formData['DIUBAH OLEH'] = currentUser.nama || currentUser.username;
       }
 
-      btn.disabled = true;
-      btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i><span>Menyimpan...</span>`;
-
-      const payload = {
-        action: rowId ? 'update' : 'create',
-        data: formDataObj
-      };
-
       try {
+        const actionType = rowId ? 'update' : 'create';
         const response = await fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(payload)
+          body: JSON.stringify({ action: actionType, data: formData })
         });
 
         const result = await response.json();
 
         if (result.status === 'success') {
+          closeFormModal();
+          
+          // SKENARIO 2: Tampilkan Notifikasi Sukses dengan Timer & Countdown
+          let timerInterval;
           Swal.fire({
             icon: 'success',
-            title: 'Berhasil',
-            text: rowId ? 'Data berhasil diperbarui!' : 'Data baru berhasil ditambahkan!',
-            timer: 1500,
-            showConfirmButton: false
+            title: rowId ? 'Data Berhasil Diperbarui!' : 'Data Berhasil Ditambahkan!',
+            html: 'Mengalihkan kembali ke dashboard dalam <b>2</b> detik...',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+            didOpen: () => {
+              const b = Swal.getHtmlContainer().querySelector('b');
+              timerInterval = setInterval(() => {
+                const secondsLeft = Math.ceil(Swal.getTimerLeft() / 1000);
+                if (b) b.textContent = secondsLeft;
+              }, 100);
+            },
+            willClose: () => {
+              clearInterval(timerInterval);
+            }
+          }).then(() => {
+            // Pengalihan kembali ke Dashboard Utama & Refresh Data secara otomatis
+            showDashboardView();
+            fetchData(true);
           });
-          closeFormModal();
-          fetchData();
+
         } else {
-          Swal.fire('Gagal', result.message || 'Gagal menyimpan data.', 'error');
+          Swal.fire('Gagal Menyimpan', result.message || 'Terjadi kesalahan saat menyimpan data.', 'error');
         }
       } catch (err) {
-        console.error("Save error:", err);
-        Swal.fire('Kesalahan Sistem', 'Tidak dapat mengirim data ke backend.', 'error');
+        console.error("Submit error:", err);
+        Swal.fire('Kesalahan Sistem', 'Tidak dapat terhubung ke server backend.', 'error');
       } finally {
-        btn.disabled = false;
-        btn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i><span>Simpan Data</span>`;
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i><span>Simpan Data</span>`;
       }
     }
 
-    function editCurrentDetail() {
-      if (!selectedDetailRow) return;
-      openFormModal(selectedDetailRow);
-    }
+    async function deleteRow(filteredIndex) {
+      const item = filteredData[filteredIndex];
+      const targetId = item.ID || item.id;
 
-    async function deleteCurrentDetail() {
-      if (!selectedDetailRow) return;
-
-      const rowId = selectedDetailRow.ID || selectedDetailRow.id;
-      if (!rowId) {
-        Swal.fire('Error', 'ID data tidak ditemukan.', 'error');
+      if (!targetId) {
+        Swal.fire('Error', 'ID Data tidak ditemukan.', 'error');
         return;
       }
 
       Swal.fire({
         title: 'Hapus Data Ini?',
-        text: `Data dengan ID "${rowId}" akan dihapus secara permanen.`,
+        text: `Apakah Anda yakin ingin menghapus data "${item['NAMA PEKERJAAN'] || targetId}"?`,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#e11d48',
-        confirmButtonText: 'Ya, Hapus'
-      }).then(async (result) => {
-        if (result.isConfirmed) {
+        confirmButtonText: 'Ya, Hapus Data'
+      }).then(async (res) => {
+        if (res.isConfirmed) {
           try {
             const response = await fetch(API_URL, {
               method: 'POST',
               headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-              body: JSON.stringify({
-                action: 'delete',
-                id: rowId
-              })
+              body: JSON.stringify({ action: 'delete', id: targetId })
             });
 
-            const res = await response.json();
-
-            if (res.status === 'success') {
+            const result = await response.json();
+            if (result.status === 'success') {
               Swal.fire('Terhapus!', 'Data berhasil dihapus.', 'success');
               showDashboardView();
-              fetchData();
+              fetchData(true);
             } else {
-              Swal.fire('Gagal', res.message || 'Tidak dapat menghapus data.', 'error');
+              Swal.fire('Gagal Hapus', result.message || 'Gagal menghapus data.', 'error');
             }
           } catch (err) {
             console.error("Delete error:", err);
-            Swal.fire('Error', 'Terjadi kesalahan sistem saat menghapus data.', 'error');
+            Swal.fire('Kesalahan Sistem', 'Tidak dapat terhubung ke server backend.', 'error');
           }
         }
       });
     }
 
-    // ================= EXPORT TO EXCEL =================
+    // ================= EXPORT EXCEL =================
     function exportToExcel() {
       if (filteredData.length === 0) {
-        Swal.fire('Peringatan', 'Tidak ada data untuk diexport.', 'warning');
+        Swal.fire('Informasi', 'Tidak ada data untuk di-export.', 'info');
         return;
       }
 
       const ws = XLSX.utils.json_to_sheet(filteredData);
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Data Pekerjaan");
+      XLSX.utils.book_append_sheet(wb, ws, "Rekap PA");
 
-      const dateStr = new Date().toISOString().slice(0, 10);
-      XLSX.writeFile(wb, `Rekap_Pekerjaan_WINSONS_${dateStr}.xlsx`);
+      XLSX.writeFile(wb, `Rekap_Pekerjaan_WINSONS_${new Date().toISOString().slice(0, 10)}.xlsx`);
     }
   </script>
 </body>
