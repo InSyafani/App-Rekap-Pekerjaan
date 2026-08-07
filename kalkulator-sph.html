@@ -128,11 +128,12 @@
                 Rp
               </span>
               <input
-                type="number"
+                type="text"
+                inputmode="numeric"
                 id="sphInputDpp"
                 value="0"
-                min="0"
-                oninput="calculateSph()"
+                autocomplete="off"
+                oninput="formatMoneyInput(this); calculateSph()"
                 class="w-full pl-9 pr-3 py-2.5 border border-slate-300 rounded-lg text-slate-800 font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
             </div>
           </div>
@@ -147,11 +148,12 @@
                 Rp
               </span>
               <input
-                type="number"
+                type="text"
+                inputmode="numeric"
                 id="sphInputHps"
                 value="0"
-                min="0"
-                oninput="calculateSph()"
+                autocomplete="off"
+                oninput="formatMoneyInput(this); calculateSph()"
                 class="w-full pl-9 pr-3 py-2.5 border border-slate-300 rounded-lg text-slate-800 font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
             </div>
           </div>
@@ -166,11 +168,12 @@
                 Rp
               </span>
               <input
-                type="number"
+                type="text"
+                inputmode="numeric"
                 id="sphInputBiayaLain"
                 value="0"
-                min="0"
-                oninput="calculateSph()"
+                autocomplete="off"
+                oninput="formatMoneyInput(this); calculateSph()"
                 class="w-full pl-9 pr-3 py-2.5 border border-slate-300 rounded-lg text-slate-800 font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
             </div>
           </div>
@@ -372,10 +375,36 @@
       }).format(number || 0);
     }
 
+    // Format khusus untuk INPUT uang: 1000000 -> 1.000.000
+    // Hanya digunakan pada parameter input, bukan pada hasil kalkulasi.
+    function formatMoneyInput(input) {
+      let value = String(input.value || '');
+
+      // Hapus semua karakter selain angka
+      value = value.replace(/\D/g, '');
+
+      // Hapus nol di depan, tetapi tetap tampilkan 0 jika kosong
+      value = value.replace(/^0+(?=\d)/, '');
+
+      if (value === '') value = '0';
+
+      // Tambahkan titik sebagai pemisah ribuan
+      input.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+
+    // Ubah angka input yang sudah memakai titik menjadi angka asli untuk kalkulasi
+    function parseMoneyInput(id) {
+      const input = document.getElementById(id);
+      if (!input) return 0;
+
+      const value = String(input.value || '').replace(/\./g, '').replace(/[^0-9]/g, '');
+      return Number(value) || 0;
+    }
+
     function calculateSph() {
-      const dpp = parseFloat(document.getElementById('sphInputDpp').value) || 0;
-      const hps = parseFloat(document.getElementById('sphInputHps').value) || 0;
-      const biayaLain = parseFloat(document.getElementById('sphInputBiayaLain').value) || 0;
+      const dpp = parseMoneyInput('sphInputDpp');
+      const hps = parseMoneyInput('sphInputHps');
+      const biayaLain = parseMoneyInput('sphInputBiayaLain');
 
       const isPkp =
         document.getElementById('sphInputPkp').value === "Ya";
@@ -478,9 +507,9 @@
 
     function resetSphCalculator() {
       // Default awal yang diminta:
-      document.getElementById('sphInputDpp').value = 0;
-      document.getElementById('sphInputHps').value = 0;
-      document.getElementById('sphInputBiayaLain').value = 0;
+      document.getElementById('sphInputDpp').value = '0';
+      document.getElementById('sphInputHps').value = '0';
+      document.getElementById('sphInputBiayaLain').value = '0';
 
       // Default pajak dari kalkulator sumber
       document.getElementById('sphInputPkp').value = "Ya";
@@ -493,6 +522,9 @@
 
     // Hitung kondisi awal saat halaman dibuka
     document.addEventListener('DOMContentLoaded', function () {
+      formatMoneyInput(document.getElementById('sphInputDpp'));
+      formatMoneyInput(document.getElementById('sphInputHps'));
+      formatMoneyInput(document.getElementById('sphInputBiayaLain'));
       calculateSph();
     });
   </script>
