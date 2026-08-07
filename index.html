@@ -98,9 +98,22 @@
         </div>
 
         <nav class="p-4 space-y-1">
-          <button onclick="showDashboardView()" class="w-full flex items-center space-x-3 px-4 py-3 bg-blue-600/20 text-blue-400 rounded-xl font-medium text-sm text-left">
+          <!-- DATA PEKERJAAN / DASHBOARD -->
+          <button
+            onclick="showDashboardView()"
+            id="menuDashboard"
+            class="w-full flex items-center space-x-3 px-4 py-3 bg-blue-600/20 text-blue-400 rounded-xl font-medium text-sm text-left transition">
             <i class="fa-solid fa-table-cells w-5"></i>
             <span>Data Pekerjaan</span>
+          </button>
+
+          <!-- KALKULATOR SPH -->
+          <button
+            onclick="showSphView()"
+            id="menuSph"
+            class="w-full flex items-center space-x-3 px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-blue-400 rounded-xl font-medium text-sm text-left transition">
+            <i class="fa-solid fa-calculator w-5"></i>
+            <span>Kalkulator SPH</span>
           </button>
         </nav>
       </div>
@@ -165,7 +178,7 @@
 
         <!-- STAT CARDS -->
         <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 md:p-6">
-          <div class="grid grid-cols-2 md:grid-cols-5 divide-y md:divide-y-0 md:divide-x divide-slate-200 gap-4 md:gap-0">
+          <div class="grid grid-cols-2 md:grid-cols-6 divide-y md:divide-y-0 md:divide-x divide-slate-200">
             <div class="flex flex-col justify-center px-2 md:px-4 pt-2 md:pt-0">
               <div class="flex items-center space-x-1.5 text-slate-400 font-medium text-xs mb-2">
                 <span>📋</span>
@@ -200,7 +213,7 @@
 
             <div class="flex flex-col justify-center px-2 md:px-6 pt-2 md:pt-0">
                         <div class="flex items-center space-x-1.5 text-slate-400 font-medium text-xs mb-2">
-                          <span class="text-yellow-600">📕</span>
+                          <span class="text-yellow-600">✅</span>
                           <span class="text-yellow-600">Dokumen</span>
                         </div>
                         <span id="statDokumen" class="text-2xl md:text-3xl font-bold text-slate-800">0</span>
@@ -351,6 +364,16 @@
 
         </div>
 
+      </div>
+
+      <!-- VIEW 3: KALKULATOR SPH -->
+      <div id="sphView" class="hidden flex-1 overflow-hidden bg-slate-100">
+        <iframe
+          id="sphFrame"
+          src="kalkulator-sph.html"
+          class="w-full h-full border-0"
+          title="Kalkulator SPH">
+        </iframe>
       </div>
 
     </main>
@@ -505,13 +528,59 @@
       document.getElementById('userDisplayName').innerText = currentUser.nama || currentUser.username;
       document.getElementById('userDisplayRole').innerText = currentUser.role || 'Operator';
 
+      showDashboardView();
       fetchData();
     }
 
     function showDashboardView() {
-      document.getElementById('tableView').classList.remove('hidden');
-      document.getElementById('detailView').classList.add('hidden');
+      const tableView = document.getElementById('tableView');
+      const detailView = document.getElementById('detailView');
+      const sphView = document.getElementById('sphView');
+
+      // Tampilkan Dashboard dan sembunyikan view lainnya
+      tableView.classList.remove('hidden');
+      detailView.classList.add('hidden');
+      sphView.classList.add('hidden');
       selectedDetailRow = null;
+
+      // Aktifkan menu Dashboard
+      const menuDashboard = document.getElementById('menuDashboard');
+      const menuSph = document.getElementById('menuSph');
+
+      if (menuDashboard) {
+        menuDashboard.classList.add('bg-blue-600/20', 'text-blue-400');
+        menuDashboard.classList.remove('text-slate-300');
+      }
+      if (menuSph) {
+        menuSph.classList.remove('bg-blue-600/20', 'text-blue-400');
+        menuSph.classList.add('text-slate-300');
+      }
+    }
+
+    function showSphView() {
+      const tableView = document.getElementById('tableView');
+      const detailView = document.getElementById('detailView');
+      const sphView = document.getElementById('sphView');
+
+      // Sembunyikan Dashboard dan Detail
+      tableView.classList.add('hidden');
+      detailView.classList.add('hidden');
+
+      // Tampilkan Kalkulator SPH
+      sphView.classList.remove('hidden');
+
+      // Aktifkan menu SPH
+      const menuDashboard = document.getElementById('menuDashboard');
+      const menuSph = document.getElementById('menuSph');
+
+      if (menuDashboard) {
+        menuDashboard.classList.remove('bg-blue-600/20', 'text-blue-400');
+        menuDashboard.classList.add('text-slate-300');
+      }
+      if (menuSph) {
+        menuSph.classList.add('bg-blue-600/20', 'text-blue-400');
+        menuSph.classList.remove('text-slate-300');
+      }
     }
 
     // ================= LOGIN & LOGOUT =================
@@ -632,9 +701,9 @@
           countSurvey++;
         } else if (st.includes('progress') || st.includes('in progress') || st.includes('progres')) {
           countInProgress++;
-        }else if (st.includes('dokumen')) {
+        } else if (st.includes('dokumen') || st.includes('document')) {
           countDokumen++;
-        }else if (st.includes('done') || st.includes('selesai')) {
+        } else if (st.includes('done') || st.includes('selesai')) {
           countDone++;
         }
       });
@@ -830,6 +899,13 @@
 
       document.getElementById('tableView').classList.add('hidden');
       document.getElementById('detailView').classList.remove('hidden');
+      document.getElementById('sphView').classList.add('hidden');
+
+      // Detail bukan menu utama, jadi nonaktifkan highlight sidebar
+      document.getElementById('menuDashboard')?.classList.remove('bg-blue-600/20', 'text-blue-400');
+      document.getElementById('menuDashboard')?.classList.add('text-slate-300');
+      document.getElementById('menuSph')?.classList.remove('bg-blue-600/20', 'text-blue-400');
+      document.getElementById('menuSph')?.classList.add('text-slate-300');
 
       const mainTbody = document.getElementById('detailMainTable');
       const secTbody = document.getElementById('detailSecondaryTable');
