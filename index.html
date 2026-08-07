@@ -89,7 +89,7 @@
             <i class="fa-solid fa-table-cells w-5"></i>
             <span>Data Pekerjaan</span>
           </button>
-          
+
           <button id="navSphBtn" onclick="showSphCalculatorView()" class="w-full flex items-center space-x-3 px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl font-medium text-sm text-left transition">
             <i class="fa-solid fa-calculator w-5"></i>
             <span>Kalkulator SPH</span>
@@ -306,7 +306,7 @@
       </div>
       <!-- VIEW 3: KALKULATOR SPH PENGADAAN -->
       <div id="sphView" class="hidden flex-1 p-6 overflow-y-auto custom-scrollbar space-y-6">
-        
+
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 class="text-2xl font-bold text-slate-800">Kalkulator SPH Pengadaan</h1>
@@ -621,7 +621,7 @@
       selectedDetailRow = null;
       resetNavStyles();
       document.getElementById('navSphBtn').className = "w-full flex items-center space-x-3 px-4 py-3 bg-blue-600/20 text-blue-400 rounded-xl font-medium text-sm text-left transition";
-      
+
       calculateSph();
     }
     // ================= KALKULATOR SPH LOGIC (EXCEL MODEL) =================
@@ -1021,21 +1021,21 @@
         container.appendChild(wrapper);
       });
     }
-    
+
     function openFormModal(data = null) {
       const modal = document.getElementById('formModal');
       const title = document.getElementById('modalTitle');
       const formRowId = document.getElementById('formRowId');
-      
+
       if (data) {
         // KONDISI EDIT DATA
         title.innerText = `Edit Data Pekerjaan (ID: ${data.ID || data.id || '-'})`;
         formRowId.value = data.ID || data.id || '';
-        
+
         document.querySelectorAll('.form-field-input').forEach(input => {
           const key = input.getAttribute('data-key');
           let val = data[key] !== undefined ? data[key] : '';
-          
+
           if (isDateField(key)) {
             input.value = formatDateForInput(val);
           } else {
@@ -1053,14 +1053,15 @@
         // KONDISI TAMBAH DATA BARU
         title.innerText = 'Tambah Data Pekerjaan Baru';
         formRowId.value = '';
-        
+
         document.querySelectorAll('.form-field-input').forEach(input => {
           const key = input.getAttribute('data-key');
           input.value = '';
 
           // Otomatisasi untuk Tambah Data
           if (key === 'ID') {
-            const randomCode = PA${currentYear}-${nomorUrut}`.toString().slice(-6);
+            const randomCode = 'WNS-' + Date.now().toString().slice(-6);
+            const randomCode = 'PA2026-' + Date.now().toString().slice(-6);
             input.value = randomCode;
             input.setAttribute('readonly', true);
             input.classList.add('bg-slate-200', 'cursor-not-allowed', 'text-slate-500');
