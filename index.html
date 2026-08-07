@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>APLIKASI REKAP PEKERJAAN - WINSONS</title>
-
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Font Awesome Icons -->
@@ -13,7 +12,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <!-- SweetAlert2 untuk Notifikasi Modern -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     body { font-family: 'Inter', sans-serif; }
@@ -21,7 +19,6 @@
     .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
     @media print {
       body * { visibility: hidden; }
       #detailView, #detailView * { visibility: visible; }
@@ -31,12 +28,10 @@
   </style>
 </head>
 <body class="bg-slate-100 text-slate-800 antialiased min-h-screen">
-
   <!-- ==================== TAMPILAN LOGIN ==================== -->
   <div id="loginView" class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 border border-slate-200 relative overflow-hidden">
       <div class="absolute -top-10 -right-10 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl"></div>
-
       <div class="text-center mb-8">
         <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-600 text-white rounded-2xl shadow-lg mb-4">
           <i class="fa-solid fa-hard-hat text-3xl"></i>
@@ -44,7 +39,6 @@
         <h1 class="text-2xl font-bold text-slate-900 tracking-tight">WINSONS SYSTEM</h1>
         <p class="text-slate-500 text-sm mt-1">Rekapitulasi Pekerjaan & Dokumen</p>
       </div>
-
       <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-5">
         <div>
           <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">Username</label>
@@ -55,7 +49,6 @@
             <input type="text" id="loginUsername" required class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:ring-2 focus:ring-blue-500 focus:bg-white focus:outline-none transition-all" placeholder="Masukkan username">
           </div>
         </div>
-
         <div>
           <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">Password</label>
           <div class="relative">
@@ -65,23 +58,18 @@
             <input type="password" id="loginPassword" required class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:ring-2 focus:ring-blue-500 focus:bg-white focus:outline-none transition-all" placeholder="••••••••">
           </div>
         </div>
-
         <button type="submit" id="loginBtn" class="w-full py-3.5 px-4 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/30 transition-all flex items-center justify-center space-x-2">
           <span>Masuk Sistem</span>
           <i class="fa-solid fa-arrow-right text-sm"></i>
         </button>
       </form>
-
       <div class="mt-8 text-center text-xs text-slate-400">
         &copy; 2026 PT WINSONS PRATAMA CEMERLANG. All rights reserved.
       </div>
     </div>
   </div>
-
-
   <!-- ==================== MAIN DASHBOARD ==================== -->
   <div id="mainDashboard" class="hidden min-h-screen flex flex-col md:flex-row">
-
     <!-- Sidebar -->
     <aside id="sidebar" class="w-full md:w-64 bg-slate-900 text-slate-300 flex-shrink-0 flex flex-col justify-between transition-all duration-300">
       <div>
@@ -96,7 +84,6 @@
             </div>
           </div>
         </div>
-
         <nav class="p-4 space-y-1">
           <button id="navDataBtn" onclick="showDashboardView()" class="w-full flex items-center space-x-3 px-4 py-3 bg-blue-600/20 text-blue-400 rounded-xl font-medium text-sm text-left transition">
             <i class="fa-solid fa-table-cells w-5"></i>
@@ -109,7 +96,6 @@
           </button>
         </nav>
       </div>
-
       <!-- User Profile & Logout -->
       <div class="p-4 border-t border-slate-800 space-y-3">
         <div class="flex items-center justify-between bg-slate-800/50 p-3 rounded-xl">
@@ -118,12 +104,10 @@
             <p id="userDisplayRole" class="text-xs text-slate-400 capitalize">Role</p>
           </div>
         </div>
-
         <button onclick="handleLogout()" class="w-full py-2.5 px-4 bg-rose-600/10 hover:bg-rose-600/20 text-rose-400 rounded-xl font-medium text-xs flex items-center justify-center space-x-2 transition">
           <i class="fa-solid fa-right-from-bracket"></i>
           <span>Keluar Sesi</span>
         </button>
-
         <div class="pt-2 text-center">
           <p class="text-[11px] font-medium text-slate-400/80 tracking-wide">
             Built with <span class="text-rose-500">♥</span> <span class="text-slate-300 font-semibold">Indah Syafani</span>
@@ -131,10 +115,8 @@
         </div>
       </div>
     </aside>
-
     <!-- Main Content Area -->
     <main class="flex-1 flex flex-col h-screen overflow-hidden">
-
       <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
         <div class="flex items-center space-x-3">
           <button class="text-slate-500 hover:text-slate-700 text-lg md:hidden">
@@ -143,16 +125,13 @@
           <span class="text-sm font-medium text-slate-600">Aplikasi Rekap Pekerjaan</span>
         </div>
       </header>
-
       <!-- VIEW 1: TABEL DASHBOARD UTAMA -->
       <div id="tableView" class="flex-1 p-6 overflow-y-auto custom-scrollbar space-y-5">
-
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 class="text-2xl font-bold text-slate-800">Data Pekerjaan</h1>
             <p class="text-xs text-slate-500">Kelola rekapitulasi pengajuan dan status pekerjaan</p>
           </div>
-
           <div class="flex items-center space-x-3">
             <button onclick="fetchData(true)" class="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-sm transition" title="Refresh Data">
               <i class="fa-solid fa-rotate"></i>
@@ -167,7 +146,6 @@
             </button>
           </div>
         </div>
-
         <!-- STAT CARDS -->
         <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 md:p-6">
           <div class="grid grid-cols-2 md:grid-cols-5 divide-y md:divide-y-0 md:divide-x divide-slate-200 gap-4 md:gap-0">
@@ -178,7 +156,6 @@
               </div>
               <span id="statTotal" class="text-2xl md:text-3xl font-bold text-slate-800">0</span>
             </div>
-
             <div class="flex flex-col justify-center px-2 md:px-6 pt-2 md:pt-0">
               <div class="flex items-center space-x-1.5 text-slate-400 font-medium text-xs mb-2">
                 <span>📄</span>
@@ -186,7 +163,6 @@
               </div>
               <span id="statCancle" class="text-2xl md:text-3xl font-bold text-slate-800">0</span>
             </div>
-
             <div class="flex flex-col justify-center px-2 md:px-6 pt-2 md:pt-0">
               <div class="flex items-center space-x-1.5 text-slate-400 font-medium text-xs mb-2">
                 <span>📄</span>
@@ -194,7 +170,6 @@
               </div>
               <span id="statSurvey" class="text-2xl md:text-3xl font-bold text-slate-800">0</span>
             </div>
-
             <div class="flex flex-col justify-center px-2 md:px-6 pt-2 md:pt-0">
               <div class="flex items-center space-x-1.5 text-slate-400 font-medium text-xs mb-2">
                 <span class="text-blue-500">🔄</span>
@@ -202,7 +177,6 @@
               </div>
               <span id="statInProgress" class="text-2xl md:text-3xl font-bold text-slate-800">0</span>
             </div>
-
             <div class="flex flex-col justify-center px-2 md:px-6 pt-2 md:pt-0">
               <div class="flex items-center space-x-1.5 text-slate-400 font-medium text-xs mb-2">
                 <span class="text-purple-600">☑️</span>
@@ -212,7 +186,6 @@
             </div>
           </div>
         </div>
-
         <!-- FILTER & SEARCH BAR -->
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
           <div class="flex flex-wrap items-center gap-3 w-full md:w-auto flex-1">
@@ -225,25 +198,21 @@
                 placeholder="Cari di semua kolom..."
               >
             </div>
-
             <div class="w-full sm:w-auto">
               <select id="statusFilter" onchange="handleFilterChange()" class="w-full bg-white border border-slate-300 text-slate-700 rounded-md px-3 py-2 focus:outline-none focus:border-blue-500">
                 <option value="ALL">-- Semua Status --</option>
               </select>
             </div>
-
             <div class="w-full sm:w-auto">
               <select id="layananFilter" onchange="handleFilterChange()" class="w-full bg-white border border-slate-300 text-slate-700 rounded-md px-3 py-2 focus:outline-none focus:border-blue-500">
                 <option value="ALL">-- Semua Layanan PA --</option>
               </select>
             </div>
-
             <div class="w-full sm:w-auto">
               <select id="tahunFilter" onchange="handleFilterChange()" class="w-full bg-white border border-slate-300 text-slate-700 rounded-md px-3 py-2 focus:outline-none focus:border-blue-500">
                 <option value="ALL">-- Semua Tahun Disposisi --</option>
               </select>
             </div>
-
             <button 
               onclick="handleFilterChange()" 
               class="px-5 py-2 bg-[#2d3748] hover:bg-[#1a202c] text-white font-medium rounded-md shadow-sm transition flex items-center justify-center space-x-1.5"
@@ -251,7 +220,6 @@
               <span>Cari Data</span>
             </button>
           </div>
-
           <div class="flex items-center space-x-2 w-full md:w-auto justify-end border-t md:border-t-0 pt-3 md:pt-0 border-slate-100">
             <span class="text-slate-600 font-medium whitespace-nowrap">Tampilkan:</span>
             <select id="pageSizeSelect" onchange="changePageSize()" class="bg-white border border-slate-300 text-slate-700 rounded-md px-3 py-2 focus:outline-none focus:border-blue-500">
@@ -264,7 +232,6 @@
             </select>
           </div>
         </div>
-
         <!-- DATA TABLE -->
         <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
           <div class="overflow-x-auto custom-scrollbar max-h-[calc(100vh-380px)]">
@@ -283,19 +250,14 @@
               </tbody>
             </table>
           </div>
-
           <div class="p-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-500 gap-3">
             <span id="recordCount">Menampilkan 0 data</span>
             <div id="paginationControls" class="flex items-center space-x-1"></div>
           </div>
         </div>
-
       </div>
-
-
       <!-- VIEW 2: DETAIL REKAP PA -->
       <div id="detailView" class="hidden flex-1 p-6 overflow-y-auto custom-scrollbar space-y-6">
-
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 no-print">
           <div>
             <h1 class="text-2xl font-normal text-slate-700 inline-block">Detail Rekap PA</h1>
@@ -316,7 +278,6 @@
             </button>
           </div>
         </div>
-
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
           <!-- CARD LEFT: Informasi Utama -->
           <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
@@ -326,14 +287,12 @@
             <table class="w-full text-xs divide-y divide-slate-100">
               <tbody id="detailMainTable" class="divide-y divide-slate-100"></tbody>
             </table>
-
             <div class="p-4 bg-slate-50/50 border-t border-slate-100 no-print">
               <a href="#" onclick="showDashboardView()" class="text-sky-500 hover:text-sky-600 font-medium text-xs flex items-center space-x-1">
                 <span>&larr; Kembali ke Dashboard</span>
               </a>
             </div>
           </div>
-
           <!-- CARD RIGHT: Rincian Tambahan -->
           <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
             <div class="px-5 py-3.5 bg-slate-50 border-b border-slate-200">
@@ -344,10 +303,7 @@
             </table>
           </div>
         </div>
-
       </div>
-
-
       <!-- VIEW 3: KALKULATOR SPH PENGADAAN -->
       <div id="sphView" class="hidden flex-1 p-6 overflow-y-auto custom-scrollbar space-y-6">
         
@@ -361,7 +317,6 @@
             <span>Reset Input</span>
           </button>
         </div>
-
         <!-- STAT CARDS KALKULATOR -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
@@ -369,29 +324,24 @@
             <p id="sphResMarginBersihCard" class="text-2xl font-extrabold text-emerald-600">0.00%</p>
             <p class="text-[11px] text-slate-400 mt-1">Laba Bersih vs DPP</p>
           </div>
-
           <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
             <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Laba Sth. PPh Final</p>
             <p id="sphResLabaSetelahPphCard" class="text-2xl font-extrabold text-blue-600">Rp 0</p>
             <p class="text-[11px] text-slate-400 mt-1">Laba Kotor - PPh Final</p>
           </div>
-
           <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
             <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Estimasi Diterima</p>
             <p id="sphResEstimasiDiterimaCard" class="text-2xl font-extrabold text-indigo-600">Rp 0</p>
             <p class="text-[11px] text-slate-400 mt-1">Invoice - PPh 22</p>
           </div>
-
           <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
             <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Harga Minimal (BEP)</p>
             <p id="sphResBepCard" class="text-2xl font-extrabold text-amber-600">Rp 0</p>
             <p class="text-[11px] text-slate-400 mt-1">HPS + Biaya Lain</p>
           </div>
         </div>
-
         <!-- LAYOUT GRID FORM & DOKUMEN HASIL -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-
           <!-- FORM INPUT (4 COLS) -->
           <div class="lg:col-span-5 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
             <div class="px-5 py-4 bg-slate-900 text-white flex items-center justify-between">
@@ -401,24 +351,21 @@
               </h3>
               <span class="text-[10px] bg-blue-600/30 text-blue-300 border border-blue-400/30 px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold">Editable</span>
             </div>
-
             <div class="p-5 space-y-4 text-xs">
               <div>
                 <label class="block font-semibold text-slate-700 mb-1">Nilai Kontrak (DPP)</label>
                 <div class="relative">
                   <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 font-medium">Rp</span>
-                  <input type="number" id="sphInputDpp" value="25000000" oninput="calculateSph()" class="w-full pl-9 pr-3 py-2.5 border border-slate-300 rounded-lg text-slate-800 font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                  <input type="number" id="sphInputDpp" value="0" oninput="calculateSph()" class="w-full pl-9 pr-3 py-2.5 border border-slate-300 rounded-lg text-slate-800 font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
               </div>
-
               <div>
                 <label class="block font-semibold text-slate-700 mb-1">Harga Pokok (HPS)</label>
                 <div class="relative">
                   <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 font-medium">Rp</span>
-                  <input type="number" id="sphInputHps" value="19000000" oninput="calculateSph()" class="w-full pl-9 pr-3 py-2.5 border border-slate-300 rounded-lg text-slate-800 font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                  <input type="number" id="sphInputHps" value="0" oninput="calculateSph()" class="w-full pl-9 pr-3 py-2.5 border border-slate-300 rounded-lg text-slate-800 font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
               </div>
-
               <div>
                 <label class="block font-semibold text-slate-700 mb-1">Biaya Lain</label>
                 <div class="relative">
@@ -426,7 +373,6 @@
                   <input type="number" id="sphInputBiayaLain" value="0" oninput="calculateSph()" class="w-full pl-9 pr-3 py-2.5 border border-slate-300 rounded-lg text-slate-800 font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
               </div>
-
               <div class="pt-2 border-t border-slate-100 grid grid-cols-2 gap-3">
                 <div>
                   <label class="block font-semibold text-slate-700 mb-1">Status PKP</label>
@@ -435,19 +381,16 @@
                     <option value="Tidak">Tidak</option>
                   </select>
                 </div>
-
                 <div>
                   <label class="block font-semibold text-slate-700 mb-1">Tarif PPN (%)</label>
                   <input type="number" step="0.1" id="sphInputPpnRate" value="11" oninput="calculateSph()" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-800 font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
               </div>
-
               <div class="grid grid-cols-2 gap-3">
                 <div>
                   <label class="block font-semibold text-slate-700 mb-1">PPh 22 (%)</label>
                   <input type="number" step="0.01" id="sphInputPph22Rate" value="0.25" oninput="calculateSph()" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-800 font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
-
                 <div>
                   <label class="block font-semibold text-slate-700 mb-1">PPh Final (%) <span class="text-slate-400 font-normal">(opsional)</span></label>
                   <input type="number" step="0.1" id="sphInputPphFinalRate" value="2" oninput="calculateSph()" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-800 font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
@@ -455,7 +398,6 @@
               </div>
             </div>
           </div>
-
           <!-- HASIL KALKULASI TABEL (7 COLS) -->
           <div class="lg:col-span-7 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
             <div class="px-5 py-4 bg-slate-800 text-white flex items-center justify-between">
@@ -465,7 +407,6 @@
               </h3>
               <span class="text-xs text-slate-300 font-mono">Excel Model Synced</span>
             </div>
-
             <div class="p-0 overflow-x-auto">
               <table class="w-full text-xs divide-y divide-slate-100">
                 <thead class="bg-slate-50 text-slate-500 font-semibold">
@@ -527,32 +468,24 @@
               </table>
             </div>
           </div>
-
         </div>
-
       </div>
-
     </main>
   </div>
-
-
   <!-- ==================== MODAL FORM (CREATE / EDIT) ==================== -->
   <div id="formModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden">
-
       <div class="px-6 py-4 bg-slate-900 text-white flex justify-between items-center">
         <h3 id="modalTitle" class="font-bold text-base">Tambah Data Pekerjaan Baru</h3>
         <button onclick="closeFormModal()" class="text-slate-400 hover:text-white text-lg">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
-
       <form id="dataForm" onsubmit="handleFormSubmit(event)" class="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-4">
         <input type="hidden" id="formRowId">
         <div id="dynamicFormFields" class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <!-- Form fields di-generate secara dinamis -->
         </div>
-
         <div class="pt-4 border-t border-slate-200 flex justify-end space-x-3">
           <button type="button" onclick="closeFormModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-medium text-xs transition">
             Batal
@@ -563,55 +496,43 @@
           </button>
         </div>
       </form>
-
     </div>
   </div>
-
-
   <!-- ==================== JAVASCRIPT LOGIC ==================== -->
   <script>
     // ================= CONFIGURATION =================
     const API_URL = "https://script.google.com/macros/s/AKfycbw5PNQsGn4SBKHR2LxQqwGt0721uJOCTo2QY0Iic8NaxlMKvMZwqFKPWt8BWDdv_rEb/exec";
-
     let currentUser = null;
     let rawData = [];
     let filteredData = [];
     let tableHeaders = [];
     let selectedDetailRow = null;
-
     let currentPage = 1;
     let pageSize = 10;
-
     const MAIN_KEYS = [
       'ID', 'NAMA PEKERJAAN', 'TGL DISPOSISI', 'SO', 'SID', 'IO', 
       'PTL', 'LAYANAN PA', 'PENARIKAN', 'TESCOM', 'TANGGAL TOKEN KABEL'
     ];
-
     const SECONDARY_KEYS = [
       'TANGGAL BAI', 'PENGAMBILAN KABEL', 'PENGEMBALIAN KABEL', 'LABEL KABEL', 
       'SUBMIT DOK AKTIVASI', 'SUBMIT DOC TESCOM', 'STATUS', 'PKT/BAPS', 
       'PEMBAYARAN MANDOR', 'DIUBAH OLEH'
     ];
-
     // Helper Format Rupiah
     function formatRupiah(number) {
       return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(number || 0);
     }
-
     // Helper Fungsi Cek Kolom/Nilai Tanggal
     function isDateField(key) {
       const lowerKey = String(key).toLowerCase();
       return lowerKey.includes('tgl') || lowerKey.includes('tanggal') || lowerKey.includes('date');
     }
-
     // Helper Konversi Nilai Tanggal ke format YYYY-MM-DD (Untuk Input Date)
     function formatDateForInput(val) {
       if (!val) return '';
       const strVal = String(val).trim();
-
       if (/^\d{4}-\d{2}-\d{2}$/.test(strVal)) return strVal;
       if (strVal.includes('T')) return strVal.split('T')[0];
-
       if (/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}$/.test(strVal)) {
         const parts = strVal.split(/[\/\-]/);
         const day = parts[0].padStart(2, '0');
@@ -619,7 +540,6 @@
         const year = parts[2];
         return `${year}-${month}-${day}`;
       }
-
       const d = new Date(strVal);
       if (!isNaN(d.getTime())) {
         const year = d.getFullYear();
@@ -627,31 +547,25 @@
         const day = String(d.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
       }
-
       return strVal;
     }
-
     // Helper Konversi Nilai Tanggal ke Format DD/MM/YYYY
     function formatDateForDisplay(val) {
       if (!val) return '-';
       const strVal = String(val).trim();
-
       if (/^\d{4}-\d{2}-\d{2}$/.test(strVal)) {
         const [y, m, d] = strVal.split('-');
         return `${d.padStart(2, '0')}/${m.padStart(2, '0')}/${y}`;
       }
-
       if (/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}$/.test(strVal)) {
         const parts = strVal.split(/[\/\-]/);
         return `${parts[0].padStart(2, '0')}/${parts[1].padStart(2, '0')}/${parts[2]}`;
       }
-
       if (strVal.includes('T')) {
         const datePart = strVal.split('T')[0];
         const [y, m, d] = datePart.split('-');
         return `${d.padStart(2, '0')}/${m.padStart(2, '0')}/${y}`;
       }
-
       const parsed = new Date(strVal);
       if (!isNaN(parsed.getTime())) {
         const day = String(parsed.getDate()).padStart(2, '0');
@@ -659,15 +573,12 @@
         const year = parsed.getFullYear();
         return `${day}/${month}/${year}`;
       }
-
       return strVal;
     }
-
     document.addEventListener('DOMContentLoaded', () => {
       checkSession();
       calculateSph();
     });
-
     function checkSession() {
       const savedUser = localStorage.getItem('winsons_user');
       if (savedUser) {
@@ -677,53 +588,42 @@
         showLogin();
       }
     }
-
     function showLogin() {
       document.getElementById('loginView').classList.remove('hidden');
       document.getElementById('mainDashboard').classList.add('hidden');
     }
-
     function showDashboard() {
       document.getElementById('loginView').classList.add('hidden');
       document.getElementById('mainDashboard').classList.remove('hidden');
-
       document.getElementById('userDisplayName').innerText = currentUser.nama || currentUser.username;
       document.getElementById('userDisplayRole').innerText = currentUser.role || 'Operator';
-
       fetchData();
     }
-
     // ================= NAVIGATION VIEWS =================
     function resetNavStyles() {
       const navDataBtn = document.getElementById('navDataBtn');
       const navSphBtn = document.getElementById('navSphBtn');
-
       navDataBtn.className = "w-full flex items-center space-x-3 px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl font-medium text-sm text-left transition";
       navSphBtn.className = "w-full flex items-center space-x-3 px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl font-medium text-sm text-left transition";
     }
-
     function showDashboardView() {
       document.getElementById('tableView').classList.remove('hidden');
       document.getElementById('detailView').classList.add('hidden');
       document.getElementById('sphView').classList.add('hidden');
       selectedDetailRow = null;
-
       resetNavStyles();
       document.getElementById('navDataBtn').className = "w-full flex items-center space-x-3 px-4 py-3 bg-blue-600/20 text-blue-400 rounded-xl font-medium text-sm text-left transition";
     }
-
     function showSphCalculatorView() {
       document.getElementById('tableView').classList.add('hidden');
       document.getElementById('detailView').classList.add('hidden');
       document.getElementById('sphView').classList.remove('hidden');
       selectedDetailRow = null;
-
       resetNavStyles();
       document.getElementById('navSphBtn').className = "w-full flex items-center space-x-3 px-4 py-3 bg-blue-600/20 text-blue-400 rounded-xl font-medium text-sm text-left transition";
       
       calculateSph();
     }
-
     // ================= KALKULATOR SPH LOGIC (EXCEL MODEL) =================
     function calculateSph() {
       const dpp = parseFloat(document.getElementById('sphInputDpp').value) || 0;
@@ -733,50 +633,36 @@
       const ppnRate = (parseFloat(document.getElementById('sphInputPpnRate').value) || 0) / 100;
       const pph22Rate = (parseFloat(document.getElementById('sphInputPph22Rate').value) || 0) / 100;
       const pphFinalRate = (parseFloat(document.getElementById('sphInputPphFinalRate').value) || 0) / 100;
-
       // Excel Formulas:
       // Row 12: Laba Kotor = B3 - B4 - B5
       const labaKotor = dpp - hps - biayaLain;
-
       // Row 13: Margin Kotor = B12 / B3
       const marginKotor = dpp > 0 ? (labaKotor / dpp) * 100 : 0;
-
       // Row 14: PPN Keluaran = IF(B6="Ya", B3*B7, 0)
       const ppnKeluaran = isPkp ? (dpp * ppnRate) : 0;
-
       // Row 15: PPN Masukan = IF(B6="Ya", B4*B7, 0)
       const ppnMasukan = isPkp ? (hps * ppnRate) : 0;
-
       // Row 16: PPN Disetor = B14 - B15
       const ppnDisetor = ppnKeluaran - ppnMasukan;
-
       // Row 17: PPh22 = B3 * B8
       const pph22 = dpp * pph22Rate;
-
       // Row 18: PPh Final = B3 * B9
       const pphFinal = dpp * pphFinalRate;
-
       // Row 19: Invoice = B3 + B14
       const invoice = dpp + ppnKeluaran;
-
       // Row 20: Estimasi Diterima = B19 - B17
       const estimasiDiterima = invoice - pph22;
-
       // Row 21: Laba Setelah PPh Final = B12 - B18
       const labaSetelahPph = labaKotor - pphFinal;
-
       // Row 22: Margin Bersih = B21 / B3
       const marginBersih = dpp > 0 ? (labaSetelahPph / dpp) * 100 : 0;
-
       // Row 23: Harga Minimal (BEP) = B4 + B5
       const bep = hps + biayaLain;
-
       // Render to DOM Cards
       document.getElementById('sphResMarginBersihCard').innerText = marginBersih.toFixed(2) + "%";
       document.getElementById('sphResLabaSetelahPphCard').innerText = formatRupiah(labaSetelahPph);
       document.getElementById('sphResEstimasiDiterimaCard').innerText = formatRupiah(estimasiDiterima);
       document.getElementById('sphResBepCard').innerText = formatRupiah(bep);
-
       // Render to DOM Table
       document.getElementById('sphResLabaKotor').innerText = formatRupiah(labaKotor);
       document.getElementById('sphResMarginKotor').innerText = marginKotor.toFixed(2) + "%";
@@ -791,7 +677,6 @@
       document.getElementById('sphResMarginBersih').innerText = marginBersih.toFixed(2) + "%";
       document.getElementById('sphResBep').innerText = formatRupiah(bep);
     }
-
     function resetSphCalculator() {
       document.getElementById('sphInputDpp').value = 25000000;
       document.getElementById('sphInputHps').value = 19000000;
@@ -802,19 +687,15 @@
       document.getElementById('sphInputPphFinalRate').value = 2;
       calculateSph();
     }
-
     // ================= LOGIN & LOGOUT =================
     async function handleLogin(e) {
       e.preventDefault();
       const userVal = document.getElementById('loginUsername').value.trim();
       const passVal = document.getElementById('loginPassword').value.trim();
       const btn = document.getElementById('loginBtn');
-
       if (!userVal || !passVal) return;
-
       btn.disabled = true;
       btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i><span>Memverifikasi...</span>`;
-
       try {
         const response = await fetch(API_URL, {
           method: 'POST',
@@ -824,9 +705,7 @@
             data: { username: userVal, password: passVal }
           })
         });
-
         const result = await response.json();
-
         if (result.status === 'success') {
           currentUser = result.user;
           localStorage.setItem('winsons_user', JSON.stringify(currentUser));
@@ -849,7 +728,6 @@
         btn.innerHTML = `<span>Masuk Sistem</span><i class="fa-solid fa-arrow-right text-sm"></i>`;
       }
     }
-
     function handleLogout() {
       Swal.fire({
         title: 'Keluar Sesi?',
@@ -866,7 +744,6 @@
         }
       });
     }
-
     // ================= FETCH & RENDER DATA =================
     async function fetchData(forceRefresh = false) {
       const tbody = document.getElementById('tableBody');
@@ -877,11 +754,9 @@
             Memuat data rekapitulasi...
           </td>
         </tr>`;
-
       try {
         const response = await fetch(API_URL);
         const json = await response.json();
-
         if (json.status === 'success' && Array.isArray(json.data)) {
           rawData = json.data;
           populateFilterOptions();
@@ -902,7 +777,6 @@
         tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-rose-500">Terjadi kesalahan koneksi jaringan.</td></tr>`;
       }
     }
-
     function updateSummaryCards() {
       const dataToCount = filteredData;
       const total = dataToCount.length;
@@ -910,10 +784,8 @@
       let countSurvey = 0;
       let countInProgress = 0;
       let countDone = 0;
-
       dataToCount.forEach(item => {
         const st = (item.STATUS || item.Status || '').trim().toLowerCase();
-
         if (st.includes('cancle') || st.includes('cancel')) {
           countCancle++;
         } else if (st.includes('survey')) {
@@ -924,31 +796,24 @@
           countDone++;
         }
       });
-
       document.getElementById('statTotal').innerText = total;
       document.getElementById('statCancle').innerText = countCancle;
       document.getElementById('statSurvey').innerText = countSurvey;
       document.getElementById('statInProgress').innerText = countInProgress;
       document.getElementById('statDone').innerText = countDone;
     }
-
     function populateFilterOptions() {
       if (rawData.length === 0) return;
-
       let keysSet = new Set();
       let statusSet = new Set();
       let layananSet = new Set();
       let tahunSet = new Set();
-
       rawData.forEach(item => {
         Object.keys(item).forEach(k => keysSet.add(k));
-
         const statusVal = item.STATUS || item.Status;
         if (statusVal) statusSet.add(statusVal);
-
         const layananVal = item['LAYANAN PA'] || item['LAYANAN_PA'] || item.Layanan;
         if (layananVal) layananSet.add(layananVal);
-
         const tglDisposisi = item['TGL DISPOSISI'] || item['TGL_DISPOSISI'] || item['TANGGAL DISPOSISI'] || item.TGL_DISPOSISI || '';
         if (tglDisposisi) {
           const matchYear = String(tglDisposisi).match(/\b(20\d{2})\b/);
@@ -962,52 +827,42 @@
           }
         }
       });
-
       tableHeaders = Array.from(keysSet);
-
       const statusFilter = document.getElementById('statusFilter');
       statusFilter.innerHTML = `<option value="ALL">-- Semua Status --</option>`;
       Array.from(statusSet).sort().forEach(st => {
         statusFilter.innerHTML += `<option value="${st}">${st}</option>`;
       });
-
       const layananFilter = document.getElementById('layananFilter');
       layananFilter.innerHTML = `<option value="ALL">-- Semua Layanan PA --</option>`;
       Array.from(layananSet).sort().forEach(ly => {
         layananFilter.innerHTML += `<option value="${ly}">${ly}</option>`;
       });
-
       const tahunFilter = document.getElementById('tahunFilter');
       tahunFilter.innerHTML = `<option value="ALL">-- Semua Tahun Disposisi --</option>`;
       Array.from(tahunSet).sort((a, b) => b - a).forEach(th => {
         tahunFilter.innerHTML += `<option value="${th}">${th}</option>`;
       });
-
       renderFormFields();
     }
-
     function handleFilterChange() {
       currentPage = 1;
       applyFilters();
     }
-
     function applyFilters() {
       const search = document.getElementById('searchInput').value.toLowerCase().trim();
       const selectedStatus = document.getElementById('statusFilter').value;
       const selectedLayanan = document.getElementById('layananFilter').value;
       const selectedTahun = document.getElementById('tahunFilter').value;
-
       filteredData = rawData.filter(item => {
         if (selectedStatus !== 'ALL') {
           const itemStatus = item.STATUS || item.Status || '';
           if (itemStatus !== selectedStatus) return false;
         }
-
         if (selectedLayanan !== 'ALL') {
           const itemLayanan = item['LAYANAN PA'] || item['LAYANAN_PA'] || item.Layanan || '';
           if (itemLayanan !== selectedLayanan) return false;
         }
-
         if (selectedTahun !== 'ALL') {
           const tglDisposisi = item['TGL DISPOSISI'] || item['TGL_DISPOSISI'] || item['TANGGAL DISPOSISI'] || item.TGL_DISPOSISI || '';
           let itemYear = '';
@@ -1022,20 +877,16 @@
           }
           if (itemYear !== selectedTahun) return false;
         }
-
         if (search) {
           return Object.values(item).some(val => 
             String(val).toLowerCase().includes(search)
           );
         }
-
         return true;
       });
-
       updateSummaryCards();
       renderTable();
     }
-
     function changePageSize() {
       const val = document.getElementById('pageSizeSelect').value;
       if (val === 'ALL') {
@@ -1046,34 +897,27 @@
       currentPage = 1;
       renderTable();
     }
-
     function renderTable() {
       const tbody = document.getElementById('tableBody');
       tbody.innerHTML = '';
-
       if (filteredData.length === 0) {
         tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-400">Tidak ada data yang cocok dengan kriteria pencarian.</td></tr>`;
         document.getElementById('recordCount').innerText = 'Menampilkan 0 data';
         document.getElementById('paginationControls').innerHTML = '';
         return;
       }
-
       const totalItems = filteredData.length;
       const totalPages = Math.ceil(totalItems / pageSize);
       if (currentPage > totalPages) currentPage = totalPages;
-
       const startIndex = (currentPage - 1) * pageSize;
       const endIndex = Math.min(startIndex + pageSize, totalItems);
       const pageData = filteredData.slice(startIndex, endIndex);
-
       document.getElementById('recordCount').innerText = `Menampilkan ${startIndex + 1} - ${endIndex} dari ${totalItems} data`;
-
       pageData.forEach((row, idx) => {
         const id = row['ID'] || row['id'] || (startIndex + idx + 1);
         const namaPekerjaan = row['NAMA PEKERJAAN'] || row['NAMA_PEKERJAAN'] || row['Pekerjaan'] || '-';
         const so = row['SO'] || '-';
         const ptl = row['PTL'] || '-';
-
         const tr = document.createElement('tr');
         tr.className = "hover:bg-slate-50 border-b border-slate-100 transition";
         tr.innerHTML = `
@@ -1089,23 +933,18 @@
         `;
         tbody.appendChild(tr);
       });
-
       renderPaginationControls(totalPages);
     }
-
     function renderPaginationControls(totalPages) {
       const container = document.getElementById('paginationControls');
       container.innerHTML = '';
-
       if (totalPages <= 1) return;
-
       const prevBtn = document.createElement('button');
       prevBtn.className = `px-3 py-1 rounded-md border border-slate-200 text-xs font-medium ${currentPage === 1 ? 'opacity-50 cursor-not-allowed bg-slate-100 text-slate-400' : 'bg-white hover:bg-slate-50 text-slate-700'}`;
       prevBtn.innerHTML = '&larr; Prev';
       prevBtn.disabled = currentPage === 1;
       prevBtn.onclick = () => { if (currentPage > 1) { currentPage--; renderTable(); } };
       container.appendChild(prevBtn);
-
       for (let i = 1; i <= totalPages; i++) {
         if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
           const pBtn = document.createElement('button');
@@ -1120,7 +959,6 @@
           container.appendChild(dots);
         }
       }
-
       const nextBtn = document.createElement('button');
       nextBtn.className = `px-3 py-1 rounded-md border border-slate-200 text-xs font-medium ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed bg-slate-100 text-slate-400' : 'bg-white hover:bg-slate-50 text-slate-700'}`;
       nextBtn.innerHTML = 'Next &rarr;';
@@ -1128,26 +966,20 @@
       nextBtn.onclick = () => { if (currentPage < totalPages) { currentPage++; renderTable(); } };
       container.appendChild(nextBtn);
     }
-
     // ================= DETAIL VIEW LOGIC =================
     function viewDetail(filteredIdx) {
       selectedDetailRow = filteredData[filteredIdx];
       if (!selectedDetailRow) return;
-
       document.getElementById('tableView').classList.add('hidden');
       document.getElementById('sphView').classList.add('hidden');
       document.getElementById('detailView').classList.remove('hidden');
-
       const mainTbody = document.getElementById('detailMainTable');
       const secondaryTbody = document.getElementById('detailSecondaryTable');
-
       mainTbody.innerHTML = '';
       secondaryTbody.innerHTML = '';
-
       MAIN_KEYS.forEach(key => {
         let val = selectedDetailRow[key] !== undefined ? selectedDetailRow[key] : '-';
         if (isDateField(key)) val = formatDateForDisplay(val);
-
         const tr = document.createElement('tr');
         tr.className = "hover:bg-slate-50";
         tr.innerHTML = `
@@ -1156,11 +988,9 @@
         `;
         mainTbody.appendChild(tr);
       });
-
       SECONDARY_KEYS.forEach(key => {
         let val = selectedDetailRow[key] !== undefined ? selectedDetailRow[key] : '-';
         if (isDateField(key)) val = formatDateForDisplay(val);
-
         const tr = document.createElement('tr');
         tr.className = "hover:bg-slate-50";
         tr.innerHTML = `
@@ -1170,18 +1000,14 @@
         secondaryTbody.appendChild(tr);
       });
     }
-
     // ================= CRUD & FORM MODAL =================
     function renderFormFields() {
       const container = document.getElementById('dynamicFormFields');
       container.innerHTML = '';
-
       const fields = tableHeaders.length > 0 ? tableHeaders : [...MAIN_KEYS, ...SECONDARY_KEYS];
-
       fields.forEach(field => {
         const isDate = isDateField(field);
         const inputType = isDate ? 'date' : 'text';
-
         const wrapper = document.createElement('div');
         wrapper.innerHTML = `
           <label class="block text-xs font-semibold text-slate-600 mb-1">${field}</label>
@@ -1195,59 +1021,84 @@
         container.appendChild(wrapper);
       });
     }
-
+    
     function openFormModal(data = null) {
       const modal = document.getElementById('formModal');
       const title = document.getElementById('modalTitle');
       const formRowId = document.getElementById('formRowId');
-
+      
       if (data) {
+        // KONDISI EDIT DATA
         title.innerText = `Edit Data Pekerjaan (ID: ${data.ID || data.id || '-'})`;
         formRowId.value = data.ID || data.id || '';
-
+        
         document.querySelectorAll('.form-field-input').forEach(input => {
           const key = input.getAttribute('data-key');
           let val = data[key] !== undefined ? data[key] : '';
+          
           if (isDateField(key)) {
             input.value = formatDateForInput(val);
           } else {
             input.value = val;
           }
+
+          // Kunci input ID dan DIUBAH OLEH agar tidak bisa diketik saat edit
+          if (key === 'ID' || key === 'DIUBAH OLEH') {
+            input.setAttribute('readonly', true);
+            input.classList.add('bg-slate-200', 'cursor-not-allowed', 'text-slate-500');
+            input.classList.remove('bg-slate-50', 'bg-white');
+          }
         });
       } else {
+        // KONDISI TAMBAH DATA BARU
         title.innerText = 'Tambah Data Pekerjaan Baru';
         formRowId.value = '';
-        document.querySelectorAll('.form-field-input').forEach(input => input.value = '');
-      }
+        
+        document.querySelectorAll('.form-field-input').forEach(input => {
+          const key = input.getAttribute('data-key');
+          input.value = '';
 
+          // Otomatisasi untuk Tambah Data
+          if (key === 'ID') {
+            const randomCode = 'WNS-' + Date.now().toString().slice(-6);
+            input.value = randomCode;
+            input.setAttribute('readonly', true);
+            input.classList.add('bg-slate-200', 'cursor-not-allowed', 'text-slate-500');
+            input.classList.remove('bg-slate-50', 'bg-white');
+          } else if (key === 'DIUBAH OLEH') {
+            input.value = currentUser ? (currentUser.nama || currentUser.username) : 'System';
+            input.setAttribute('readonly', true);
+            input.classList.add('bg-slate-200', 'cursor-not-allowed', 'text-slate-500');
+            input.classList.remove('bg-slate-50', 'bg-white');
+          } else {
+            input.removeAttribute('readonly');
+            input.classList.remove('bg-slate-200', 'cursor-not-allowed', 'text-slate-500');
+            input.classList.add('bg-slate-50');
+          }
+        });
+      }
       modal.classList.remove('hidden');
     }
 
     function closeFormModal() {
       document.getElementById('formModal').classList.add('hidden');
     }
-
     function editCurrentDetail() {
       if (selectedDetailRow) openFormModal(selectedDetailRow);
     }
-
     async function handleFormSubmit(e) {
       e.preventDefault();
       const saveBtn = document.getElementById('saveBtn');
       const rowId = document.getElementById('formRowId').value;
       const isEdit = Boolean(rowId);
-
       const formDataObj = {};
       document.querySelectorAll('.form-field-input').forEach(input => {
         const key = input.getAttribute('data-key');
         formDataObj[key] = input.value;
       });
-
-      formDataObj['DIUBAH OLEH'] = currentUser.nama || currentUser.username;
-
+      formDataObj['DIUBAH OLEH'] = currentUser ? (currentUser.nama || currentUser.username) : 'System';
       saveBtn.disabled = true;
       saveBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i><span>Menyimpan...</span>`;
-
       try {
         const response = await fetch(API_URL, {
           method: 'POST',
@@ -1257,9 +1108,7 @@
             data: formDataObj
           })
         });
-
         const result = await response.json();
-
         if (result.status === 'success') {
           Swal.fire({
             icon: 'success',
@@ -1283,12 +1132,9 @@
         saveBtn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i><span>Simpan Data</span>`;
       }
     }
-
     async function deleteCurrentDetail() {
       if (!selectedDetailRow) return;
-
       const rowId = selectedDetailRow.ID || selectedDetailRow.id;
-
       Swal.fire({
         title: 'Hapus Data Pekerjaan?',
         text: `Data dengan ID ${rowId} akan dihapus secara permanen.`,
@@ -1307,9 +1153,7 @@
                 data: { ID: rowId }
               })
             });
-
             const resJson = await response.json();
-
             if (resJson.status === 'success') {
               Swal.fire({
                 icon: 'success',
@@ -1329,18 +1173,15 @@
         }
       });
     }
-
     // ================= EXPORT EXCEL =================
     function exportToExcel() {
       if (filteredData.length === 0) {
         Swal.fire('Informasi', 'Tidak ada data untuk diexport', 'info');
         return;
       }
-
       const worksheet = XLSX.utils.json_to_sheet(filteredData);
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Data Pekerjaan");
-
       const today = new Date().toISOString().split('T')[0];
       XLSX.writeFile(workbook, `Rekap_Pekerjaan_Winsons_${today}.xlsx`);
     }
