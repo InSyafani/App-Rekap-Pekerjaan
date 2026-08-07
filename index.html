@@ -176,7 +176,7 @@
 
             <div class="flex flex-col justify-center px-2 md:px-6 pt-2 md:pt-0">
               <div class="flex items-center space-x-1.5 text-slate-400 font-medium text-xs mb-2">
-                <span>📄</span>
+                <span>⛔ </span>
                 <span>Cancle</span>
               </div>
               <span id="statCancle" class="text-2xl md:text-3xl font-bold text-slate-800">0</span>
@@ -184,7 +184,7 @@
 
             <div class="flex flex-col justify-center px-2 md:px-6 pt-2 md:pt-0">
               <div class="flex items-center space-x-1.5 text-slate-400 font-medium text-xs mb-2">
-                <span>📄</span>
+                <span>📌</span>
                 <span>Survey</span>
               </div>
               <span id="statSurvey" class="text-2xl md:text-3xl font-bold text-slate-800">0</span>
@@ -192,15 +192,23 @@
 
             <div class="flex flex-col justify-center px-2 md:px-6 pt-2 md:pt-0">
               <div class="flex items-center space-x-1.5 text-slate-400 font-medium text-xs mb-2">
-                <span class="text-blue-500">🔄</span>
+                <span class="text-blue-500">⚡</span>
                 <span class="text-blue-600">In Progress</span>
               </div>
               <span id="statInProgress" class="text-2xl md:text-3xl font-bold text-slate-800">0</span>
             </div>
 
             <div class="flex flex-col justify-center px-2 md:px-6 pt-2 md:pt-0">
+                        <div class="flex items-center space-x-1.5 text-slate-400 font-medium text-xs mb-2">
+                          <span class="text-yellow-600">📕</span>
+                          <span class="text-yellow-600">Dokumen</span>
+                        </div>
+                        <span id="statDokumen" class="text-2xl md:text-3xl font-bold text-slate-800">0</span>
+            </div>          
+           
+            <div class="flex flex-col justify-center px-2 md:px-6 pt-2 md:pt-0">
               <div class="flex items-center space-x-1.5 text-slate-400 font-medium text-xs mb-2">
-                <span class="text-purple-600">☑️</span>
+                <span class="text-purple-600">✅</span>
                 <span class="text-purple-600">Done</span>
               </div>
               <span id="statDone" class="text-2xl md:text-3xl font-bold text-slate-800">0</span>
@@ -297,7 +305,7 @@
             <span class="text-xl italic font-light text-slate-400 ml-2">Informasi Lengkap</span>
           </div>
           <div class="flex items-center space-x-2">
-
+           
             <button onclick="editCurrentDetail()" class="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white rounded-lg text-xs font-semibold shadow flex items-center space-x-1.5 transition">
               <i class="fa-solid fa-pen-to-square"></i>
               <span>Edit</span>
@@ -612,6 +620,7 @@
       let countCancle = 0;
       let countSurvey = 0;
       let countInProgress = 0;
+      let countDokumen = 0;
       let countDone = 0;
 
       dataToCount.forEach(item => {
@@ -623,7 +632,9 @@
           countSurvey++;
         } else if (st.includes('progress') || st.includes('in progress') || st.includes('progres')) {
           countInProgress++;
-        } else if (st.includes('done') || st.includes('selesai')) {
+        }else if (st.includes('dokumen')) {
+          countDokumen++;
+        }else if (st.includes('done') || st.includes('selesai')) {
           countDone++;
         }
       });
@@ -632,6 +643,7 @@
       document.getElementById('statCancle').innerText = countCancle;
       document.getElementById('statSurvey').innerText = countSurvey;
       document.getElementById('statInProgress').innerText = countInProgress;
+      document.getElementById('statDokumen').innerText = countDokumen;
       document.getElementById('statDone').innerText = countDone;
     }
 
@@ -868,7 +880,7 @@
       }
 
       // Daftar pilihan opsi untuk dropdown Status (sesuaikan dengan isi dropdown di spreadsheet Anda)
-      const statusOptions = ['Cancle', 'Survey', 'In Progress', 'Done'];
+      const statusOptions = ['Cancle', 'Survey', 'In Progress','Dokumen', 'Done'];
 
       keysToRender.forEach(key => {
         const upperKey = String(key).toUpperCase();
@@ -970,12 +982,38 @@
 
         const result = await response.json();
 
-        if (result.status === 'success') {
-          Swal.fire('Berhasil', 'Data berhasil disimpan!', 'success');
-          closeFormModal();
-          fetchData(true);
-          if (actionType === 'update') showDashboardView();
-        } else {
+       
+      if (result.status === 'success') {
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil',
+          text: 'Data berhasil disimpan!',
+          timer: 1200,
+          showConfirmButton: false
+        });
+      
+        closeFormModal();
+      
+        // Simpan ID data yang sedang diedit
+        const updatedRowId = rowId;
+      
+        // Ambil data terbaru dari server
+        await fetchData(true);
+      
+        // Jika yang dilakukan adalah EDIT
+        if (actionType === 'update') {
+          // Cari data yang baru saja diperbarui
+          const updatedRow = rawData.find(
+            item => String(item.ID || item.id) === String(updatedRowId)
+          );
+      
+          // Tampilkan kembali halaman Detail dengan data terbaru
+          if (updatedRow) {
+            selectedDetailRow = updatedRow;
+            viewDetail(updatedRowId);
+          }
+        }
+      }else {
           Swal.fire('Gagal', result.message || 'Gagal menyimpan data.', 'error');
         }
       } catch (err) {
