@@ -1,533 +1,2831 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kalkulator SPH Pengadaan</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
+<title>Kalkulator SPH Pengadaan</title>
 
-  <!-- Font Awesome -->
-  <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
 
-  <style>
-    body {
-      font-family: Arial, Helvetica, sans-serif;
-    }
-  </style>
+<link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+>
+
+<style>
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    opacity: 1;
+}
+
+.table-input {
+    width: 100%;
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+    padding: 7px 8px;
+    font-size: 12px;
+    outline: none;
+}
+
+.table-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59,130,246,.12);
+}
+
+.money {
+    text-align: right;
+}
+
+.status-box {
+    transition: .2s;
+}
+
+</style>
+
 </head>
+
 
 <body class="bg-slate-100 min-h-screen">
 
-  <main class="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
 
-    <!-- HEADER -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-      <div>
+<main class="max-w-[1700px] mx-auto p-4 sm:p-6 space-y-6">
+
+
+<!-- =====================================================
+HEADER
+===================================================== -->
+
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+
+    <div>
+
         <h1 class="text-2xl font-bold text-slate-800">
-          Kalkulator SPH Pengadaan
+            Kalkulator SPH Pengadaan
         </h1>
-        <p class="text-xs text-slate-500">
-          Hitung estimasi margin, PPN, PPh, invoice, dan break-even point (BEP)
-        </p>
-      </div>
 
-      <button
+        <p class="text-xs text-slate-500 mt-1">
+            Analisis Barang/Jasa • Quantity • HPP • Margin • BEP • Pajak
+        </p>
+
+    </div>
+
+
+    <button
         onclick="resetSphCalculator()"
-        class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition">
-        <i class="fa-solid fa-rotate-left"></i>
-        <span>Reset Input</span>
-      </button>
+        class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-semibold">
+
+        <i class="fa-solid fa-rotate-left mr-1"></i>
+
+        Reset Input
+
+    </button>
+
+</div>
+
+
+
+<!-- =====================================================
+STATUS SPH
+===================================================== -->
+
+<div
+    id="statusBox"
+    class="status-box bg-slate-800 text-white rounded-xl shadow-sm p-5"
+>
+
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+
+        <div>
+
+            <p class="text-[11px] uppercase tracking-wider text-slate-300 font-semibold">
+                Status Pengajuan SPH
+            </p>
+
+            <p
+                id="statusTitle"
+                class="text-2xl font-extrabold mt-1"
+            >
+                Belum Ada Data
+            </p>
+
+            <p
+                id="statusDescription"
+                class="text-xs text-slate-300 mt-1"
+            >
+                Masukkan barang/jasa, quantity, harga beli, dan harga jual.
+            </p>
+
+        </div>
+
+
+        <div class="text-left lg:text-right">
+
+            <p class="text-[11px] text-slate-300">
+                Margin Bersih
+            </p>
+
+            <p
+                id="statusMargin"
+                class="text-3xl font-extrabold"
+            >
+                0.00%
+            </p>
+
+        </div>
+
     </div>
 
-    <!-- STAT CARDS -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+</div>
 
-      <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
-        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
-          Margin Bersih
-        </p>
-        <p id="sphResMarginBersihCard"
-           class="text-2xl font-extrabold text-emerald-600">
-          0.00%
-        </p>
-        <p class="text-[11px] text-slate-400 mt-1">
-          Laba Bersih vs DPP
-        </p>
-      </div>
 
-      <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
-        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
-          Laba Sth. PPh Final
-        </p>
-        <p id="sphResLabaSetelahPphCard"
-           class="text-2xl font-extrabold text-blue-600">
-          Rp 0
-        </p>
-        <p class="text-[11px] text-slate-400 mt-1">
-          Laba Kotor - PPh Final
-        </p>
-      </div>
 
-      <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
-        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
-          Estimasi Diterima
-        </p>
-        <p id="sphResEstimasiDiterimaCard"
-           class="text-2xl font-extrabold text-indigo-600">
-          Rp 0
-        </p>
-        <p class="text-[11px] text-slate-400 mt-1">
-          Invoice - PPh 22
-        </p>
-      </div>
+<!-- =====================================================
+STAT CARDS
+===================================================== -->
 
-      <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
-        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
-          Harga Minimal (BEP)
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+
+
+    <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+
+        <p class="text-[11px] font-semibold text-slate-500 uppercase">
+            Total HPP
         </p>
-        <p id="sphResBepCard"
-           class="text-2xl font-extrabold text-amber-600">
-          Rp 0
+
+        <p
+            id="cardHpp"
+            class="text-lg font-extrabold text-slate-800 mt-1"
+        >
+            Rp 0
         </p>
-        <p class="text-[11px] text-slate-400 mt-1">
-          HPS + Biaya Lain
-        </p>
-      </div>
 
     </div>
 
-    <!-- FORM + HASIL -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-      <!-- INPUT -->
-      <div class="lg:col-span-5 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
 
-        <div class="px-5 py-4 bg-slate-900 text-white flex items-center justify-between">
-          <h3 class="font-bold text-sm flex items-center space-x-2">
-            <i class="fa-solid fa-sliders text-blue-400"></i>
-            <span>PARAMETER INPUT</span>
-          </h3>
+        <p class="text-[11px] font-semibold text-slate-500 uppercase">
+            Total Modal
+        </p>
 
-          <span class="text-[10px] bg-blue-600/30 text-blue-300 border border-blue-400/30 px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold">
-            Editable
-          </span>
-        </div>
+        <p
+            id="cardModal"
+            class="text-lg font-extrabold text-slate-800 mt-1"
+        >
+            Rp 0
+        </p>
 
-        <div class="p-5 space-y-4 text-xs">
+    </div>
 
-          <!-- DPP -->
-          <div>
-            <label class="block font-semibold text-slate-700 mb-1">
-              Nilai Kontrak (DPP)
-            </label>
-            <div class="relative">
-              <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 font-medium">
-                Rp
-              </span>
-              <input
-                type="text"
-                inputmode="numeric"
-                id="sphInputDpp"
-                value="0"
-                autocomplete="off"
-                oninput="formatMoneyInput(this); calculateSph()"
-                class="w-full pl-9 pr-3 py-2.5 border border-slate-300 rounded-lg text-slate-800 font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
-            </div>
-          </div>
 
-          <!-- HPS -->
-          <div>
-            <label class="block font-semibold text-slate-700 mb-1">
-              Harga Pokok (HPS)
-            </label>
-            <div class="relative">
-              <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 font-medium">
-                Rp
-              </span>
-              <input
-                type="text"
-                inputmode="numeric"
-                id="sphInputHps"
-                value="0"
-                autocomplete="off"
-                oninput="formatMoneyInput(this); calculateSph()"
-                class="w-full pl-9 pr-3 py-2.5 border border-slate-300 rounded-lg text-slate-800 font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
-            </div>
-          </div>
+    <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
 
-          <!-- BIAYA LAIN -->
-          <div>
-            <label class="block font-semibold text-slate-700 mb-1">
-              Biaya Lain
-            </label>
-            <div class="relative">
-              <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 font-medium">
-                Rp
-              </span>
-              <input
-                type="text"
-                inputmode="numeric"
-                id="sphInputBiayaLain"
-                value="0"
-                autocomplete="off"
-                oninput="formatMoneyInput(this); calculateSph()"
-                class="w-full pl-9 pr-3 py-2.5 border border-slate-300 rounded-lg text-slate-800 font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
-            </div>
-          </div>
+        <p class="text-[11px] font-semibold text-slate-500 uppercase">
+            DPP SPH
+        </p>
 
-          <!-- PKP + PPN -->
-          <div class="pt-2 border-t border-slate-100 grid grid-cols-2 gap-3">
+        <p
+            id="cardDpp"
+            class="text-lg font-extrabold text-blue-700 mt-1"
+        >
+            Rp 0
+        </p>
 
-            <div>
-              <label class="block font-semibold text-slate-700 mb-1">
-                Status PKP
-              </label>
-              <select
-                id="sphInputPkp"
-                onchange="calculateSph()"
-                class="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-800 font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
-                <option value="Ya" selected>Ya</option>
-                <option value="Tidak">Tidak</option>
-              </select>
-            </div>
+    </div>
 
-            <div>
-              <label class="block font-semibold text-slate-700 mb-1">
-                Tarif PPN (%)
-              </label>
-              <input
-                type="number"
-                step="0.1"
-                id="sphInputPpnRate"
-                value="11"
-                min="0"
-                oninput="calculateSph()"
-                class="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-800 font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
-            </div>
 
-          </div>
+    <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
 
-          <!-- PPH -->
-          <div class="grid grid-cols-2 gap-3">
+        <p class="text-[11px] font-semibold text-slate-500 uppercase">
+            Laba Bersih
+        </p>
 
-            <div>
-              <label class="block font-semibold text-slate-700 mb-1">
-                PPh 22 (%)
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                id="sphInputPph22Rate"
-                value="0.25"
-                min="0"
-                oninput="calculateSph()"
-                class="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-800 font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
-            </div>
+        <p
+            id="cardLaba"
+            class="text-lg font-extrabold text-emerald-600 mt-1"
+        >
+            Rp 0
+        </p>
 
-            <div>
-              <label class="block font-semibold text-slate-700 mb-1">
-                PPh Final (%)
-                <span class="text-slate-400 font-normal">(opsional)</span>
-              </label>
-              <input
-                type="number"
-                step="0.1"
-                id="sphInputPphFinalRate"
-                value="2"
-                min="0"
-                oninput="calculateSph()"
-                class="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-800 font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
-            </div>
+    </div>
 
-          </div>
+
+    <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+
+        <p class="text-[11px] font-semibold text-slate-500 uppercase">
+            Margin Bersih
+        </p>
+
+        <p
+            id="cardMargin"
+            class="text-lg font-extrabold text-emerald-600 mt-1"
+        >
+            0.00%
+        </p>
+
+    </div>
+
+
+    <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+
+        <p class="text-[11px] font-semibold text-slate-500 uppercase">
+            BEP
+        </p>
+
+        <p
+            id="cardBep"
+            class="text-lg font-extrabold text-amber-600 mt-1"
+        >
+            Rp 0
+        </p>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+DAFTAR BARANG / JASA
+===================================================== -->
+
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+
+
+    <div class="px-5 py-4 bg-slate-900 text-white flex items-center justify-between">
+
+        <div>
+
+            <h3 class="font-bold text-sm">
+
+                <i class="fa-solid fa-boxes-stacked text-blue-400 mr-2"></i>
+
+                DAFTAR BARANG / JASA
+
+            </h3>
+
+            <p class="text-[10px] text-slate-400 mt-1">
+                Tambahkan seluruh barang dan jasa yang masuk dalam SPH.
+            </p>
 
         </div>
-      </div>
 
-      <!-- HASIL -->
-      <div class="lg:col-span-7 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
 
-        <div class="px-5 py-4 bg-slate-800 text-white flex items-center justify-between">
-          <h3 class="font-bold text-sm flex items-center space-x-2">
-            <i class="fa-solid fa-chart-pie text-emerald-400"></i>
-            <span>RINCIAN HASIL ANALISIS SPH</span>
-          </h3>
+        <button
+            onclick="addItem()"
+            class="px-3 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-xs font-semibold"
+        >
 
-          <span class="text-xs text-slate-300 font-mono">
-            Excel Model Synced
-          </span>
-        </div>
+            <i class="fa-solid fa-plus mr-1"></i>
 
-        <div class="p-0 overflow-x-auto">
+            Tambah Item
 
-          <table class="w-full text-xs divide-y divide-slate-100">
+        </button>
 
-            <thead class="bg-slate-50 text-slate-500 font-semibold">
-              <tr>
-                <th class="px-5 py-3 text-left">Komponen Analisis</th>
-                <th class="px-5 py-3 text-right">Nilai Kalkulasi</th>
-              </tr>
+    </div>
+
+
+
+    <div class="overflow-x-auto">
+
+        <table class="w-full text-xs min-w-[1450px]">
+
+            <thead class="bg-slate-50 text-slate-500">
+
+                <tr>
+
+                    <th class="px-3 py-3 text-center w-12">
+                        No
+                    </th>
+
+                    <th class="px-3 py-3 text-left w-28">
+                        Jenis
+                    </th>
+
+                    <th class="px-3 py-3 text-left min-w-[220px]">
+                        Barang / Jasa
+                    </th>
+
+                    <th class="px-3 py-3 text-center w-24">
+                        Qty
+                    </th>
+
+                    <th class="px-3 py-3 text-left w-24">
+                        Satuan
+                    </th>
+
+                    <th class="px-3 py-3 text-right w-36">
+                        Harga Beli / Unit
+                    </th>
+
+                    <th class="px-3 py-3 text-right w-40">
+                        Total HPP
+                    </th>
+
+                    <th class="px-3 py-3 text-right w-36">
+                        Harga Jual / Unit
+                    </th>
+
+                    <th class="px-3 py-3 text-right w-40">
+                        Total Jual
+                    </th>
+
+                    <th class="px-3 py-3 text-right w-32">
+                        Laba
+                    </th>
+
+                    <th class="px-3 py-3 text-right w-24">
+                        Margin
+                    </th>
+
+                    <th class="px-3 py-3 text-right w-24">
+                        Markup
+                    </th>
+
+                    <th class="px-3 py-3 text-center w-16">
+                        #
+                    </th>
+
+                </tr>
+
             </thead>
 
-            <tbody class="divide-y divide-slate-100 font-medium">
 
-              <tr>
-                <td class="px-5 py-3 text-slate-700 font-semibold">Laba Kotor</td>
-                <td id="sphResLabaKotor" class="px-5 py-3 text-right font-bold text-slate-800">Rp 0</td>
-              </tr>
+            <tbody id="itemTableBody"></tbody>
 
-              <tr>
-                <td class="px-5 py-3 text-slate-600">Margin Kotor</td>
-                <td id="sphResMarginKotor" class="px-5 py-3 text-right font-semibold text-slate-700">0.00%</td>
-              </tr>
 
-              <tr class="bg-slate-50/30">
-                <td class="px-5 py-3 text-slate-600">PPN Keluaran</td>
-                <td id="sphResPpnKeluaran" class="px-5 py-3 text-right text-slate-700">Rp 0</td>
-              </tr>
+            <tfoot class="bg-slate-100 font-bold">
 
-              <tr class="bg-slate-50/30">
-                <td class="px-5 py-3 text-slate-600">PPN Masukan</td>
-                <td id="sphResPpnMasukan" class="px-5 py-3 text-right text-slate-700">Rp 0</td>
-              </tr>
+                <tr>
 
-              <tr class="bg-blue-50/20">
-                <td class="px-5 py-3 text-blue-900 font-semibold">PPN Disetor</td>
-                <td id="sphResPpnDisetor" class="px-5 py-3 text-right font-bold text-blue-700">Rp 0</td>
-              </tr>
+                    <td colspan="3" class="px-3 py-3 text-right">
+                        TOTAL
+                    </td>
 
-              <tr>
-                <td class="px-5 py-3 text-slate-600">PPh 22</td>
-                <td id="sphResPph22" class="px-5 py-3 text-right text-slate-700">Rp 0</td>
-              </tr>
+                    <td
+                        id="totalQty"
+                        class="px-3 py-3 text-center"
+                    >
+                        0
+                    </td>
 
-              <tr>
-                <td class="px-5 py-3 text-slate-600">PPh Final</td>
-                <td id="sphResPphFinal" class="px-5 py-3 text-right text-slate-700">Rp 0</td>
-              </tr>
+                    <td></td>
 
-              <tr class="bg-slate-100/50">
-                <td class="px-5 py-3 text-slate-800 font-bold">Total Invoice</td>
-                <td id="sphResInvoice" class="px-5 py-3 text-right font-bold text-slate-900">Rp 0</td>
-              </tr>
+                    <td></td>
 
-              <tr class="bg-indigo-50/30">
-                <td class="px-5 py-3 text-indigo-950 font-bold">Estimasi Diterima</td>
-                <td id="sphResEstimasiDiterima" class="px-5 py-3 text-right font-bold text-indigo-700">Rp 0</td>
-              </tr>
+                    <td
+                        id="totalHpp"
+                        class="px-3 py-3 text-right"
+                    >
+                        Rp 0
+                    </td>
 
-              <tr class="bg-emerald-50/30">
-                <td class="px-5 py-3 text-emerald-950 font-bold">Laba Setelah PPh Final</td>
-                <td id="sphResLabaSetelahPph" class="px-5 py-3 text-right font-bold text-emerald-700">Rp 0</td>
-              </tr>
+                    <td></td>
 
-              <tr>
-                <td class="px-5 py-3 text-slate-700 font-semibold">Margin Bersih</td>
-                <td id="sphResMarginBersih" class="px-5 py-3 text-right font-bold text-emerald-700">0.00%</td>
-              </tr>
+                    <td
+                        id="totalJualItem"
+                        class="px-3 py-3 text-right"
+                    >
+                        Rp 0
+                    </td>
 
-              <tr class="bg-amber-50/30">
-                <td class="px-5 py-3 text-amber-900 font-bold">Harga Minimal (BEP)</td>
-                <td id="sphResBep" class="px-5 py-3 text-right font-bold text-amber-700">Rp 0</td>
-              </tr>
+                    <td
+                        id="totalLabaItem"
+                        class="px-3 py-3 text-right text-emerald-700"
+                    >
+                        Rp 0
+                    </td>
 
-            </tbody>
-          </table>
+                    <td
+                        id="totalMarginItem"
+                        class="px-3 py-3 text-right text-emerald-700"
+                    >
+                        0.00%
+                    </td>
+
+                    <td
+                        id="totalMarkupItem"
+                        class="px-3 py-3 text-right text-blue-700"
+                    >
+                        0.00%
+                    </td>
+
+                    <td></td>
+
+                </tr>
+
+            </tfoot>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+TIGA PANEL
+===================================================== -->
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+
+
+<!-- =====================================================
+BIAYA TAMBAHAN
+===================================================== -->
+
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+
+
+    <div class="px-5 py-4 bg-slate-900 text-white">
+
+        <h3 class="font-bold text-sm">
+
+            <i class="fa-solid fa-money-bill-transfer text-blue-400 mr-2"></i>
+
+            BIAYA TAMBAHAN
+
+        </h3>
+
+    </div>
+
+
+    <div class="p-5 space-y-4 text-xs">
+
+
+        <div>
+
+            <label class="block font-semibold text-slate-700 mb-1">
+                Ongkir
+            </label>
+
+            <input
+                id="biayaOngkir"
+                type="text"
+                value="0"
+                class="table-input money"
+                oninput="formatMoneyInput(this); calculateSph()"
+            >
 
         </div>
-      </div>
+
+
+        <div>
+
+            <label class="block font-semibold text-slate-700 mb-1">
+                Instalasi / Teknisi
+            </label>
+
+            <input
+                id="biayaInstalasi"
+                type="text"
+                value="0"
+                class="table-input money"
+                oninput="formatMoneyInput(this); calculateSph()"
+            >
+
+        </div>
+
+
+        <div>
+
+            <label class="block font-semibold text-slate-700 mb-1">
+                Operasional
+            </label>
+
+            <input
+                id="biayaOperasional"
+                type="text"
+                value="0"
+                class="table-input money"
+                oninput="formatMoneyInput(this); calculateSph()"
+            >
+
+        </div>
+
+
+        <div>
+
+            <label class="block font-semibold text-slate-700 mb-1">
+                Biaya Lain
+            </label>
+
+            <input
+                id="biayaLain"
+                type="text"
+                value="0"
+                class="table-input money"
+                oninput="formatMoneyInput(this); calculateSph()"
+            >
+
+        </div>
+
+
+        <div class="border-t pt-3 flex justify-between">
+
+            <span class="font-semibold text-slate-600">
+                Total Biaya
+            </span>
+
+            <span
+                id="totalBiaya"
+                class="font-bold text-slate-800"
+            >
+                Rp 0
+            </span>
+
+        </div>
 
     </div>
 
-    <!-- CATATAN -->
-    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 text-xs text-slate-500">
-      <p class="font-semibold text-slate-700 mb-2">Catatan Perhitungan</p>
-      <ul class="list-disc ml-5 space-y-1">
-        <li>Laba Kotor = DPP - HPS - Biaya Lain</li>
-        <li>PPN Keluaran = DPP × Tarif PPN jika Status PKP = Ya</li>
-        <li>PPN Masukan = HPS × Tarif PPN jika Status PKP = Ya</li>
-        <li>PPN Disetor = PPN Keluaran - PPN Masukan</li>
-        <li>PPh 22 = DPP × Tarif PPh 22</li>
-        <li>PPh Final = DPP × Tarif PPh Final</li>
-        <li>Total Invoice = DPP + PPN Keluaran</li>
-        <li>Estimasi Diterima = Total Invoice - PPh 22</li>
-        <li>Laba Setelah PPh Final = Laba Kotor - PPh Final</li>
-        <li>Harga Minimal (BEP) = HPS + Biaya Lain</li>
-      </ul>
+</div>
+
+
+
+<!-- =====================================================
+TARGET KEUNTUNGAN
+===================================================== -->
+
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+
+
+    <div class="px-5 py-4 bg-slate-900 text-white">
+
+        <h3 class="font-bold text-sm">
+
+            <i class="fa-solid fa-bullseye text-emerald-400 mr-2"></i>
+
+            TARGET MARGIN & HARGA SPH
+
+        </h3>
+
     </div>
 
-  </main>
 
-  <script>
-    // =========================================
-    // KALKULATOR SPH PENGADAAN
-    // Dipisahkan dari aplikasi Rekap PA
-    // =========================================
+    <div class="p-5 space-y-4 text-xs">
 
-    function formatRupiah(number) {
-      return new Intl.NumberFormat('id-ID', {
+
+        <div>
+
+            <label class="block font-semibold text-slate-700 mb-1">
+                Target Margin Bersih (%)
+            </label>
+
+            <input
+                id="targetMargin"
+                type="number"
+                value="20"
+                min="0"
+                max="99"
+                step="0.1"
+                oninput="calculateSph()"
+                class="w-full px-3 py-2.5 border border-slate-300 rounded-lg font-semibold"
+            >
+
+            <p class="text-[10px] text-slate-400 mt-1">
+                Target keuntungan bersih dari nilai SPH.
+            </p>
+
+        </div>
+
+
+
+        <div>
+
+            <label class="block font-semibold text-slate-700 mb-1">
+                Harga SPH yang Diajukan
+            </label>
+
+            <div class="flex gap-2">
+
+                <input
+                    id="hargaSph"
+                    type="text"
+                    value="0"
+                    class="table-input money flex-1"
+                    oninput="formatMoneyInput(this); calculateSph()"
+                >
+
+                <button
+                    onclick="gunakanTotalJualItem()"
+                    class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[10px] font-semibold whitespace-nowrap"
+                >
+
+                    <i class="fa-solid fa-arrow-down mr-1"></i>
+
+                    Ambil Total Jual
+
+                </button>
+
+            </div>
+
+            <p class="text-[10px] text-slate-400 mt-1">
+                Harga yang ingin diajukan kepada PLN Icon Plus.
+            </p>
+
+        </div>
+
+
+
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+
+            <p class="text-[10px] text-blue-700 font-bold uppercase">
+                HARGA SPH YANG DISARANKAN
+            </p>
+
+            <p
+                id="hargaSphDisarankan"
+                class="text-2xl font-extrabold text-blue-700 mt-1"
+            >
+                Rp 0
+            </p>
+
+            <p
+                id="targetMarginDescription"
+                class="text-[10px] text-blue-600 mt-2 leading-relaxed"
+            >
+                Masukkan HPP dan biaya terlebih dahulu.
+            </p>
+
+        </div>
+
+
+
+        <div class="flex justify-between border-t pt-3">
+
+            <span class="font-semibold text-slate-600">
+                Selisih dengan Harga Target
+            </span>
+
+            <span
+                id="selisihTargetMini"
+                class="font-bold text-slate-800"
+            >
+                Rp 0
+            </span>
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+PARAMETER PAJAK
+===================================================== -->
+
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+
+
+    <div class="px-5 py-4 bg-slate-900 text-white">
+
+        <h3 class="font-bold text-sm">
+
+            <i class="fa-solid fa-percent text-emerald-400 mr-2"></i>
+
+            PARAMETER PAJAK
+
+        </h3>
+
+    </div>
+
+
+    <div class="p-5 space-y-4 text-xs">
+
+
+        <div>
+
+            <label class="block font-semibold text-slate-700 mb-1">
+                Status PKP
+            </label>
+
+            <select
+                id="sphInputPkp"
+                onchange="calculateSph()"
+                class="w-full px-3 py-2.5 border border-slate-300 rounded-lg font-semibold bg-white"
+            >
+
+                <option value="Ya" selected>
+                    Ya
+                </option>
+
+                <option value="Tidak">
+                    Tidak
+                </option>
+
+            </select>
+
+        </div>
+
+
+
+        <div>
+
+            <label class="block font-semibold text-slate-700 mb-1">
+                Tarif PPN (%)
+            </label>
+
+            <input
+                id="sphInputPpnRate"
+                type="number"
+                value="11"
+                min="0"
+                step="0.1"
+                oninput="calculateSph()"
+                class="w-full px-3 py-2.5 border border-slate-300 rounded-lg font-semibold"
+            >
+
+        </div>
+
+
+
+        <div>
+
+            <label class="block font-semibold text-slate-700 mb-1">
+                PPN Masukan Aktual
+            </label>
+
+            <input
+                id="ppnMasukanAktual"
+                type="text"
+                value="0"
+                class="table-input money"
+                oninput="formatMoneyInput(this); calculateSph()"
+            >
+
+            <p class="text-[10px] text-slate-400 mt-1">
+                Isi sesuai faktur pajak pembelian jika tersedia.
+            </p>
+
+        </div>
+
+
+
+        <div class="grid grid-cols-2 gap-3">
+
+            <div>
+
+                <label class="block font-semibold text-slate-700 mb-1">
+                    PPh 22 (%)
+                </label>
+
+                <input
+                    id="sphInputPph22Rate"
+                    type="number"
+                    value="0.25"
+                    min="0"
+                    step="0.01"
+                    oninput="calculateSph()"
+                    class="w-full px-3 py-2.5 border border-slate-300 rounded-lg font-semibold"
+                >
+
+            </div>
+
+
+            <div>
+
+                <label class="block font-semibold text-slate-700 mb-1">
+                    PPh Final (%)
+                </label>
+
+                <input
+                    id="sphInputPphFinalRate"
+                    type="number"
+                    value="0"
+                    min="0"
+                    step="0.1"
+                    oninput="calculateSph()"
+                    class="w-full px-3 py-2.5 border border-slate-300 rounded-lg font-semibold"
+                >
+
+            </div>
+
+        </div>
+
+
+
+        <div class="bg-amber-50 border border-amber-200 rounded-lg p-3">
+
+            <p class="font-semibold text-amber-800">
+                PPh Final
+            </p>
+
+            <p class="text-[10px] text-amber-700 mt-1 leading-relaxed">
+
+                Default 0%.
+
+                Aktifkan hanya jika transaksi memang menggunakan
+                skema PPh Final yang sesuai.
+
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+</div>
+
+
+
+<!-- =====================================================
+RINCIAN HASIL
+===================================================== -->
+
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+
+
+    <div class="px-5 py-4 bg-slate-800 text-white">
+
+        <h3 class="font-bold text-sm">
+
+            <i class="fa-solid fa-chart-pie text-emerald-400 mr-2"></i>
+
+            RINCIAN HASIL ANALISIS SPH
+
+        </h3>
+
+    </div>
+
+
+    <div class="overflow-x-auto">
+
+        <table class="w-full text-xs">
+
+            <tbody class="divide-y divide-slate-100">
+
+
+                <tr>
+
+                    <td class="px-5 py-3 font-semibold">
+                        Total HPP Barang / Jasa
+                    </td>
+
+                    <td
+                        id="resHpp"
+                        class="px-5 py-3 text-right font-bold"
+                    >
+                        Rp 0
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td class="px-5 py-3">
+                        Total Biaya Tambahan
+                    </td>
+
+                    <td
+                        id="resBiaya"
+                        class="px-5 py-3 text-right"
+                    >
+                        Rp 0
+                    </td>
+
+                </tr>
+
+
+                <tr class="bg-slate-100">
+
+                    <td class="px-5 py-3 font-bold">
+                        TOTAL MODAL
+                    </td>
+
+                    <td
+                        id="resModal"
+                        class="px-5 py-3 text-right font-bold"
+                    >
+                        Rp 0
+                    </td>
+
+                </tr>
+
+
+                <tr class="bg-blue-50">
+
+                    <td class="px-5 py-3 font-bold text-blue-900">
+                        DPP / NILAI SPH
+                    </td>
+
+                    <td
+                        id="resDpp"
+                        class="px-5 py-3 text-right font-bold text-blue-700"
+                    >
+                        Rp 0
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td class="px-5 py-3">
+                        Laba Kotor
+                    </td>
+
+                    <td
+                        id="resLabaKotor"
+                        class="px-5 py-3 text-right font-bold text-emerald-700"
+                    >
+                        Rp 0
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td class="px-5 py-3">
+                        Margin Kotor
+                    </td>
+
+                    <td
+                        id="resMarginKotor"
+                        class="px-5 py-3 text-right font-bold"
+                    >
+                        0.00%
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td class="px-5 py-3">
+                        Markup
+                    </td>
+
+                    <td
+                        id="resMarkup"
+                        class="px-5 py-3 text-right font-bold text-blue-700"
+                    >
+                        0.00%
+                    </td>
+
+                </tr>
+
+
+                <tr class="bg-blue-50/30">
+
+                    <td class="px-5 py-3">
+                        PPN Keluaran
+                    </td>
+
+                    <td
+                        id="resPpnKeluaran"
+                        class="px-5 py-3 text-right"
+                    >
+                        Rp 0
+                    </td>
+
+                </tr>
+
+
+                <tr class="bg-blue-50/30">
+
+                    <td class="px-5 py-3">
+                        PPN Masukan Aktual
+                    </td>
+
+                    <td
+                        id="resPpnMasukan"
+                        class="px-5 py-3 text-right"
+                    >
+                        Rp 0
+                    </td>
+
+                </tr>
+
+
+                <tr class="bg-blue-50/50">
+
+                    <td class="px-5 py-3 font-semibold">
+                        Estimasi PPN Disetor
+                    </td>
+
+                    <td
+                        id="resPpnDisetor"
+                        class="px-5 py-3 text-right font-bold"
+                    >
+                        Rp 0
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td class="px-5 py-3">
+                        PPh 22
+                    </td>
+
+                    <td
+                        id="resPph22"
+                        class="px-5 py-3 text-right"
+                    >
+                        Rp 0
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td class="px-5 py-3">
+                        PPh Final
+                    </td>
+
+                    <td
+                        id="resPphFinal"
+                        class="px-5 py-3 text-right"
+                    >
+                        Rp 0
+                    </td>
+
+                </tr>
+
+
+                <tr class="bg-slate-100">
+
+                    <td class="px-5 py-3 font-bold">
+                        Total Invoice
+                    </td>
+
+                    <td
+                        id="resInvoice"
+                        class="px-5 py-3 text-right font-bold"
+                    >
+                        Rp 0
+                    </td>
+
+                </tr>
+
+
+                <tr class="bg-indigo-50">
+
+                    <td class="px-5 py-3 font-bold text-indigo-900">
+                        Estimasi Diterima Setelah PPh 22
+                    </td>
+
+                    <td
+                        id="resEstimasiDiterima"
+                        class="px-5 py-3 text-right font-bold text-indigo-700"
+                    >
+                        Rp 0
+                    </td>
+
+                </tr>
+
+
+                <tr class="bg-emerald-50">
+
+                    <td class="px-5 py-3 font-bold text-emerald-900">
+                        Laba Setelah PPh Final
+                    </td>
+
+                    <td
+                        id="resLabaSetelahPph"
+                        class="px-5 py-3 text-right font-bold text-emerald-700"
+                    >
+                        Rp 0
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td class="px-5 py-3 font-bold">
+                        Margin Bersih
+                    </td>
+
+                    <td
+                        id="resMarginBersih"
+                        class="px-5 py-3 text-right font-bold text-emerald-700"
+                    >
+                        0.00%
+                    </td>
+
+                </tr>
+
+
+                <tr class="bg-amber-50">
+
+                    <td class="px-5 py-3 font-bold text-amber-900">
+                        Harga Minimal BEP Operasional
+                    </td>
+
+                    <td
+                        id="resBep"
+                        class="px-5 py-3 text-right font-bold text-amber-700"
+                    >
+                        Rp 0
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td class="px-5 py-3 text-slate-600">
+                        BEP Setelah PPh Final
+                    </td>
+
+                    <td
+                        id="resBepSetelahPph"
+                        class="px-5 py-3 text-right font-bold text-amber-700"
+                    >
+                        Rp 0
+                    </td>
+
+                </tr>
+
+
+                <tr class="bg-blue-50">
+
+                    <td class="px-5 py-3 font-bold text-blue-900">
+                        Harga SPH untuk Target Margin
+                    </td>
+
+                    <td
+                        id="resHargaTarget"
+                        class="px-5 py-3 text-right font-bold text-blue-700"
+                    >
+                        Rp 0
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td class="px-5 py-3 font-semibold">
+                        Selisih Harga SPH vs Target
+                    </td>
+
+                    <td
+                        id="resSelisihTarget"
+                        class="px-5 py-3 text-right font-bold"
+                    >
+                        Rp 0
+                    </td>
+
+                </tr>
+
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+KETERANGAN BEP
+===================================================== -->
+
+<div
+    id="bepDescription"
+    class="px-5 py-4 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800"
+>
+
+    <strong>Pengertian BEP:</strong>
+
+    BEP adalah nilai penjualan minimum untuk menutup
+    seluruh HPP dan biaya tambahan.
+
+</div>
+
+
+
+<!-- =====================================================
+KESIMPULAN
+===================================================== -->
+
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+
+    <h3 class="font-bold text-sm text-slate-800 mb-3">
+
+        <i class="fa-solid fa-lightbulb text-amber-500 mr-2"></i>
+
+        KESIMPULAN ANALISIS
+
+    </h3>
+
+
+    <div
+        id="kesimpulanText"
+        class="text-xs text-slate-600 leading-relaxed"
+    >
+
+        Masukkan data barang/jasa untuk melihat analisis.
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+CARA MEMBACA
+===================================================== -->
+
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 text-xs text-slate-600">
+
+    <h3 class="font-bold text-slate-800 mb-3">
+
+        <i class="fa-solid fa-circle-info text-blue-500 mr-2"></i>
+
+        CARA MEMBACA KALKULATOR
+
+    </h3>
+
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+
+        <div>
+
+            <p class="font-bold text-slate-700">
+                HPP
+            </p>
+
+            <p class="mt-1">
+                Total biaya pembelian barang/jasa berdasarkan
+                Quantity × Harga Beli.
+            </p>
+
+        </div>
+
+
+        <div>
+
+            <p class="font-bold text-slate-700">
+                Total Modal
+            </p>
+
+            <p class="mt-1">
+                HPP ditambah seluruh biaya tambahan.
+            </p>
+
+        </div>
+
+
+        <div>
+
+            <p class="font-bold text-slate-700">
+                BEP
+            </p>
+
+            <p class="mt-1">
+                Nilai penjualan minimum untuk menutup modal.
+                BEP bukan keuntungan.
+            </p>
+
+        </div>
+
+
+        <div>
+
+            <p class="font-bold text-slate-700">
+                Harga SPH Disarankan
+            </p>
+
+            <p class="mt-1">
+                Harga yang diperlukan agar target margin
+                bersih dapat tercapai.
+            </p>
+
+        </div>
+
+
+        <div>
+
+            <p class="font-bold text-slate-700">
+                Margin
+            </p>
+
+            <p class="mt-1">
+                Persentase laba dibandingkan nilai SPH.
+            </p>
+
+        </div>
+
+
+        <div>
+
+            <p class="font-bold text-slate-700">
+                Markup
+            </p>
+
+            <p class="mt-1">
+                Persentase keuntungan dibandingkan total modal.
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+CATATAN
+===================================================== -->
+
+<div class="bg-slate-50 rounded-xl border border-slate-200 p-5 text-[11px] text-slate-500">
+
+    <p class="font-bold text-slate-700 mb-2">
+        Catatan Pajak
+    </p>
+
+    <ul class="list-disc ml-5 space-y-1">
+
+        <li>
+            Tarif pajak pada kalkulator dapat diubah sesuai kondisi transaksi.
+        </li>
+
+        <li>
+            PPN Masukan sebaiknya menggunakan nilai aktual dari faktur pajak
+            pembelian apabila tersedia.
+        </li>
+
+        <li>
+            PPh 22 ditampilkan sebagai pemotongan/pemungutan dari pembayaran
+            dan tidak dimasukkan sebagai pengurang laba usaha dalam simulasi.
+        </li>
+
+        <li>
+            PPh Final hanya dihitung jika tarifnya diisi.
+        </li>
+
+        <li>
+            Hasil kalkulator merupakan simulasi perencanaan harga dan pajak.
+        </li>
+
+    </ul>
+
+</div>
+
+
+</main>
+
+
+
+<script>
+
+
+/* =====================================================
+FORMAT RUPIAH
+===================================================== */
+
+function formatRupiah(number) {
+
+    return new Intl.NumberFormat('id-ID', {
+
         style: 'currency',
+
         currency: 'IDR',
+
         maximumFractionDigits: 0
-      }).format(number || 0);
+
+    }).format(number || 0);
+
+}
+
+
+
+/* =====================================================
+FORMAT INPUT UANG
+===================================================== */
+
+function formatMoneyInput(input) {
+
+    let value = String(input.value || '');
+
+    value = value.replace(/\D/g, '');
+
+    value = value.replace(/^0+(?=\d)/, '');
+
+    if (value === '') {
+        value = '0';
     }
 
-    // Format khusus untuk INPUT uang: 1000000 -> 1.000.000
-    // Hanya digunakan pada parameter input, bukan pada hasil kalkulasi.
-    function formatMoneyInput(input) {
-      let value = String(input.value || '');
+    input.value =
+        value.replace(
+            /\B(?=(\d{3})+(?!\d))/g,
+            '.'
+        );
 
-      // Hapus semua karakter selain angka
-      value = value.replace(/\D/g, '');
+}
 
-      // Hapus nol di depan, tetapi tetap tampilkan 0 jika kosong
-      value = value.replace(/^0+(?=\d)/, '');
 
-      if (value === '') value = '0';
 
-      // Tambahkan titik sebagai pemisah ribuan
-      input.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+/* =====================================================
+AMBIL NILAI UANG
+===================================================== */
+
+function parseMoney(value) {
+
+    return Number(
+
+        String(value || '')
+
+            .replace(/\./g, '')
+
+            .replace(/[^0-9]/g, '')
+
+    ) || 0;
+
+}
+
+
+
+/* =====================================================
+ITEM COUNTER
+===================================================== */
+
+let itemCounter = 0;
+
+
+
+/* =====================================================
+TAMBAH ITEM
+===================================================== */
+
+function addItem(
+    jenis = 'Barang',
+    nama = '',
+    qty = 1,
+    satuan = 'Unit',
+    hargaBeli = 0,
+    hargaJual = 0
+) {
+
+    itemCounter++;
+
+    const tbody =
+        document.getElementById(
+            'itemTableBody'
+        );
+
+    const tr =
+        document.createElement('tr');
+
+    tr.className =
+        'border-t border-slate-100 hover:bg-slate-50';
+
+
+    tr.innerHTML = `
+
+        <td class="px-3 py-2 text-center font-semibold item-no">
+            ${itemCounter}
+        </td>
+
+
+        <td class="px-3 py-2">
+
+            <select
+                class="table-input item-jenis"
+                onchange="calculateSph()"
+            >
+
+                <option value="Barang"
+                    ${jenis === 'Barang' ? 'selected' : ''}>
+                    Barang
+                </option>
+
+                <option value="Jasa"
+                    ${jenis === 'Jasa' ? 'selected' : ''}>
+                    Jasa
+                </option>
+
+            </select>
+
+        </td>
+
+
+        <td class="px-3 py-2">
+
+            <input
+                type="text"
+                class="table-input item-nama"
+                value="${nama}"
+                placeholder="Input Barang/Jasa"
+                oninput="calculateSph()"
+            >
+
+        </td>
+
+
+        <td class="px-3 py-2">
+
+            <input
+                type="number"
+                min="0"
+                step="0.01"
+                class="table-input item-qty text-center"
+                value="${qty}"
+                oninput="calculateSph()"
+            >
+
+        </td>
+
+
+        <td class="px-3 py-2">
+
+            <input
+                type="text"
+                class="table-input item-satuan"
+                value="${satuan}"
+                placeholder="Unit"
+                oninput="calculateSph()"
+            >
+
+        </td>
+
+
+        <td class="px-3 py-2">
+
+            <input
+                type="text"
+                class="table-input item-harga-beli money"
+                value="${hargaBeli ? hargaBeli.toLocaleString('id-ID') : '0'}"
+                oninput="formatMoneyInput(this); calculateSph()"
+            >
+
+        </td>
+
+
+        <td class="px-3 py-2 text-right font-semibold item-hpp">
+            Rp 0
+        </td>
+
+
+        <td class="px-3 py-2">
+
+            <input
+                type="text"
+                class="table-input item-harga-jual money"
+                value="${hargaJual ? hargaJual.toLocaleString('id-ID') : '0'}"
+                oninput="formatMoneyInput(this); calculateSph()"
+            >
+
+        </td>
+
+
+        <td class="px-3 py-2 text-right font-semibold item-total-jual">
+            Rp 0
+        </td>
+
+
+        <td class="px-3 py-2 text-right font-semibold item-laba">
+            Rp 0
+        </td>
+
+
+        <td class="px-3 py-2 text-right font-semibold item-margin">
+            0.00%
+        </td>
+
+
+        <td class="px-3 py-2 text-right font-semibold item-markup">
+            0.00%
+        </td>
+
+
+        <td class="px-3 py-2 text-center">
+
+            <button
+                onclick="removeItem(this)"
+                class="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 text-red-600"
+                title="Hapus item"
+            >
+
+                <i class="fa-solid fa-trash"></i>
+
+            </button>
+
+        </td>
+
+    `;
+
+
+    tbody.appendChild(tr);
+
+    renumberItems();
+
+    calculateSph();
+
+}
+
+
+
+/* =====================================================
+HAPUS ITEM
+===================================================== */
+
+function removeItem(button) {
+
+    const row =
+        button.closest('tr');
+
+    if (row) {
+
+        row.remove();
+
     }
 
-    // Ubah angka input yang sudah memakai titik menjadi angka asli untuk kalkulasi
-    function parseMoneyInput(id) {
-      const input = document.getElementById(id);
-      if (!input) return 0;
+    renumberItems();
 
-      const value = String(input.value || '').replace(/\./g, '').replace(/[^0-9]/g, '');
-      return Number(value) || 0;
-    }
+    calculateSph();
 
-    function calculateSph() {
-      const dpp = parseMoneyInput('sphInputDpp');
-      const hps = parseMoneyInput('sphInputHps');
-      const biayaLain = parseMoneyInput('sphInputBiayaLain');
+}
 
-      const isPkp =
-        document.getElementById('sphInputPkp').value === "Ya";
 
-      const ppnRate =
-        (parseFloat(document.getElementById('sphInputPpnRate').value) || 0) / 100;
 
-      const pph22Rate =
-        (parseFloat(document.getElementById('sphInputPph22Rate').value) || 0) / 100;
+/* =====================================================
+NOMOR ITEM
+===================================================== */
 
-      const pphFinalRate =
-        (parseFloat(document.getElementById('sphInputPphFinalRate').value) || 0) / 100;
+function renumberItems() {
 
-      // Rumus dari kalkulator SPH sumber
-      const labaKotor = dpp - hps - biayaLain;
+    document
+        .querySelectorAll(
+            '#itemTableBody tr'
+        )
+        .forEach(
+            (row, index) => {
 
-      const marginKotor =
-        dpp > 0 ? (labaKotor / dpp) * 100 : 0;
+                const no =
+                    row.querySelector(
+                        '.item-no'
+                    );
 
-      const ppnKeluaran =
-        isPkp ? (dpp * ppnRate) : 0;
+                if (no) {
 
-      const ppnMasukan =
-        isPkp ? (hps * ppnRate) : 0;
+                    no.innerText =
+                        index + 1;
 
-      const ppnDisetor =
-        ppnKeluaran - ppnMasukan;
+                }
 
-      const pph22 =
+            }
+        );
+
+}
+
+
+
+/* =====================================================
+AMBIL TOTAL JUAL
+===================================================== */
+
+function gunakanTotalJualItem() {
+
+    let totalJual = 0;
+
+
+    document
+        .querySelectorAll(
+            '#itemTableBody tr'
+        )
+        .forEach(row => {
+
+            const qty =
+                Number(
+                    row.querySelector(
+                        '.item-qty'
+                    )?.value
+                ) || 0;
+
+
+            const hargaJual =
+                parseMoney(
+                    row.querySelector(
+                        '.item-harga-jual'
+                    )?.value
+                );
+
+
+            totalJual +=
+                qty * hargaJual;
+
+        });
+
+
+    const input =
+        document.getElementById(
+            'hargaSph'
+        );
+
+
+    input.value =
+        totalJual.toLocaleString(
+            'id-ID'
+        );
+
+
+    calculateSph();
+
+}
+
+
+
+/* =====================================================
+PERHITUNGAN UTAMA
+===================================================== */
+
+function calculateSph() {
+
+
+    let totalQty = 0;
+
+    let totalHpp = 0;
+
+    let totalJualItem = 0;
+
+
+    const rows =
+        document.querySelectorAll(
+            '#itemTableBody tr'
+        );
+
+
+    rows.forEach(row => {
+
+
+        const qty =
+            Number(
+                row.querySelector(
+                    '.item-qty'
+                )?.value
+            ) || 0;
+
+
+        const hargaBeli =
+            parseMoney(
+                row.querySelector(
+                    '.item-harga-beli'
+                )?.value
+            );
+
+
+        const hargaJual =
+            parseMoney(
+                row.querySelector(
+                    '.item-harga-jual'
+                )?.value
+            );
+
+
+        const hpp =
+            qty * hargaBeli;
+
+
+        const totalJual =
+            qty * hargaJual;
+
+
+        const laba =
+            totalJual - hpp;
+
+
+        const margin =
+            totalJual > 0
+                ? (laba / totalJual) * 100
+                : 0;
+
+
+        const markup =
+            hpp > 0
+                ? (laba / hpp) * 100
+                : 0;
+
+
+        totalQty += qty;
+
+        totalHpp += hpp;
+
+        totalJualItem += totalJual;
+
+
+        row.querySelector(
+            '.item-hpp'
+        ).innerText =
+            formatRupiah(hpp);
+
+
+        row.querySelector(
+            '.item-total-jual'
+        ).innerText =
+            formatRupiah(totalJual);
+
+
+        row.querySelector(
+            '.item-laba'
+        ).innerText =
+            formatRupiah(laba);
+
+
+        row.querySelector(
+            '.item-margin'
+        ).innerText =
+            margin.toFixed(2) + '%';
+
+
+        row.querySelector(
+            '.item-markup'
+        ).innerText =
+            markup.toFixed(2) + '%';
+
+    });
+
+
+
+    /* =====================================================
+    BIAYA TAMBAHAN
+    ===================================================== */
+
+    const biayaOngkir =
+        parseMoney(
+            document.getElementById(
+                'biayaOngkir'
+            ).value
+        );
+
+
+    const biayaInstalasi =
+        parseMoney(
+            document.getElementById(
+                'biayaInstalasi'
+            ).value
+        );
+
+
+    const biayaOperasional =
+        parseMoney(
+            document.getElementById(
+                'biayaOperasional'
+            ).value
+        );
+
+
+    const biayaLain =
+        parseMoney(
+            document.getElementById(
+                'biayaLain'
+            ).value
+        );
+
+
+    const totalBiaya =
+        biayaOngkir +
+        biayaInstalasi +
+        biayaOperasional +
+        biayaLain;
+
+
+    const totalModal =
+        totalHpp +
+        totalBiaya;
+
+
+
+    /* =====================================================
+    HARGA SPH
+    ===================================================== */
+
+    const hargaSph =
+        parseMoney(
+            document.getElementById(
+                'hargaSph'
+            ).value
+        );
+
+
+    const dpp =
+        hargaSph;
+
+
+
+    /* =====================================================
+    TARGET MARGIN
+    ===================================================== */
+
+    const targetMargin =
+        Number(
+            document.getElementById(
+                'targetMargin'
+            ).value
+        ) || 0;
+
+
+    const targetMarginDecimal =
+        targetMargin / 100;
+
+
+
+    /* =====================================================
+    PARAMETER PAJAK
+    ===================================================== */
+
+    const isPkp =
+        document.getElementById(
+            'sphInputPkp'
+        ).value === 'Ya';
+
+
+    const ppnRate =
+        (
+            Number(
+                document.getElementById(
+                    'sphInputPpnRate'
+                ).value
+            ) || 0
+        ) / 100;
+
+
+    const pph22Rate =
+        (
+            Number(
+                document.getElementById(
+                    'sphInputPph22Rate'
+                ).value
+            ) || 0
+        ) / 100;
+
+
+    const pphFinalRate =
+        (
+            Number(
+                document.getElementById(
+                    'sphInputPphFinalRate'
+                ).value
+            ) || 0
+        ) / 100;
+
+
+
+    /* =====================================================
+    PPN
+    ===================================================== */
+
+    const ppnKeluaran =
+        isPkp
+            ? dpp * ppnRate
+            : 0;
+
+
+    const ppnMasukan =
+        isPkp
+            ? parseMoney(
+                document.getElementById(
+                    'ppnMasukanAktual'
+                ).value
+            )
+            : 0;
+
+
+    const ppnDisetor =
+        Math.max(
+            0,
+            ppnKeluaran -
+            ppnMasukan
+        );
+
+
+
+    /* =====================================================
+    PPH
+    ===================================================== */
+
+    const pph22 =
         dpp * pph22Rate;
 
-      const pphFinal =
+
+    const pphFinal =
         dpp * pphFinalRate;
 
-      const invoice =
-        dpp + ppnKeluaran;
 
-      const estimasiDiterima =
-        invoice - pph22;
 
-      const labaSetelahPph =
-        labaKotor - pphFinal;
+    /* =====================================================
+    INVOICE
+    ===================================================== */
 
-      const marginBersih =
-        dpp > 0 ? (labaSetelahPph / dpp) * 100 : 0;
+    const invoice =
+        dpp +
+        ppnKeluaran;
 
-      const bep =
-        hps + biayaLain;
 
-      // Cards
-      document.getElementById('sphResMarginBersihCard').innerText =
-        marginBersih.toFixed(2) + "%";
+    const estimasiDiterima =
+        invoice -
+        pph22;
 
-      document.getElementById('sphResLabaSetelahPphCard').innerText =
-        formatRupiah(labaSetelahPph);
 
-      document.getElementById('sphResEstimasiDiterimaCard').innerText =
-        formatRupiah(estimasiDiterima);
 
-      document.getElementById('sphResBepCard').innerText =
-        formatRupiah(bep);
+    /* =====================================================
+    LABA
+    ===================================================== */
 
-      // Table
-      document.getElementById('sphResLabaKotor').innerText =
+    const labaKotor =
+        dpp -
+        totalModal;
+
+
+    const marginKotor =
+        dpp > 0
+            ? (labaKotor / dpp) * 100
+            : 0;
+
+
+    const labaSetelahPph =
+        labaKotor -
+        pphFinal;
+
+
+    const marginBersih =
+        dpp > 0
+            ? (labaSetelahPph / dpp) * 100
+            : 0;
+
+
+    const markup =
+        totalModal > 0
+            ? (labaKotor / totalModal) * 100
+            : 0;
+
+
+
+    /* =====================================================
+    BEP
+    ===================================================== */
+
+    const bep =
+        totalModal;
+
+
+    let bepSetelahPph = 0;
+
+
+    if (pphFinalRate < 1) {
+
+        bepSetelahPph =
+            totalModal /
+            (1 - pphFinalRate);
+
+    }
+
+
+
+    /* =====================================================
+    HARGA SPH TARGET
+    ===================================================== */
+
+    let hargaTarget = 0;
+
+
+    const penyebutTarget =
+        1 -
+        targetMarginDecimal -
+        pphFinalRate;
+
+
+    if (
+        totalModal > 0 &&
+        penyebutTarget > 0
+    ) {
+
+        hargaTarget =
+            totalModal /
+            penyebutTarget;
+
+    }
+
+
+
+    /* =====================================================
+    SELISIH
+    ===================================================== */
+
+    const selisihTarget =
+        dpp -
+        hargaTarget;
+
+
+
+    /* =====================================================
+    TOTAL ITEM
+    ===================================================== */
+
+    document.getElementById(
+        'totalQty'
+    ).innerText =
+        totalQty;
+
+
+    document.getElementById(
+        'totalHpp'
+    ).innerText =
+        formatRupiah(totalHpp);
+
+
+    document.getElementById(
+        'totalJualItem'
+    ).innerText =
+        formatRupiah(totalJualItem);
+
+
+    const totalLabaItem =
+        totalJualItem -
+        totalHpp;
+
+
+    document.getElementById(
+        'totalLabaItem'
+    ).innerText =
+        formatRupiah(totalLabaItem);
+
+
+    document.getElementById(
+        'totalMarginItem'
+    ).innerText =
+        totalJualItem > 0
+            ? (
+                totalLabaItem /
+                totalJualItem *
+                100
+            ).toFixed(2) + '%'
+            : '0.00%';
+
+
+    document.getElementById(
+        'totalMarkupItem'
+    ).innerText =
+        totalHpp > 0
+            ? (
+                totalLabaItem /
+                totalHpp *
+                100
+            ).toFixed(2) + '%'
+            : '0.00%';
+
+
+
+    /* =====================================================
+    HASIL
+    ===================================================== */
+
+    document.getElementById(
+        'totalBiaya'
+    ).innerText =
+        formatRupiah(totalBiaya);
+
+
+    document.getElementById(
+        'resHpp'
+    ).innerText =
+        formatRupiah(totalHpp);
+
+
+    document.getElementById(
+        'resBiaya'
+    ).innerText =
+        formatRupiah(totalBiaya);
+
+
+    document.getElementById(
+        'resModal'
+    ).innerText =
+        formatRupiah(totalModal);
+
+
+    document.getElementById(
+        'resDpp'
+    ).innerText =
+        formatRupiah(dpp);
+
+
+    document.getElementById(
+        'resLabaKotor'
+    ).innerText =
         formatRupiah(labaKotor);
 
-      document.getElementById('sphResMarginKotor').innerText =
-        marginKotor.toFixed(2) + "%";
 
-      document.getElementById('sphResPpnKeluaran').innerText =
+    document.getElementById(
+        'resMarginKotor'
+    ).innerText =
+        marginKotor.toFixed(2) + '%';
+
+
+    document.getElementById(
+        'resMarkup'
+    ).innerText =
+        markup.toFixed(2) + '%';
+
+
+    document.getElementById(
+        'resPpnKeluaran'
+    ).innerText =
         formatRupiah(ppnKeluaran);
 
-      document.getElementById('sphResPpnMasukan').innerText =
+
+    document.getElementById(
+        'resPpnMasukan'
+    ).innerText =
         formatRupiah(ppnMasukan);
 
-      document.getElementById('sphResPpnDisetor').innerText =
+
+    document.getElementById(
+        'resPpnDisetor'
+    ).innerText =
         formatRupiah(ppnDisetor);
 
-      document.getElementById('sphResPph22').innerText =
+
+    document.getElementById(
+        'resPph22'
+    ).innerText =
         formatRupiah(pph22);
 
-      document.getElementById('sphResPphFinal').innerText =
+
+    document.getElementById(
+        'resPphFinal'
+    ).innerText =
         formatRupiah(pphFinal);
 
-      document.getElementById('sphResInvoice').innerText =
+
+    document.getElementById(
+        'resInvoice'
+    ).innerText =
         formatRupiah(invoice);
 
-      document.getElementById('sphResEstimasiDiterima').innerText =
+
+    document.getElementById(
+        'resEstimasiDiterima'
+    ).innerText =
         formatRupiah(estimasiDiterima);
 
-      document.getElementById('sphResLabaSetelahPph').innerText =
+
+    document.getElementById(
+        'resLabaSetelahPph'
+    ).innerText =
         formatRupiah(labaSetelahPph);
 
-      document.getElementById('sphResMarginBersih').innerText =
-        marginBersih.toFixed(2) + "%";
 
-      document.getElementById('sphResBep').innerText =
+    document.getElementById(
+        'resMarginBersih'
+    ).innerText =
+        marginBersih.toFixed(2) + '%';
+
+
+    document.getElementById(
+        'resBep'
+    ).innerText =
         formatRupiah(bep);
+
+
+    document.getElementById(
+        'resBepSetelahPph'
+    ).innerText =
+        formatRupiah(bepSetelahPph);
+
+
+    document.getElementById(
+        'resHargaTarget'
+    ).innerText =
+        formatRupiah(hargaTarget);
+
+
+    document.getElementById(
+        'resSelisihTarget'
+    ).innerText =
+        formatRupiah(selisihTarget);
+
+
+    document.getElementById(
+        'hargaSphDisarankan'
+    ).innerText =
+        formatRupiah(hargaTarget);
+
+
+    document.getElementById(
+        'selisihTargetMini'
+    ).innerText =
+        formatRupiah(selisihTarget);
+
+
+
+    /* =====================================================
+    CARD
+    ===================================================== */
+
+    document.getElementById(
+        'cardHpp'
+    ).innerText =
+        formatRupiah(totalHpp);
+
+
+    document.getElementById(
+        'cardModal'
+    ).innerText =
+        formatRupiah(totalModal);
+
+
+    document.getElementById(
+        'cardDpp'
+    ).innerText =
+        formatRupiah(dpp);
+
+
+    document.getElementById(
+        'cardLaba'
+    ).innerText =
+        formatRupiah(labaSetelahPph);
+
+
+    document.getElementById(
+        'cardMargin'
+    ).innerText =
+        marginBersih.toFixed(2) + '%';
+
+
+    document.getElementById(
+        'cardBep'
+    ).innerText =
+        formatRupiah(bep);
+
+
+
+    /* =====================================================
+    KETERANGAN TARGET
+    ===================================================== */
+
+    const targetDescription =
+        document.getElementById(
+            'targetMarginDescription'
+        );
+
+
+    if (totalModal <= 0) {
+
+        targetDescription.innerHTML =
+            '<strong>Belum dapat dihitung.</strong> ' +
+            'Isi minimal satu barang/jasa dengan harga beli dan quantity.';
+
     }
 
-    function resetSphCalculator() {
-      // Default awal yang diminta:
-      document.getElementById('sphInputDpp').value = '0';
-      document.getElementById('sphInputHps').value = '0';
-      document.getElementById('sphInputBiayaLain').value = '0';
+    else if (hargaTarget <= 0) {
 
-      // Default pajak dari kalkulator sumber
-      document.getElementById('sphInputPkp').value = "Ya";
-      document.getElementById('sphInputPpnRate').value = 11;
-      document.getElementById('sphInputPph22Rate').value = 0.25;
-      document.getElementById('sphInputPphFinalRate').value = 2;
+        targetDescription.innerHTML =
+            '<strong>Target tidak valid.</strong> ' +
+            'Target margin + PPh Final terlalu tinggi untuk dihitung.';
 
-      calculateSph();
     }
 
-    // Hitung kondisi awal saat halaman dibuka
-    document.addEventListener('DOMContentLoaded', function () {
-      formatMoneyInput(document.getElementById('sphInputDpp'));
-      formatMoneyInput(document.getElementById('sphInputHps'));
-      formatMoneyInput(document.getElementById('sphInputBiayaLain'));
-      calculateSph();
-    });
-  </script>
+    else if (dpp <= 0) {
+
+        targetDescription.innerHTML =
+            'Untuk mencapai target margin bersih ' +
+            '<strong>' +
+            targetMargin.toFixed(2) +
+            '%</strong>, ' +
+            'harga SPH yang diperlukan sekitar ' +
+            '<strong>' +
+            formatRupiah(hargaTarget) +
+            '</strong>.';
+
+    }
+
+    else if (dpp < hargaTarget) {
+
+        targetDescription.innerHTML =
+            '<strong>⚠ Harga masih di bawah target.</strong> ' +
+            'Agar mencapai margin bersih ' +
+            '<strong>' +
+            targetMargin.toFixed(2) +
+            '%</strong>, ' +
+            'harga SPH sebaiknya sekitar ' +
+            '<strong>' +
+            formatRupiah(hargaTarget) +
+            '</strong>.';
+
+    }
+
+    else {
+
+        targetDescription.innerHTML =
+            '<strong>✓ Target tercapai.</strong> ' +
+            'Harga SPH sudah memenuhi target margin ' +
+            '<strong>' +
+            targetMargin.toFixed(2) +
+            '%</strong>.';
+
+    }
+
+
+
+    /* =====================================================
+    KETERANGAN BEP
+    ===================================================== */
+
+    const bepDescription =
+        document.getElementById(
+            'bepDescription'
+        );
+
+
+    if (totalModal <= 0) {
+
+        bepDescription.innerHTML =
+            '<strong>Pengertian BEP:</strong> ' +
+            'Isi HPP dan biaya tambahan terlebih dahulu ' +
+            'untuk mendapatkan nilai BEP.';
+
+    }
+
+    else if (dpp <= 0) {
+
+        bepDescription.innerHTML =
+            '<strong>BEP Operasional = ' +
+            formatRupiah(bep) +
+            '.</strong> ' +
+            'Artinya nilai penjualan minimal untuk menutup ' +
+            'seluruh modal. BEP bukan keuntungan.';
+
+    }
+
+    else if (dpp < bep) {
+
+        bepDescription.className =
+            'px-5 py-4 rounded-xl bg-red-50 border border-red-200 text-xs text-red-700';
+
+
+        bepDescription.innerHTML =
+            '<strong>🔴 Di bawah BEP.</strong> ' +
+            'Harga SPH masih kurang ' +
+            '<strong>' +
+            formatRupiah(bep - dpp) +
+            '</strong> ' +
+            'dari modal yang harus ditutup.';
+
+    }
+
+    else if (dpp >= bep && dpp < hargaTarget) {
+
+        bepDescription.className =
+            'px-5 py-4 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800';
+
+
+        bepDescription.innerHTML =
+            '<strong>🟡 Di atas BEP tetapi belum mencapai target.</strong> ' +
+            'SPH sudah menutup modal, tetapi margin bersih masih ' +
+            'di bawah target ' +
+            '<strong>' +
+            targetMargin.toFixed(2) +
+            '%</strong>.';
+
+    }
+
+    else {
+
+        bepDescription.className =
+            'px-5 py-4 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-700';
+
+
+        bepDescription.innerHTML =
+            '<strong>🟢 Aman.</strong> ' +
+            'SPH sudah melewati BEP dan memenuhi target margin ' +
+            '<strong>' +
+            targetMargin.toFixed(2) +
+            '%</strong>.';
+
+    }
+
+
+
+    /* =====================================================
+    STATUS
+    ===================================================== */
+
+    const statusTitle =
+        document.getElementById(
+            'statusTitle'
+        );
+
+
+    const statusDescription =
+        document.getElementById(
+            'statusDescription'
+        );
+
+
+    const statusMargin =
+        document.getElementById(
+            'statusMargin'
+        );
+
+
+    const statusBox =
+        document.getElementById(
+            'statusBox'
+        );
+
+
+    statusMargin.innerText =
+        marginBersih.toFixed(2) + '%';
+
+
+
+    if (dpp <= 0) {
+
+        statusTitle.innerText =
+            '⚪ BELUM ADA HARGA SPH';
+
+
+        statusDescription.innerText =
+            'Masukkan harga SPH yang ingin diajukan.';
+
+
+        statusBox.className =
+            'status-box bg-slate-800 text-white rounded-xl shadow-sm p-5';
+
+    }
+
+    else if (labaSetelahPph < 0) {
+
+        statusTitle.innerText =
+            '🔴 BERISIKO RUGI';
+
+
+        statusDescription.innerText =
+            'Harga SPH belum menutup modal setelah simulasi PPh Final.';
+
+
+        statusBox.className =
+            'status-box bg-red-700 text-white rounded-xl shadow-sm p-5';
+
+    }
+
+    else if (marginBersih < targetMargin) {
+
+        statusTitle.innerText =
+            '🟡 TARGET BELUM TERCAPAI';
+
+
+        statusDescription.innerText =
+            'SPH sudah menghasilkan keuntungan, tetapi margin bersih masih di bawah target.';
+
+
+        statusBox.className =
+            'status-box bg-amber-600 text-white rounded-xl shadow-sm p-5';
+
+    }
+
+    else {
+
+        statusTitle.innerText =
+            '🟢 TARGET MARGIN TERCAPAI';
+
+
+        statusDescription.innerText =
+            'Harga SPH sudah memenuhi target margin bersih yang ditentukan.';
+
+
+        statusBox.className =
+            'status-box bg-emerald-700 text-white rounded-xl shadow-sm p-5';
+
+    }
+
+
+
+    /* =====================================================
+    KESIMPULAN
+    ===================================================== */
+
+    const kesimpulan =
+        document.getElementById(
+            'kesimpulanText'
+        );
+
+
+    if (dpp <= 0) {
+
+        kesimpulan.innerHTML =
+            'Masukkan seluruh barang/jasa, quantity, harga beli, ' +
+            'biaya tambahan, dan harga SPH untuk mendapatkan kesimpulan.';
+
+    }
+
+    else {
+
+        let html = '';
+
+
+        html +=
+            '<p>' +
+            'Total modal yang harus ditutup adalah ' +
+            '<strong>' +
+            formatRupiah(totalModal) +
+            '</strong>.' +
+            '</p>';
+
+
+        html +=
+            '<p class="mt-1">' +
+            'Harga SPH yang Anda masukkan adalah ' +
+            '<strong>' +
+            formatRupiah(dpp) +
+            '</strong>.' +
+            '</p>';
+
+
+        html +=
+            '<p class="mt-1">' +
+            'Laba setelah simulasi PPh Final adalah ' +
+            '<strong>' +
+            formatRupiah(labaSetelahPph) +
+            '</strong> ' +
+            'dengan margin bersih ' +
+            '<strong>' +
+            marginBersih.toFixed(2) +
+            '%</strong>.' +
+            '</p>';
+
+
+        if (dpp < bep) {
+
+            html +=
+                '<p class="mt-3 text-red-700 font-bold">' +
+                '⚠ Harga berada di bawah BEP. ' +
+                'Periksa kembali HPP atau harga SPH.' +
+                '</p>';
+
+        }
+
+        else if (dpp < hargaTarget) {
+
+            html +=
+                '<p class="mt-3 text-amber-700 font-bold">' +
+                '⚠ Harga sudah menghasilkan keuntungan, ' +
+                'tetapi belum mencapai target margin ' +
+                targetMargin.toFixed(2) +
+                '%. Harga target sekitar ' +
+                formatRupiah(hargaTarget) +
+                '.' +
+                '</p>';
+
+        }
+
+        else {
+
+            html +=
+                '<p class="mt-3 text-emerald-700 font-bold">' +
+                '✓ Harga SPH sudah memenuhi target margin ' +
+                targetMargin.toFixed(2) +
+                '%.' +
+                '</p>';
+
+        }
+
+
+        kesimpulan.innerHTML =
+            html;
+
+    }
+
+}
+
+
+
+/* =====================================================
+RESET
+===================================================== */
+
+function resetSphCalculator() {
+
+
+    document.getElementById(
+        'itemTableBody'
+    ).innerHTML = '';
+
+
+    itemCounter = 0;
+
+
+    document.getElementById(
+        'biayaOngkir'
+    ).value = '0';
+
+
+    document.getElementById(
+        'biayaInstalasi'
+    ).value = '0';
+
+
+    document.getElementById(
+        'biayaOperasional'
+    ).value = '0';
+
+
+    document.getElementById(
+        'biayaLain'
+    ).value = '0';
+
+
+    document.getElementById(
+        'targetMargin'
+    ).value = '20';
+
+
+    document.getElementById(
+        'hargaSph'
+    ).value = '0';
+
+
+    document.getElementById(
+        'ppnMasukanAktual'
+    ).value = '0';
+
+
+    document.getElementById(
+        'sphInputPkp'
+    ).value = 'Ya';
+
+
+    document.getElementById(
+        'sphInputPpnRate'
+    ).value = '11';
+
+
+    document.getElementById(
+        'sphInputPph22Rate'
+    ).value = '0.25';
+
+
+    document.getElementById(
+        'sphInputPphFinalRate'
+    ).value = '0';
+
+
+    addItem(
+        'Barang',
+        '',
+        1,
+        'Unit',
+        0,
+        0
+    );
+
+
+    calculateSph();
+
+}
+
+
+
+/* =====================================================
+LOAD AWAL
+===================================================== */
+
+document.addEventListener(
+    'DOMContentLoaded',
+    function() {
+
+        addItem(
+            'Barang',
+            '',
+            1,
+            'Unit',
+            0,
+            0
+        );
+
+        calculateSph();
+
+    }
+);
+
+</script>
+
 
 </body>
+
 </html>
