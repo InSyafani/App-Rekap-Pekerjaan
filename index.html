@@ -215,7 +215,7 @@
 
             <div class="flex flex-col justify-center px-2 md:px-6 pt-2 md:pt-0">
                         <div class="flex items-center space-x-1.5 text-slate-400 font-medium text-xs mb-2">
-                          <span class="text-yellow-600">📕</span>
+                          <span class="text-yellow-600">✅</span>
                           <span class="text-yellow-600">Dokumen</span>
                         </div>
                         <span id="statDokumen" class="text-2xl md:text-3xl font-bold text-slate-800">0</span>
@@ -368,6 +368,42 @@
 
       </div>
 
+      <!-- ==================== PERANGKAT PA ==================== -->
+      <div id="perangkatSection" class="hidden mt-6 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden no-print">
+        <div class="px-5 py-4 bg-slate-900 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h3 class="font-bold text-sm flex items-center space-x-2">
+              <i class="fa-solid fa-microchip text-blue-400"></i>
+              <span>PERANGKAT PA</span>
+            </h3>
+            <p class="text-[11px] text-slate-400 mt-1">Daftar perangkat berdasarkan No. SO pada PA ini</p>
+          </div>
+          <button onclick="openDeviceModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold flex items-center justify-center space-x-1.5 transition">
+            <i class="fa-solid fa-plus"></i>
+            <span>Tambah Perangkat</span>
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-left">
+            <thead class="bg-slate-50 text-slate-500 font-semibold uppercase tracking-wider">
+              <tr>
+                <th class="px-4 py-3 whitespace-nowrap">Perangkat</th>
+                <th class="px-4 py-3 whitespace-nowrap">Tipe/Model</th>
+                <th class="px-4 py-3 whitespace-nowrap">SN</th>
+                <th class="px-4 py-3 whitespace-nowrap">Status</th>
+                <th class="px-4 py-3 whitespace-nowrap">Tanggal</th>
+                <th class="px-4 py-3 whitespace-nowrap">Keterangan</th>
+                <th class="px-4 py-3 text-center whitespace-nowrap">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="perangkatTableBody" class="divide-y divide-slate-100">
+              <tr><td colspan="7" class="px-4 py-8 text-center text-slate-400">Belum ada data perangkat.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- VIEW 3: KALKULATOR SPH -->
       <div id="sphView" class="hidden flex-1 overflow-hidden bg-slate-100">
         <iframe
@@ -381,6 +417,69 @@
     </main>
   </div>
 
+
+  <!-- ==================== MODAL PERANGKAT PA ==================== -->
+  <div id="deviceModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+      <div class="px-6 py-4 bg-slate-900 text-white flex justify-between items-center">
+        <div>
+          <h3 id="deviceModalTitle" class="font-bold text-base">Tambah Perangkat PA</h3>
+          <p id="deviceModalSo" class="text-[11px] text-slate-400 mt-0.5"></p>
+        </div>
+        <button onclick="closeDeviceModal()" class="text-slate-400 hover:text-white text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form id="deviceForm" onsubmit="handleDeviceSubmit(event)" class="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-4">
+        <input type="hidden" id="deviceRowNumber">
+        <input type="hidden" id="deviceOriginalSn">
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Perangkat</label>
+            <input type="text" id="deviceName" required placeholder="Input Pe" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Tipe/Model</label>
+            <input type="text" id="deviceModel" required placeholder="Input Type" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Serial Number (SN)</label>
+            <input type="text" id="deviceSn" required placeholder="Masukkan SN perangkat" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Status</label>
+            <select id="deviceStatus" required onchange="updateDeviceDateLabel()" class="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              <option value="Terpasang">🟢 Terpasang</option>
+              <option value="Batal Terpasang">🔴 Batal Terpasang</option>
+            </select>
+          </div>
+
+          <div>
+            <label id="deviceDateLabel" class="block text-xs font-semibold text-slate-600 mb-1">Tanggal Pasang</label>
+            <input type="date" id="deviceDate" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Keterangan <span class="font-normal text-slate-400">(opsional)</span></label>
+            <input type="text" id="deviceNote" placeholder="Keterangan perangkat" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-slate-200 flex justify-end space-x-3">
+          <button type="button" onclick="closeDeviceModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-medium text-xs transition">Batal</button>
+          <button type="submit" id="deviceSaveBtn" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium text-xs shadow-md transition flex items-center space-x-2">
+            <i class="fa-solid fa-floppy-disk"></i>
+            <span>Simpan Perangkat</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- ==================== MODAL FORM (CREATE / EDIT) ==================== -->
   <div id="formModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -417,13 +516,14 @@
   <!-- ==================== JAVASCRIPT LOGIC ==================== -->
   <script>
     // ================= CONFIGURATION =================
-    const API_URL = "https://script.google.com/macros/s/AKfycbw5PNQsGn4SBKHR2LxQqwGt0721uJOCTo2QY0Iic8NaxlMKvMZwqFKPWt8BWDdv_rEb/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbyHppvvFYnCKpbTyB9AqWoTyXzIuGeaxbtkdD6PB9jPJjZhSwSyRyXdTmKScJr7gO-1/exec";
 
     let currentUser = null;
     let rawData = [];
     let filteredData = [];
     let tableHeaders = [];
     let selectedDetailRow = null;
+    let currentDevices = [];
 
     let currentPage = 1;
     let pageSize = 10;
@@ -543,6 +643,10 @@
       tableView.classList.remove('hidden');
       detailView.classList.add('hidden');
       sphView.classList.add('hidden');
+
+      // PERANGKAT PA hanya tampil pada halaman Detail PA
+      document.getElementById('perangkatSection')?.classList.add('hidden');
+
       selectedDetailRow = null;
 
       // Aktifkan menu Dashboard
@@ -570,6 +674,9 @@
 
       // Tampilkan Kalkulator SPH
       sphView.classList.remove('hidden');
+
+      // Sembunyikan PERANGKAT PA saat di Kalkulator SPH
+      document.getElementById('perangkatSection')?.classList.add('hidden');
 
       // Aktifkan menu SPH
       const menuDashboard = document.getElementById('menuDashboard');
@@ -903,6 +1010,9 @@
       document.getElementById('detailView').classList.remove('hidden');
       document.getElementById('sphView').classList.add('hidden');
 
+      // Tampilkan PERANGKAT PA hanya ketika Detail PA dibuka
+      document.getElementById('perangkatSection')?.classList.remove('hidden');
+
       // Detail bukan menu utama, jadi nonaktifkan highlight sidebar
       document.getElementById('menuDashboard')?.classList.remove('bg-blue-600/20', 'text-blue-400');
       document.getElementById('menuDashboard')?.classList.add('text-slate-300');
@@ -936,6 +1046,215 @@
           </tr>
         `;
       });
+
+      // Muat perangkat berdasarkan No. SO pada PA yang sedang dibuka
+      loadDevicesForCurrentPA();
+    }
+
+    // ================= PERANGKAT PA =================
+    async function loadDevicesForCurrentPA() {
+      const tbody = document.getElementById('perangkatTableBody');
+      if (!tbody) return;
+
+      const so = selectedDetailRow?.SO || selectedDetailRow?.so || '';
+      if (!so) {
+        currentDevices = [];
+        tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-8 text-center text-slate-400">No. SO pada PA ini belum tersedia.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-8 text-center text-slate-400"><i class="fa-solid fa-spinner animate-spin mr-2"></i>Memuat perangkat...</td></tr>`;
+
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'getDevices', so })
+        });
+        const result = await response.json();
+
+        if (result.status === 'success' && Array.isArray(result.data)) {
+          currentDevices = result.data;
+          renderDevicesTable();
+        } else {
+          currentDevices = [];
+          renderDevicesTable();
+        }
+      } catch (err) {
+        console.error('Load devices error:', err);
+        currentDevices = [];
+        tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-8 text-center text-rose-500">Gagal memuat data perangkat.</td></tr>`;
+      }
+    }
+
+    function renderDevicesTable() {
+      const tbody = document.getElementById('perangkatTableBody');
+      if (!tbody) return;
+
+      if (!currentDevices.length) {
+        tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-8 text-center text-slate-400">Belum ada perangkat untuk PA ini.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = currentDevices.map((device, index) => {
+        const status = String(device.STATUS || '').trim();
+        const isInstalled = status.toLowerCase() === 'terpasang';
+        const statusHtml = isInstalled
+          ? `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 font-semibold"><span class="w-2 h-2 rounded-full bg-emerald-400"></span>Terpasang</span>`
+          : `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 font-semibold"><span class="w-2 h-2 rounded-full bg-rose-400"></span>${escapeHtml(status || 'Batal Terpasang')}</span>`;
+
+        return `
+          <tr class="hover:bg-slate-50 transition">
+            <td class="px-4 py-3 font-semibold text-slate-800">${escapeHtml(device.PERANGKAT || '-')}</td>
+            <td class="px-4 py-3 text-slate-600">${escapeHtml(device['TIPE/MODEL'] || device.TIPE || '-')}</td>
+            <td class="px-4 py-3 font-mono text-slate-700">${escapeHtml(device.SN || '-')}</td>
+            <td class="px-4 py-3">${statusHtml}</td>
+            <td class="px-4 py-3 text-slate-600 whitespace-nowrap">${formatDateForDisplay(device.TANGGAL || device.TANGGAL_PASANG || device['TANGGAL RMA'])}</td>
+            <td class="px-4 py-3 text-slate-600">${escapeHtml(device.KETERANGAN || '-')}</td>
+            <td class="px-4 py-3 text-center whitespace-nowrap">
+              <button onclick="editDevice(${index})" class="px-2.5 py-1.5 bg-sky-50 text-sky-600 hover:bg-sky-600 hover:text-white rounded-lg text-xs font-semibold transition" title="Edit">
+                <i class="fa-solid fa-pen"></i>
+              </button>
+              <button onclick="deleteDevice(${index})" class="px-2.5 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white rounded-lg text-xs font-semibold transition ml-1" title="Hapus">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </td>
+          </tr>`;
+      }).join('');
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;', '"':'&quot;'}[ch]));
+    }
+
+    function openDeviceModal(index = null) {
+      if (!selectedDetailRow) return;
+      const so = selectedDetailRow.SO || selectedDetailRow.so || '';
+      if (!so) {
+        Swal.fire('Tidak dapat menambah perangkat', 'No. SO pada PA ini belum tersedia.', 'warning');
+        return;
+      }
+
+      document.getElementById('deviceForm').reset();
+      document.getElementById('deviceRowNumber').value = '';
+      document.getElementById('deviceOriginalSn').value = '';
+      document.getElementById('deviceModalSo').innerText = `No. SO: ${so}`;
+      document.getElementById('deviceModalTitle').innerText = index === null ? 'Tambah Perangkat PA' : 'Edit Perangkat PA';
+
+      if (index !== null && currentDevices[index]) {
+        const d = currentDevices[index];
+        document.getElementById('deviceRowNumber').value = d.ROW_NUMBER || d.rowNumber || '';
+        document.getElementById('deviceOriginalSn').value = d.SN || '';
+        document.getElementById('deviceName').value = d.PERANGKAT || '';
+        document.getElementById('deviceModel').value = d['TIPE/MODEL'] || d.TIPE || '';
+        document.getElementById('deviceSn').value = d.SN || '';
+        document.getElementById('deviceStatus').value = d.STATUS || 'Terpasang';
+        document.getElementById('deviceDate').value = formatDateForInput(d.TANGGAL || d.TANGGAL_PASANG || d['TANGGAL RMA']);
+        document.getElementById('deviceNote').value = d.KETERANGAN || '';
+      }
+
+      updateDeviceDateLabel();
+      document.getElementById('deviceModal').classList.remove('hidden');
+    }
+
+    function editDevice(index) {
+      openDeviceModal(index);
+    }
+
+    function closeDeviceModal() {
+      document.getElementById('deviceModal').classList.add('hidden');
+    }
+
+    function updateDeviceDateLabel() {
+      const status = document.getElementById('deviceStatus').value;
+      document.getElementById('deviceDateLabel').innerText = status === 'Batal Terpasang' ? 'Tanggal RMA' : 'Tanggal Pasang';
+    }
+
+    async function handleDeviceSubmit(e) {
+      e.preventDefault();
+      const so = selectedDetailRow?.SO || selectedDetailRow?.so || '';
+      const btn = document.getElementById('deviceSaveBtn');
+      const rowNumber = document.getElementById('deviceRowNumber').value;
+
+      const data = {
+        SO: so,
+        PERANGKAT: document.getElementById('deviceName').value.trim(),
+        'TIPE/MODEL': document.getElementById('deviceModel').value.trim(),
+        SN: document.getElementById('deviceSn').value.trim(),
+        STATUS: document.getElementById('deviceStatus').value,
+        TANGGAL: document.getElementById('deviceDate').value,
+        KETERANGAN: document.getElementById('deviceNote').value.trim()
+      };
+
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i><span>Menyimpan...</span>`;
+
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: rowNumber ? 'updateDevice' : 'createDevice',
+            rowNumber,
+            originalSN: document.getElementById('deviceOriginalSn').value,
+            data
+          })
+        });
+        const result = await response.json();
+
+        if (result.status === 'success') {
+          closeDeviceModal();
+          await loadDevicesForCurrentPA();
+          Swal.fire({ icon: 'success', title: 'Berhasil', text: 'Perangkat berhasil disimpan.', timer: 1200, showConfirmButton: false });
+        } else {
+          Swal.fire('Gagal', result.message || 'Gagal menyimpan perangkat.', 'error');
+        }
+      } catch (err) {
+        console.error('Save device error:', err);
+        Swal.fire('Kesalahan', 'Gagal terhubung ke server.', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i><span>Simpan Perangkat</span>`;
+      }
+    }
+
+    async function deleteDevice(index) {
+      const device = currentDevices[index];
+      if (!device) return;
+
+      const confirm = await Swal.fire({
+        title: 'Hapus perangkat?',
+        text: `${device.PERANGKAT || ''} - SN ${device.SN || ''}`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#e11d48',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Ya, Hapus',
+        cancelButtonText: 'Batal'
+      });
+      if (!confirm.isConfirmed) return;
+
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'deleteDevice',
+            rowNumber: device.ROW_NUMBER || device.rowNumber || '',
+            data: { SO: selectedDetailRow?.SO || selectedDetailRow?.so || '', SN: device.SN || '' }
+          })
+        });
+        const result = await response.json();
+        if (result.status === 'success') {
+          await loadDevicesForCurrentPA();
+          Swal.fire({ icon: 'success', title: 'Terhapus', text: 'Perangkat berhasil dihapus.', timer: 1200, showConfirmButton: false });
+        } else {
+          Swal.fire('Gagal', result.message || 'Gagal menghapus perangkat.', 'error');
+        }
+      } catch (err) {
+        console.error('Delete device error:', err);
+        Swal.fire('Kesalahan', 'Gagal terhubung ke server.', 'error');
+      }
     }
 
     // ================= FORM & MODAL ACTIONS =================
